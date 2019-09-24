@@ -17,16 +17,10 @@ export async function cacheHaskellTool(installDir: string, tool: string) {
 }
 
 export async function findHaskellGHCVersion(version: string) {
-  if (!version) {
-    version = '8.6.5';
-  }
   return _findHaskellToolVersion('ghc', version);
 }
 
 export async function findHaskellCabalVersion(version: string) {
-  if (!version) {
-    version = '3.0';
-  }
   return _findHaskellToolVersion('cabal', version);
 }
 
