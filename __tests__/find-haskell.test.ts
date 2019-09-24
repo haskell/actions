@@ -80,4 +80,14 @@ describe('find-haskell', () => {
     }
     expect(thrown).toBe(true);
   });
+
+  it('findHaskellCabalVersion throws if cannot find any version of ghc', async () => {
+    let thrown = false;
+    try {
+      await findHaskellCabalVersion('9.9.9');
+    } catch {
+      thrown = true;
+    }
+    expect(thrown).toBe(true);
+  });
 });
