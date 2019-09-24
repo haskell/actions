@@ -1,0 +1,10 @@
+name: 'Setup Haskell environment'
+description: 'Setup a Haskell environment and add it to the PATH'
+author: 'GitHub'
+inputs:
+  ghc-version:
+    description: 'Version range or exact version of ghc to use.'
+    default: '>= 8.6.5'
+runs:
+  using: 'node12'
+  main: 'lib/setup-haskell.js'

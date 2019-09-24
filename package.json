@@ -1,0 +1,50 @@
+{
+  "name": "setup-haskell",
+  "version": "1.0.0",
+  "private": true,
+  "description": "setup haskell action",
+  "main": "lib/setup-haskell.js",
+  "scripts": {
+    "build": "tsc",
+    "format": "prettier --write **/*.ts",
+    "format-check": "prettier --check **/*.ts",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/actions/setup-haskell.git"
+  },
+  "keywords": [
+    "actions",
+    "haskell",
+    "ghc",
+    "cabal",
+    "setup"
+  ],
+  "author": "GitHub",
+  "license": "MIT",
+  "dependencies": {
+    "@actions/core": "^1.1.1",
+    "@actions/tool-cache": "^1.1.1",
+    "semver": "^6.1.1"
+  },
+  "devDependencies": {
+    "@actions/io": "^1.0.1",
+    "@types/jest": "^24.0.18",
+    "@types/node": "^12.7.5",
+    "@types/semver": "^6.0.2",
+    "husky": "^2.3.0",
+    "jest": "^24.9.0",
+    "jest-circus": "^24.9.0",
+    "prettier": "^1.17.1",
+    "ts-jest": "^24.1.0",
+    "typescript": "^3.6.3"
+  },
+  "husky": {
+    "skipCI": true,
+    "hooks": {
+      "pre-commit": "npm run build && npm run format",
+      "post-commit": "npm prune --production && git add node_modules/* && git commit -m \"Husky commit correct node modules\""
+    }
+  }
+}
