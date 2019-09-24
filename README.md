@@ -33,6 +33,7 @@ jobs:
     strategy:
       matrix:
         ghc: [ '8.2.2', '8.6.5' ]
+        cabal: [ '2.0', '3.0' ]
     name: Haskell GHC ${{ matrix.ghc }} sample
     steps:
       - uses: actions/checkout@master
@@ -40,6 +41,7 @@ jobs:
         uses: actions/setup-haskell@v1
         with:
           ghc-version: ${{ matrix.ghc }}
+          cabal-version: ${{ matrix.cabal }}
       - run: runghc Hello.hs
 ```
 
