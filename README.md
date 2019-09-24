@@ -21,6 +21,7 @@ steps:
 - uses: actions/setup-haskell@v1
   with:
     ghc-version: '8.6.5' # Version range or exact version of ghc to use, using semvers version range syntax.
+    cabal-version: '3.0'
 - run: runghc Hello.hs
 ```
 
