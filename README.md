@@ -7,7 +7,20 @@
 This action sets up a Haskell environment for use in actions by:
 
 - optionally installing a version of ghc and cabal and adding to PATH. Note that this action only uses versions of ghc and cabal already installed in the cache. The action will fail if no matching versions are found.
-- registering problem matchers for error output
+ - Supported versions of GHC:
+    - `8.0.2`
+    - `8.2.2`
+    - `8.4.4`
+    - `8.6.2`
+    - `8.6.3`
+    - `8.6.4`
+    - `8.6.5`
+    - `8.8.1`
+ - Supported versions of Cabal:
+    - `2.0`
+    - `2.2`
+    - `2.4`
+    - `3.0`
 
 # Usage
 
@@ -20,7 +33,7 @@ steps:
 - uses: actions/checkout@master
 - uses: actions/setup-haskell@v1
   with:
-    ghc-version: '8.6.5' # Version range or exact version of ghc to use, using semvers version range syntax.
+    ghc-version: '8.6.5' # Exact version of ghc to use
     cabal-version: '3.0'
 - run: runghc Hello.hs
 ```
