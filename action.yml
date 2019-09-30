@@ -3,8 +3,11 @@ description: 'Setup a Haskell environment and add it to the PATH'
 author: 'GitHub'
 inputs:
   ghc-version:
-    description: 'Version range or exact version of ghc to use.'
-    default: '>= 8.6.5'
+    description: 'Exact version of ghc to use.'
+    default: '8.6.5'
+  cabal-version:
+    description: 'Exact version of cabal to use.'
+    default: '3.0'
 runs:
   using: 'node12'
   main: 'lib/setup-haskell.js'
