@@ -29,11 +29,10 @@ export function _findHaskellToolVersion(
   }
 
   const toolPath: string = path.join(baseInstallDir, tool, version, 'bin');
-  throw new Error(`Looking in ${toolPath}`);
-  // if (fs.existsSync(toolPath)) {
-  //   core.debug(`Found tool in cache ${tool} ${version}`);
-  //   core.addPath(toolPath);
-  // } else {
-  //   throw new Error(`Version ${version} of ${tool} not found`);
-  // }
+  if (fs.existsSync(toolPath)) {
+    core.debug(`Found tool in cache ${tool} ${version}`);
+    core.addPath(toolPath);
+  } else {
+    throw new Error(`Version ${version} of ${tool} not found`);
+  }
 }
