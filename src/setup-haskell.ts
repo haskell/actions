@@ -13,13 +13,13 @@ async function run() {
     if (!ghcVersion) {
       ghcVersion = defaultGHCVersion;
     }
-    await findHaskellGHCVersion(baseInstallDir, ghcVersion);
+    findHaskellGHCVersion(baseInstallDir, ghcVersion);
 
     let cabalVersion = core.getInput('cabal-version');
     if (!cabalVersion) {
       cabalVersion = defaultCabalVersion;
     }
-    await findHaskellCabalVersion(baseInstallDir, cabalVersion);
+    findHaskellCabalVersion(baseInstallDir, cabalVersion);
   } catch (error) {
     core.setFailed(error.message);
   }

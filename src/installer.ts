@@ -2,21 +2,18 @@ import * as core from '@actions/core';
 import * as fs from 'fs';
 import * as path from 'path';
 
-export async function findHaskellGHCVersion(
-  baseInstallDir: string,
-  version: string
-) {
+export function findHaskellGHCVersion(baseInstallDir: string, version: string) {
   return _findHaskellToolVersion(baseInstallDir, 'ghc', version);
 }
 
-export async function findHaskellCabalVersion(
+export function findHaskellCabalVersion(
   baseInstallDir: string,
   version: string
 ) {
   return _findHaskellToolVersion(baseInstallDir, 'cabal', version);
 }
 
-export async function _findHaskellToolVersion(
+export function _findHaskellToolVersion(
   baseInstallDir: string,
   tool: string,
   version: string
@@ -33,11 +30,10 @@ export async function _findHaskellToolVersion(
 
   const toolPath: string = path.join(baseInstallDir, tool, version, 'bin');
   throw new Error(`Looking in ${toolPath}`);
-
-  if (fs.existsSync(toolPath)) {
-    core.debug(`Found tool in cache ${tool} ${version}`);
-    core.addPath(toolPath);
-  } else {
-    throw new Error(`Version ${version} of ${tool} not found`);
-  }
+  // if (fs.existsSync(toolPath)) {
+  //   core.debug(`Found tool in cache ${tool} ${version}`);
+  //   core.addPath(toolPath);
+  // } else {
+  //   throw new Error(`Version ${version} of ${tool} not found`);
+  // }
 }
