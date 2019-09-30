@@ -31,12 +31,7 @@ export async function _findHaskellToolVersion(
     throw new Error('versionSpec parameter is required');
   }
 
-  const toolPath: string = path.join(
-    baseInstallDir,
-    tool,
-    version,
-    'bin'
-  );
+  const toolPath: string = path.join(baseInstallDir, tool, version, 'bin');
   if (fs.existsSync(toolPath)) {
     core.debug(`Found tool in cache ${tool} ${version}`);
     core.addPath(toolPath);
