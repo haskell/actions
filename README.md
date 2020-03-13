@@ -16,7 +16,7 @@ Basic:
 
 ``` yaml
 steps:
-- uses: actions/checkout@master
+- uses: actions/checkout@v2
 - uses: actions/setup-haskell@v1
   with:
     ghc-version: '8.6.5' # Exact version of ghc to use
@@ -36,7 +36,7 @@ jobs:
         cabal: [ '2.0', '3.0' ]
     name: Haskell GHC ${{ matrix.ghc }} sample
     steps:
-      - uses: actions/checkout@master
+      - uses: actions/checkout@v2
       - name: Setup Haskell
         uses: actions/setup-haskell@v1
         with:

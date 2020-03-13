@@ -1,5 +1,5 @@
-name: 'Setup Haskell environment'
-description: 'Setup a Haskell environment and add it to the PATH'
+name: 'Setup Haskell'
+description: 'Set up a specific version of GHC and Cabal and add the command-line tools to the PATH'
 author: 'GitHub'
 inputs:
   ghc-version:
