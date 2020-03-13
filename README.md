@@ -36,7 +36,7 @@ jobs:
         cabal: [ '2.0', '3.0' ]
     name: Haskell GHC ${{ matrix.ghc }} sample
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2
       - name: Setup Haskell
         uses: actions/setup-haskell@v1
         with:
