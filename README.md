@@ -16,7 +16,7 @@ Basic:
 
 ``` yaml
 steps:
-- uses: actions/checkout@v1
+- uses: actions/checkout@v2
 - uses: actions/setup-haskell@v1
   with:
     ghc-version: '8.6.5' # Exact version of ghc to use
