@@ -1,73 +1,79 @@
-import * as io from '@actions/io';
-import fs = require('fs');
-import os = require('os');
-import path = require('path');
+import {getOpts, getDefaults} from '../src/installer';
+import {getInput} from '@actions/core';
 
-const toolDir = path.join(__dirname, 'runner', 'tools');
+const def = getDefaults();
 
-process.env['AGENT_TOOLSDIRECTORY'] = toolDir;
-process.env['RUNNER_TOOL_CACHE'] = toolDir;
+const environments = {
+  empty: {'ghc-version': null, 'cabal-version': null},
+  stack: {'stack-version': '2.1.3'},
+  stacklatest: {'stack-version': 'latest'},
+  stackOnly: {'stack-version': 'latest', 'stack-no-global': 'true'},
+  stackOnlyWrong: {'stack-no-global': 'true'},
+  stackOnlyWrong2: {'stack-setup-ghc': 'true'}
+};
 
-import {findHaskellGHCVersion, findHaskellCabalVersion} from '../src/installer';
+const mkName = (s: string): string =>
+  `INPUT_${s.replace(/ /g, '_').toUpperCase()}`;
 
-describe('find-haskell', () => {
-  beforeAll(async () => {
-    await io.rmRF(toolDir);
+const setupEnv = (o: Record<string, unknown>): void =>
+  Object.entries(o).forEach(([k, v]) => v && (process.env[mkName(k)] = `${v}`));
 
-    const ghcDir: string = path.join(toolDir, 'ghc', '8.6.5', 'bin');
-    await io.mkdirP(ghcDir);
-    fs.writeFileSync(`${ghcDir}.complete`, 'hello');
+describe('actions/setup-haskell', () => {
+  const OLD_ENV = process.env;
 
-    const cabalDir: string = path.join(toolDir, 'cabal', '2.0', 'bin');
-    await io.mkdirP(cabalDir);
-    fs.writeFileSync(`${cabalDir}.complete`, 'hello');
+  beforeEach(() => {
+    jest.resetModules();
+    process.env = {...OLD_ENV};
+    delete process.env.NODE_ENV;
   });
 
-  afterAll(async () => {
-    try {
-      await io.rmRF(toolDir);
-    } catch {
-      console.log('Failed to remove test directories');
-    }
-  }, 100000);
+  afterEach(() => (process.env = OLD_ENV));
 
-  it('Uses version of ghc installed in cache', async () => {
-    // This will throw if it doesn't find it in the cache (because no such version exists)
-    await findHaskellGHCVersion(toolDir, '8.6.5');
+  it('Parses action.yml to get correct default GHC', () => {
+    expect(def.ghc.version).toBe('8.8.3');
   });
 
-  it('Uses version of cabal installed in cache', async () => {
-    // This will throw if it doesn't find it in the cache (because no such version exists)
-    await findHaskellCabalVersion(toolDir, '2.0');
+  it('Parses action.yml to get correct default Cabal', () => {
+    expect(def.cabal.version).toBe('3.0.0.0');
   });
 
-  it('findHaskellGHCVersion throws if cannot find any version of ghc', async () => {
-    let thrown = false;
-    try {
-      await findHaskellGHCVersion(toolDir, '9.9.9');
-    } catch {
-      thrown = true;
-    }
-    expect(thrown).toBe(true);
+  it('[meta] Setup Env works', () => {
+    setupEnv({input: 'value'});
+    const i = getInput('input');
+    expect(i).toEqual('value');
   });
 
-  it('findHaskellCabalVersion throws if cannot find any version of ghc', async () => {
-    let thrown = false;
-    try {
-      await findHaskellCabalVersion(toolDir, '9.9.9');
-    } catch {
-      thrown = true;
-    }
-    expect(thrown).toBe(true);
+  it('getOpts grabs defaults correctly from environment', () => {
+    setupEnv(environments.empty);
+    const options = getOpts(def);
+    expect(options.ghc.version).toBe(def.ghc.version);
   });
 
-  it('findHaskellGHCVersion throws without baseInstallDir', async () => {
-    let thrown = false;
-    try {
-      await findHaskellGHCVersion('', '8.6.5');
-    } catch {
-      thrown = true;
-    }
-    expect(thrown).toBe(true);
+  it('Enabling stack does not disable GHC', () => {
+    setupEnv(environments.stack);
+    const {ghc, stack} = getOpts(def);
+    expect({
+      ghc: ghc.enable,
+      stack: stack.enable
+    }).toStrictEqual({ghc: true, stack: true});
+  });
+
+  it('Enabling stack-no-global does disable GHC and Cabal', () => {
+    setupEnv(environments.stackOnly);
+    const {ghc, cabal} = getOpts(def);
+    expect({
+      ghc: ghc.enable,
+      cabal: cabal.enable
+    }).toStrictEqual({ghc: false, cabal: false});
+  });
+
+  it('Enabling stack-no-global without setting stack-version errors', () => {
+    setupEnv(environments.stackOnlyWrong);
+    expect(() => getOpts(def)).toThrow();
+  });
+
+  it('Enabling stack-setup-ghc without setting stack-version errors', () => {
+    setupEnv(environments.stackOnlyWrong2);
+    expect(() => getOpts(def)).toThrow();
   });
 });

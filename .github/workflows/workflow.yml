@@ -1,26 +1,62 @@
 name: Main workflow
 on: [push]
 jobs:
-  run:
-    name: Run
-    runs-on: ${{ matrix.operating-system }}
+  test:
+    name: Test ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        operating-system: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
-    - name: Checkout
-      uses: actions/checkout@master
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v1
+        with:
+          node-version: 12.x
+      # http://www.tiernok.com/posts/2019/faster-npm-installs-during-ci/
+      - run: npm ci --prefer-offline --no-audit --progress=false
+      - run: npm run pre-push
 
-    - name: Set Node.js 10.x
-      uses: actions/setup-node@master
-      with:
-        node-version: 10.x
+  install-haskell:
+    name: Test GHC Install ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        ghc: ['8.8.3']
+        cabal: ['3.0.0.0']
+        include:
+          - os: ubuntu-latest
+            ghc: '7.10.3'
+            cabal: '3.0.0.0'
 
-    - name: npm install
-      run: npm install
+    steps:
+      - uses: actions/checkout@v2
 
-    - name: Lint
-      run: npm run format-check
+      - uses: actions/cache@v1
+        if: matrix.os  == 'macOS-latest' || matrix.ghc == '7.10.3'
+        with:
+          path: ~/.ghcup
+          key: ${{ runner.os }}-${{ matrix.ghc }}-ghcup
 
-    - name: npm test
-      run: npm test
+      - uses: ./
+        with:
+          ghc-version: ${{ matrix.ghc }}
+          cabal-version: ${{ matrix.cabal }}
+      - run: runhaskell __tests__/hello.hs
+
+  install-stack:
+    name: Test Stack Install ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        stack: ['latest', '1.9.1']
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: ./
+        with:
+          stack-version: ${{ matrix.stack }}
+          stack-no-global: true
+      - run: stack

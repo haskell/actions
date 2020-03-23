@@ -3,11 +3,22 @@ description: 'Set up a specific version of GHC and Cabal and add the command-lin
 author: 'GitHub'
 inputs:
   ghc-version:
+    required: false
     description: 'Exact version of ghc to use.'
-    default: '8.6.5'
+    default: '8.8.3'
   cabal-version:
+    required: false
     description: 'Exact version of cabal to use.'
-    default: '3.0'
+    default: '3.0.0.0'
+  stack-version:
+    required: false
+    description: 'If specified, will download the given version of stack. If set to "latest", it will always get the latest stable version of stack.'
+  stack-no-global:
+    required: false
+    description: 'If specified, stack-version must be set. Prevents installing GHC and Cabal globally'
+  stack-setup-ghc:
+    required: false
+    description: 'If specified, will run stack setup to install the specified GHC'
 runs:
   using: 'node12'
-  main: 'lib/setup-haskell.js'
+  main: 'dist/index.js'

@@ -1,28 +1,26 @@
 import * as core from '@actions/core';
-import {findHaskellGHCVersion, findHaskellCabalVersion} from './installer';
+import {getOpts, getDefaults} from './installer';
+import {exec} from '@actions/exec';
 
-// ghc and cabal are installed directly to /opt so use that directlly instead of
-// copying over to the toolcache dir.
-const baseInstallDir = '/opt';
-const defaultGHCVersion = '8.6.5';
-const defaultCabalVersion = '3.0';
-
-async function run() {
+(async () => {
   try {
-    let ghcVersion = core.getInput('ghc-version');
-    if (!ghcVersion) {
-      ghcVersion = defaultGHCVersion;
-    }
-    findHaskellGHCVersion(baseInstallDir, ghcVersion);
+    const opts = getOpts(getDefaults());
+    core.info('Preparing to setup a Haskell environment');
+    core.debug(`Options are: ${JSON.stringify(opts)}`);
 
-    let cabalVersion = core.getInput('cabal-version');
-    if (!cabalVersion) {
-      cabalVersion = defaultCabalVersion;
+    for (const [tool, o] of Object.entries(opts)) {
+      if (o.enable) {
+        core.info(`Installing ${tool} version ${o.version}`);
+        await o.install(o.version);
+      }
     }
-    findHaskellCabalVersion(baseInstallDir, cabalVersion);
+
+    if (opts.stack.setup) {
+      core.startGroup('Pre-installing GHC with stack');
+      await exec('stack', ['setup', opts.ghc.version]);
+      core.endGroup();
+    }
   } catch (error) {
     core.setFailed(error.message);
   }
-}
-
-run();
+})();
