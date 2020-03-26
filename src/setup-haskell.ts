@@ -20,6 +20,19 @@ import {exec} from '@actions/exec';
       await exec('stack', ['setup', opts.ghc.version]);
       core.endGroup();
     }
+
+    if (opts.cabal.enable) {
+      core.startGroup('Setting up cabal');
+      await exec('cabal', [
+        'user-config',
+        'update',
+        '-a',
+        'http-transport: plain-http',
+        '-v3'
+      ]);
+      await exec('cabal', ['update']);
+      core.endGroup();
+    }
   } catch (error) {
     core.setFailed(error.message);
   }

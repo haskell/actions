@@ -6954,6 +6954,18 @@ const exec_1 = __webpack_require__(986);
             await exec_1.exec('stack', ['setup', opts.ghc.version]);
             core.endGroup();
         }
+        if (opts.cabal.enable) {
+            core.startGroup('Setting up cabal');
+            await exec_1.exec('cabal', [
+                'user-config',
+                'update',
+                '-a',
+                'http-transport: plain-http',
+                '-v3'
+            ]);
+            await exec_1.exec('cabal', ['update']);
+            core.endGroup();
+        }
     }
     catch (error) {
         core.setFailed(error.message);
