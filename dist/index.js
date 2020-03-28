@@ -8661,9 +8661,7 @@ async function installTool(tool, version) {
         const cmd = ['choco', 'install', tool, '--version', version];
         const flags = ['-m', '--no-progress', '-r'];
         await exec_1.exec('powershell', cmd.concat(flags));
-        const t = `${tool}.${version}`;
-        const p = ['lib', t, 'tools', t, tool === 'ghc' ? 'bin' : ''];
-        core.addPath(path_1.join(process.env.ChocolateyInstall || '', ...p));
+        core.addPath(path_1.join(process.env.ChocolateyInstall || '', 'lib', `${tool}.${version}`, 'tools', `${tool}-${version}`, tool === 'ghc' ? 'bin' : ''));
     }
     else {
         const ghcup = await tc.downloadTool('https://raw.githubusercontent.com/haskell/ghcup/master/ghcup');
