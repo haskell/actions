@@ -8658,9 +8658,16 @@ async function installTool(tool, version) {
         }
     }
     if (process.platform === 'win32') {
-        const cmd = ['choco', 'install', tool, '--version', version];
-        const flags = ['-m', '--no-progress', '-r'];
-        await exec_1.exec('powershell', cmd.concat(flags));
+        await exec_1.exec('powershell', [
+            'choco',
+            'install',
+            tool,
+            '--version',
+            version,
+            '-m',
+            '--no-progress',
+            '-r'
+        ]);
         core.addPath(path_1.join(process.env.ChocolateyInstall || '', 'lib', `${tool}.${version}`, 'tools', `${tool}-${version}`, tool === 'ghc' ? 'bin' : ''));
     }
     else {

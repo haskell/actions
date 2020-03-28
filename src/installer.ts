@@ -131,9 +131,16 @@ async function installTool(tool: Tool, version: string): Promise<void> {
   }
 
   if (process.platform === 'win32') {
-    const cmd = ['choco', 'install', tool, '--version', version];
-    const flags = ['-m', '--no-progress', '-r'];
-    await exec('powershell', cmd.concat(flags));
+    await exec('powershell', [
+      'choco',
+      'install',
+      tool,
+      '--version',
+      version,
+      '-m',
+      '--no-progress',
+      '-r'
+    ]);
 
     core.addPath(
       join(
