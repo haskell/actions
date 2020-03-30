@@ -2,10 +2,13 @@
 
 [![GitHub Actions status](https://github.com/actions/setup-haskell/workflows/Main%20workflow/badge.svg)](https://github.com/actions/setup-haskell)
 
-This action installs a specified version of GHC and Cabal. It can also install [Stack](https://haskellstack.org).
+This action sets up a Haskell environment for use in actions by:
 
-Currently only Linux comes with [pre-installed versions of GHC and Cabal](https://github.com/actions/virtual-environments/blob/master/images/linux/Ubuntu1804-README.md). Those will be used whenever possible.
-For all other versions and for Windows and macOS, this action utilizes [`ghcup`](https://gitlab.haskell.com/ghcup) and [`chocolatey`](https://chocolatey.org/packages/ghc).
+- optionally installing a version of [ghc](https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/) and [cabal](https://www.haskell.org/cabal/) and adding to PATH.
+- optionally installing a version of [Stack](https://haskellstack.org) and adding to PATH.
+
+The GitHub runners come with [pre-installed versions of GHC and Cabal](https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners). Those will be used whenever possible.
+For all other versions, this action utilizes [`ppa:hvr/ghc`](https://launchpad.net/~hvr/+archive/ubuntu/ghc), [`ghcup`](https://gitlab.haskell.com/ghcup), and [`chocolatey`](https://chocolatey.org/packages/ghc).
 
 ## Usage
 
