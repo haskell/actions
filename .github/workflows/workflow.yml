@@ -1,5 +1,13 @@
-name: Main workflow
-on: [push]
+name: build-test
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
 jobs:
   run:
     name: Run
