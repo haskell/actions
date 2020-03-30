@@ -113,20 +113,34 @@ export async function installStack(version: string): Promise<void> {
 type Tool = 'cabal' | 'ghc';
 async function installTool(tool: Tool, version: string): Promise<void> {
   core.startGroup(`Installing ${tool}`);
-  // Currently only linux comes pre-installed with some versions of GHC.
-  // They're intalled to /opt. Let's see if we can save ourselves a download
+  // Linux comes pre-installed with some versions of GHC and supports older
+  // versions through hvr's PPA.
   if (process.platform === 'linux') {
     // Cabal is installed to /opt/cabal/x.x but cabal's full version is X.X.Y.Z
     const v = tool === 'cabal' ? version.slice(0, 3) : version;
+
+    const p = join('/opt', tool, v, 'bin');
+    const installed = await fs
+      .access(p)
+      .then(() => true)
+      .catch(() => false);
+
+    if (tool === 'ghc' && !installed) {
+      try {
+        // hvr's PPA has better support for GHC < 8.0
+        await exec(`sudo -- sh -c "apt-get -y install ghc-${v}"`);
+      } catch {
+        // oh well, we tried
+      }
+    }
+
     try {
-      const p = join('/opt', tool, v, 'bin');
       await fs.access(p);
-      core.debug(`Using pre-installed ${tool} ${version}`);
       core.addPath(p);
       core.endGroup();
       return;
     } catch {
-      // oh well, we tried
+      // ok, let's try the generic install now
     }
   }
 

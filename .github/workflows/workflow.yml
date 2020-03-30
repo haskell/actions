@@ -2,9 +2,10 @@ name: Main workflow
 on: [push]
 jobs:
   test:
-    name: Test ${{ matrix.os }}
+    name: Unit Tests - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
@@ -17,9 +18,10 @@ jobs:
       - run: npm run pre-push
 
   install-haskell:
-    name: Test GHC Install ${{ matrix.os }}
+    name: GHC ${{ matrix.ghc }}, Cabal ${{ matrix.cabal }} - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         ghc: ['8.8.3', '8.4.4']
@@ -33,7 +35,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - uses: actions/cache@v1
-        if: matrix.os  == 'macOS-latest' || matrix.ghc == '7.10.3'
+        if: matrix.os  == 'macOS-latest'
         with:
           path: ~/.ghcup
           key: ${{ runner.os }}-${{ matrix.ghc }}-ghcup
@@ -43,9 +45,11 @@ jobs:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
       - run: runhaskell __tests__/hello.hs
+      - shell: bash
+        run: cd __tests__/project && cabal build && cabal run
 
   install-stack:
-    name: Test Stack Install ${{ matrix.os }}
+    name: Stack ${{ matrix.stack }} ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
