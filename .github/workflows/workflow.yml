@@ -1,5 +1,13 @@
-name: Main workflow
-on: [push]
+name: build-test
+on:
+  push:
+    branches:
+      - master
+    paths-ignore:
+      - '**.md'
+  pull_request:
+    paths-ignore:
+      - '**.md'
 jobs:
   test:
     name: Unit Tests - ${{ matrix.os }}
@@ -9,10 +17,13 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-node@v1
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Set Node.js 12
+        uses: actions/setup-node@v1
         with:
-          node-version: 12.x
+          node-version: 12
       # http://www.tiernok.com/posts/2019/faster-npm-installs-during-ci/
       - run: npm ci --prefer-offline --no-audit --progress=false
       - run: npm run pre-push
