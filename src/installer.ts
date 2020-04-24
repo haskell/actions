@@ -1,181 +1,190 @@
 import * as core from '@actions/core';
 import {exec} from '@actions/exec';
-import * as io from '@actions/io';
+import {which} from '@actions/io';
+import {create as glob} from '@actions/glob';
 import * as tc from '@actions/tool-cache';
-import {promises as fs, readFileSync} from 'fs';
-import {safeLoad} from 'js-yaml';
+import {promises as fs} from 'fs';
 import {join} from 'path';
+import type {OS, Tool} from './opts';
 
-export interface ProgramOpt {
-  enable: boolean;
-  version: string;
-  install: (version: string) => Promise<void>;
+function failed(tool: Tool, version: string): void {
+  throw new Error(`All install methods for ${tool} ${version} failed`);
 }
 
-export interface Options {
-  ghc: ProgramOpt;
-  cabal: ProgramOpt;
-  stack: ProgramOpt & {setup: boolean};
-}
-
-export interface Defaults {
-  ghc: {version: string};
-  cabal: {version: string};
-}
-
-export function getDefaults(): Defaults {
-  const actionYml = safeLoad(
-    readFileSync(join(__dirname, '..', 'action.yml'), 'utf8')
+async function success(
+  tool: Tool,
+  version: string,
+  path: string
+): Promise<true> {
+  core.addPath(path);
+  core.setOutput(`${tool}-path`, path);
+  core.setOutput(`${tool}-exe`, await which(tool));
+  core.info(
+    `Found ${tool} ${version} in cache at path ${path}. Setup successful.`
   );
-  return {
-    ghc: {version: actionYml.inputs['ghc-version'].default},
-    cabal: {version: actionYml.inputs['cabal-version'].default}
-  };
+  return true;
 }
 
-export function getOpts(def: Defaults): Options {
-  const stackNoGlobal = core.getInput('stack-no-global') !== '';
-  const stackVersion = core.getInput('stack-version');
-  const stackSetupGhc = core.getInput('stack-setup-ghc') !== '';
+function warn(tool: Tool, version: string): void {
+  const policy = {
+    cabal: `the two latest major releases of ${tool} are commonly supported.`,
+    ghc: `the three latest major releases of ${tool} are commonly supported.`,
+    stack: `the latest release of ${tool} is commonly supported.`
+  }[tool];
 
-  const errors = [];
-  if (stackNoGlobal && stackVersion === '') {
-    errors.push('stack-version is required if stack-no-global is set');
-  }
+  core.warning(
+    `${tool} ${version} was not found in the cache. It will be downloaded.\n` +
+      `If this is unexpected, please check if version ${version} is pre-installed.\n` +
+      `The list of pre-installed versions is available here: https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners\n` +
+      `The above list follows a common haskell convention that ${policy}\n` +
+      'If the list is outdated, please file an issue here: https://github.com/actions/virtual-environments\n' +
+      'by using the appropriate tool request template: https://github.com/actions/virtual-environments/issues/new/choose'
+  );
+}
 
-  if (stackSetupGhc && stackVersion === '') {
-    errors.push('stack-version is required if stack-setup-ghc is set');
-  }
+async function isInstalled(
+  tool: Tool,
+  version: string,
+  os: OS
+): Promise<boolean> {
+  const toolPath = tc.find(tool, version);
+  if (toolPath) return success(tool, version, toolPath);
 
-  if (errors.length > 0) {
-    throw new Error(errors.join('\n'));
-  }
+  const ghcupPath = `${process.env.HOME}/.ghcup${
+    tool === 'ghc' ? `/ghc/${version}` : ''
+  }/bin`;
+  const v = tool === 'cabal' ? version.slice(0, 3) : version;
+  const aptPath = `/opt/${tool}/${v}/bin`;
 
-  return {
-    ghc: {
-      version: core.getInput('ghc-version') || def.ghc.version,
-      enable: !stackNoGlobal,
-      install: installGHC
-    },
+  const chocoPath = join(
+    `${process.env.ChocolateyInstall}`,
+    'lib',
+    `${tool}.${version}`,
+    'tools',
+    `${tool}-${version}`,
+    tool === 'ghc' ? 'bin' : ''
+  );
+
+  const locations = {
+    stack: [], // Always installed into the tool cache
     cabal: {
-      version: core.getInput('cabal-version') || def.cabal.version,
-      enable: !stackNoGlobal,
-      install: installCabal
-    },
-    stack: {
-      version: stackVersion,
-      enable: stackVersion !== '',
-      install: installStack,
-      setup: core.getInput('stack-setup-ghc') !== ''
-    }
+      win32: [chocoPath],
+      linux: [aptPath],
+      darwin: []
+    }[os],
+    ghc: {
+      win32: [chocoPath],
+      linux: [aptPath, ghcupPath],
+      darwin: [ghcupPath]
+    }[os]
   };
+
+  for (const p of locations[tool]) {
+    const installedPath = await fs
+      .access(p)
+      .then(() => p)
+      .catch(() => undefined);
+
+    if (installedPath) return success(tool, version, installedPath);
+  }
+
+  if (tool === 'cabal' && os !== 'win32') {
+    const installedPath = await fs
+      .access(`${ghcupPath}/cabal`)
+      .then(() => ghcupPath)
+      .catch(() => undefined);
+
+    if (installedPath) return success(tool, version, installedPath);
+  }
+
+  return false;
 }
 
-export const installCabal = async (version: string): Promise<void> =>
-  installTool('cabal', version);
+export async function installTool(
+  tool: Tool,
+  version: string,
+  os: OS
+): Promise<void> {
+  if (await isInstalled(tool, version, os)) return;
+  warn(tool, version);
 
-export const installGHC = async (version: string): Promise<void> =>
-  installTool('ghc', version);
+  if (tool === 'stack') {
+    await stack(version, os);
+    if (await isInstalled(tool, version, os)) return;
+    return failed(tool, version);
+  }
 
-export async function installStack(version: string): Promise<void> {
-  const info =
-    version === 'latest'
-      ? 'Installing the latest version'
-      : `Installing version ${version}`;
-  core.startGroup(`${info} of stack`);
-  const platformMap = ({
+  switch (os) {
+    case 'linux':
+      await apt(tool, version);
+      if (await isInstalled(tool, version, os)) return;
+      await ghcup(tool, version, os);
+      break;
+    case 'win32':
+      await choco(tool, version);
+      break;
+    case 'darwin':
+      await ghcup(tool, version, os);
+      break;
+  }
+
+  if (await isInstalled(tool, version, os)) return;
+  return failed(tool, version);
+}
+
+async function stack(version: string, os: OS): Promise<void> {
+  core.info(`Attempting to install stack ${version}`);
+  const build = {
     linux: 'linux-x86_64-static',
     darwin: 'osx-x86_64',
     win32: 'windows-x86_64'
-  } as unknown) as Record<NodeJS.Platform, string>;
+  }[os];
 
-  const name = `stack-${version}-${platformMap[process.platform]}`;
   const url =
     version === 'latest'
-      ? `get.haskellstack.org/stable/${platformMap[process.platform]}`
-      : `github.com/commercialhaskell/stack/releases/download/v${version}/${name}`;
+      ? `https://get.haskellstack.org/stable/${build}.tar.gz`
+      : `https://github.com/commercialhaskell/stack/releases/download/v${version}/stack-${version}-${build}.tar.gz`;
+  const p = await tc.downloadTool(`${url}`).then(tc.extractTar);
+  const [stackPath] = await glob(`${p}/stack*`, {
+    implicitDescendants: false
+  }).then(async g => g.glob());
+  await tc.cacheDir(stackPath, 'stack', version);
 
-  const stack = await tc.downloadTool(`https://${url}.tar.gz`);
-  const p = await tc.extractTar(stack);
-
-  // Less janky than figuring out how to ./p/*/stack. (Not by much)
-  const stackPath =
-    (await fs.readdir(p, {withFileTypes: true}))
-      .flatMap(d => (d.isDirectory() ? [d.name] : []))
-      .find(f => f.startsWith('stack')) ?? '';
-
-  const cachedTool = await tc.cacheDir(join(p, stackPath), 'stack', version);
-  core.addPath(cachedTool);
-
-  core.endGroup();
+  if (os === 'win32') core.exportVariable('STACK_ROOT', 'C:\\sr');
 }
 
-type Tool = 'cabal' | 'ghc';
-async function installTool(tool: Tool, version: string): Promise<void> {
-  core.startGroup(`Installing ${tool}`);
-  // Linux comes pre-installed with some versions of GHC and supports older
-  // versions through hvr's PPA.
-  if (process.platform === 'linux') {
-    // Cabal is installed to /opt/cabal/x.x but cabal's full version is X.X.Y.Z
-    const v = tool === 'cabal' ? version.slice(0, 3) : version;
+async function apt(tool: Tool, version: string): Promise<void> {
+  const toolName = tool === 'ghc' ? 'ghc' : 'cabal-install';
+  const v = tool === 'cabal' ? version.slice(0, 3) : version;
+  core.info(`Attempting to install ${toolName} ${v} using apt-get`);
+  await exec(`sudo -- sh -c "apt-get -y install ${toolName}-${v}"`);
+}
 
-    const p = join('/opt', tool, v, 'bin');
-    const installed = await fs
-      .access(p)
-      .then(() => true)
-      .catch(() => false);
+async function choco(tool: Tool, version: string): Promise<void> {
+  core.info(`Attempting to install ${tool} ${version} using chocolatey`);
 
-    if (tool === 'ghc' && !installed) {
-      try {
-        // hvr's PPA has better support for GHC < 8.0
-        await exec(`sudo -- sh -c "apt-get -y install ghc-${v}"`);
-      } catch {
-        // oh well, we tried
-      }
-    }
+  await exec('powershell', [
+    'choco',
+    'install',
+    tool,
+    '--version',
+    version,
+    '-m',
+    '--no-progress',
+    '-r'
+  ]);
+}
 
-    try {
-      await fs.access(p);
-      core.addPath(p);
-      core.endGroup();
-      return;
-    } catch {
-      // ok, let's try the generic install now
-    }
-  }
+async function ghcup(tool: Tool, version: string, os: OS): Promise<void> {
+  core.info(`Attempting to install ${tool} ${version} using ghcup`);
 
-  if (process.platform === 'win32') {
-    await exec('powershell', [
-      'choco',
-      'install',
-      tool,
-      '--version',
-      version,
-      '-m',
-      '--no-progress',
-      '-r'
-    ]);
+  const bin = await tc.downloadTool(
+    `https://downloads.haskell.org/~ghcup/x86_64-${
+      os === 'darwin' ? 'apple-darwin' : 'linux'
+    }-ghcup`
+  );
+  await fs.chmod(bin, 0o755);
 
-    core.addPath(
-      join(
-        process.env.ChocolateyInstall || '',
-        'lib',
-        `${tool}.${version}`,
-        'tools',
-        `${tool}-${version}`,
-        tool === 'ghc' ? 'bin' : ''
-      )
-    );
-  } else {
-    const ghcup = await tc.downloadTool(
-      'https://raw.githubusercontent.com/haskell/ghcup/master/ghcup'
-    );
-    await fs.chmod(ghcup, 0o755);
-    await io.mkdirP(join(process.env.HOME || '', '.ghcup', 'bin'));
-    await exec(ghcup, [tool === 'ghc' ? 'install' : 'install-cabal', version]);
-
-    const p = tool === 'ghc' ? ['ghc', version] : [];
-    core.addPath(join(process.env.HOME || '', '.ghcup', ...p, 'bin'));
-  }
-  core.endGroup();
+  await exec(bin, [tool === 'ghc' ? 'install' : 'install-cabal', version]);
+  if (tool === 'ghc') await exec(bin, ['set', version]);
 }

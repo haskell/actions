@@ -4,21 +4,40 @@ author: 'GitHub'
 inputs:
   ghc-version:
     required: false
-    description: 'Exact version of ghc to use.'
-    default: '8.8.3'
+    description: 'Version of GHC to use. If set to "latest", it will always get the latest stable version.'
+    default: 'latest'
   cabal-version:
     required: false
-    description: 'Exact version of cabal to use.'
-    default: '3.0.0.0'
+    description: 'Version of Cabal to use. If set to "latest", it will always get the latest stable version.'
+    default: 'latest'
   stack-version:
     required: false
-    description: 'If specified, will download the given version of stack. If set to "latest", it will always get the latest stable version of stack.'
+    description: 'Version of Stack to use. If set to "latest", it will always get the latest stable version.'
+    default: 'latest'
+  enable-stack:
+    required: false
+    description: 'If specified, will setup Stack'
   stack-no-global:
     required: false
-    description: 'If specified, stack-version must be set. Prevents installing GHC and Cabal globally'
+    description: 'If specified, enable-stack must be set. Prevents installing GHC and Cabal globally'
   stack-setup-ghc:
     required: false
-    description: 'If specified, will run stack setup to install the specified GHC'
+    description: 'If specified, enable-stack must be set. Will run stack setup to install the specified GHC'
+outputs:
+  ghc-path:
+    description: 'The path of the ghc executable _directory_'
+  cabal-path:
+    description: 'The path of the cabal executable _directory_'
+  stack-path:
+    description: 'The path of the stack executable _directory_'
+  cabal-store:
+    description: 'The path to the cabal store'
+  ghc-exe:
+    description: 'The path of the ghc _executable_'
+  cabal-exe:
+    description: 'The path of the cabal _executable_'
+  stack-exe:
+    description: 'The path of the stack _executable_'
 runs:
   using: 'node12'
   main: 'dist/index.js'

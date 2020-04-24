@@ -4,12 +4,25 @@ author: 'GitHub'
 inputs:
   ghc-version:
     required: false
-    description: 'Exact version of ghc to use.'
-    default: '8.8.3'
+    description: 'Version of ghc to use.'
+    default: '8.8'
   cabal-version:
     required: false
-    description: 'Exact version of cabal to use.'
-    default: '3.0.0.0'
+    description: 'Version of cabal to use. If set to "latest", it will always get the latest stable version.'
+    default: 'latest'
+  stack-version:
+    required: false
+    description: 'Version of stack to use. If set to "latest", it will always get the latest stable version.'
+    default: 'latest'
+  enable-stack:
+    required: false
+    description: 'If specified, will setup stack'
+  stack-no-global:
+    required: false
+    description: 'If specified, enable-stack must be set. Prevents installing GHC and Cabal globally'
+  stack-setup-ghc:
+    required: false
+    description: 'If specified, enable-stack must be set. Will run stack setup to install the specified GHC'
 runs:
   using: 'node12'
   main: 'dist/index.js'

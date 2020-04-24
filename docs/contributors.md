@@ -18,3 +18,9 @@ git commit -m "Informative commit message"  # Commit. This will run Husky
 
 During the commit step, Husky will take care of formatting all files with [Prettier](https://github.com/prettier/prettier). It will also bundle the code into a single `dist/index.js` file.
 Finally, it will make sure these changes are appropriately included in your commit--no further work is needed.
+
+## Versions
+
+Cabal does not follow SemVer and Stack has both SemVer compatible version numbers as well as PVP-style versions; due to this, support for "resolving" a version like `X.X` into the latest `X.X.Y` or `X.X.Y.Y` version is tricky.
+To avoid complications, all recognized versions of GHC, Cabal, and Stack are in `src/versions.json`; these versions are supported across all three operating systems.
+When a new release of GHC, Cabal, or Stack comes out, the `src/versions.json` file will need to be updated accordingly.

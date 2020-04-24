@@ -26,7 +26,7 @@ jobs:
           node-version: 12
       # http://www.tiernok.com/posts/2019/faster-npm-installs-during-ci/
       - run: npm ci --prefer-offline --no-audit --progress=false
-      - run: npm run pre-push
+      - run: npm test
 
   install-haskell:
     name: GHC ${{ matrix.ghc }}, Cabal ${{ matrix.cabal }} - ${{ matrix.os }}
@@ -35,7 +35,7 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        ghc: ['8.8.3', '8.4.4']
+        ghc: ['8.8', '8.4.4']
         cabal: ['3.0.0.0']
         include:
           - os: ubuntu-latest
@@ -55,14 +55,20 @@ jobs:
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
-      - run: runhaskell __tests__/hello.hs
+      - run: |
+          runhaskell --version
+          runhaskell __tests__/hello.hs
       - shell: bash
         run: cd __tests__/project && cabal build && cabal run
+      - run: |
+          cabal --version
+          ghc --version
 
   install-stack:
     name: Stack ${{ matrix.stack }} ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         stack: ['latest', '1.9.1']
@@ -72,6 +78,9 @@ jobs:
 
       - uses: ./
         with:
-          stack-version: ${{ matrix.stack }}
+          enable-stack: true
           stack-no-global: true
-      - run: stack
+          stack-version: ${{ matrix.stack }}
+      - run: |
+          stack --version
+          stack
