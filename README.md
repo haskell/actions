@@ -15,6 +15,21 @@ For all other versions, this action utilizes [`ppa:hvr/ghc`](https://launchpad.n
 
 See [action.yml](action.yml)
 
+Minimal:
+
+```yaml
+on: [push]
+name: build
+jobs:
+  runhaskell:
+    name: Hello World
+    runs-on: ubuntu-latest # or macOS-latest, or windows-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-haskell@v1
+      - run: runhaskell Hello.hs
+```
+
 Basic:
 
 ```yaml
