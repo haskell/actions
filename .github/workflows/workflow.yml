@@ -44,13 +44,6 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
-
-      - uses: actions/cache@v1
-        if: matrix.os  == 'macOS-latest'
-        with:
-          path: ~/.ghcup
-          key: ${{ runner.os }}-${{ matrix.ghc }}-ghcup
-
       - uses: ./
         with:
           ghc-version: ${{ matrix.ghc }}

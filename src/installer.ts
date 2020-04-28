@@ -178,10 +178,11 @@ async function choco(tool: Tool, version: string): Promise<void> {
 async function ghcup(tool: Tool, version: string, os: OS): Promise<void> {
   core.info(`Attempting to install ${tool} ${version} using ghcup`);
 
+  const v = '0.1.4';
   const bin = await tc.downloadTool(
-    `https://downloads.haskell.org/~ghcup/x86_64-${
+    `https://downloads.haskell.org/~ghcup/${v}/x86_64-${
       os === 'darwin' ? 'apple-darwin' : 'linux'
-    }-ghcup`
+    }-ghcup-${v}`
   );
   await fs.chmod(bin, 0o755);
 
