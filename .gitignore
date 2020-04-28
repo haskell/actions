@@ -1,2 +1,4 @@
-!node_modules/
-__tests__/runner/*
+node_modules
+dist-newstyle
+.out
+.eslintcache

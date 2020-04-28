@@ -9,26 +9,71 @@ on:
     paths-ignore:
       - '**.md'
 jobs:
-  run:
-    name: Run
-    runs-on: ${{ matrix.operating-system }}
+  test:
+    name: Unit Tests - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
-        operating-system: [ubuntu-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
-    - name: Checkout
-      uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v2
 
-    - name: Set Node.js 12
-      uses: actions/setup-node@v1
-      with:
-        node-version: 12
+      - name: Set Node.js 12
+        uses: actions/setup-node@v1
+        with:
+          node-version: 12
+      # http://www.tiernok.com/posts/2019/faster-npm-installs-during-ci/
+      - run: npm ci --prefer-offline --no-audit --progress=false
+      - run: npm test
 
-    - name: npm install
-      run: npm install
+  install-haskell:
+    name: GHC ${{ matrix.ghc }}, Cabal ${{ matrix.cabal }} - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        ghc: ['8.8', '8.4.4']
+        cabal: ['3.0.0.0']
+        include:
+          - os: ubuntu-latest
+            ghc: '7.10.3'
+            cabal: '3.0.0.0'
 
-    - name: Lint
-      run: npm run format-check
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./
+        with:
+          ghc-version: ${{ matrix.ghc }}
+          cabal-version: ${{ matrix.cabal }}
+      - run: |
+          runhaskell --version
+          runhaskell __tests__/hello.hs
+      - shell: bash
+        run: cd __tests__/project && cabal build && cabal run
+      - run: |
+          cabal --version
+          ghc --version
 
-    - name: npm test
-      run: npm test
+  install-stack:
+    name: Stack ${{ matrix.stack }} ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+        stack: ['latest', '1.9.1']
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - uses: ./
+        with:
+          enable-stack: true
+          stack-no-global: true
+          stack-version: ${{ matrix.stack }}
+      - run: |
+          stack --version
+          stack
