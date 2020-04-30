@@ -2584,7 +2584,7 @@ function escapeProperty(s) {
 /***/ 447:
 /***/ (function(module) {
 
-module.exports = {"ghc":["8.10.1","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.2.0.0","3.0.0.0","2.4.1.0","2.4.0.0","2.2.0.0"],"stack":["2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"]};
+module.exports = {"ghc":["8.10.1","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.2.0.0","3.0.0.0","2.4.1.0","2.4.0.0","2.2.0.0"],"stack":["2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"]};
 
 /***/ }),
 
@@ -10721,13 +10721,11 @@ exports.installTool = installTool;
 async function stack(version, os) {
     core.info(`Attempting to install stack ${version}`);
     const build = {
-        linux: 'linux-x86_64-static',
+        linux: `linux-x86_64${version >= '2.3.1' ? '' : '-static'}`,
         darwin: 'osx-x86_64',
         win32: 'windows-x86_64'
     }[os];
-    const url = version === 'latest'
-        ? `https://get.haskellstack.org/stable/${build}.tar.gz`
-        : `https://github.com/commercialhaskell/stack/releases/download/v${version}/stack-${version}-${build}.tar.gz`;
+    const url = `https://github.com/commercialhaskell/stack/releases/download/v${version}/stack-${version}-${build}.tar.gz`;
     const p = await tc.downloadTool(`${url}`).then(tc.extractTar);
     const [stackPath] = await glob_1.create(`${p}/stack*`, {
         implicitDescendants: false
