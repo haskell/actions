@@ -26,7 +26,7 @@ jobs:
     runs-on: ubuntu-latest # or macOS-latest, or windows-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-haskell@v1
+      - uses: actions/setup-haskell@v1.1
       - run: runhaskell Hello.hs
 ```
 
@@ -41,7 +41,7 @@ jobs:
     runs-on: ubuntu-latest # or macOS-latest, or windows-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-haskell@v1
+      - uses: actions/setup-haskell@v1.1
         with:
           ghc-version: '8.8' # Resolves to the latest point release of GHC 8.8
           cabal-version: '3.0.0.0' # Exact version of Cabal
@@ -59,7 +59,7 @@ jobs:
     runs-on: ubuntu-latest # or macOS-latest, or windows-latest
     steps:
       - uses: actions/checkout@v2
-      - uses: actions/setup-haskell@v1
+      - uses: actions/setup-haskell@v1.1
         with:
           ghc-version: '8.8.3' # Exact version of ghc to use
           # cabal-version: 'latest'. Omitted, but defalts to 'latest'
@@ -88,7 +88,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - name: Setup Haskell
-        uses: actions/setup-haskell@v1
+        uses: actions/setup-haskell@v1.1
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
@@ -156,6 +156,7 @@ Recommendation: Use the latest available version if possible.
 **Stack:**
 
 - `latest` (recommended) -- follows the latest release automatically.
+- `2.3.1` `2.3`
 - `2.1.3` `2.1`
 - `2.1.1`
 - `1.9.3.1` `1.9`

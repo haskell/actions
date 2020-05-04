@@ -135,15 +135,12 @@ export async function installTool(
 async function stack(version: string, os: OS): Promise<void> {
   core.info(`Attempting to install stack ${version}`);
   const build = {
-    linux: 'linux-x86_64-static',
+    linux: `linux-x86_64${version >= '2.3.1' ? '' : '-static'}`,
     darwin: 'osx-x86_64',
     win32: 'windows-x86_64'
   }[os];
 
-  const url =
-    version === 'latest'
-      ? `https://get.haskellstack.org/stable/${build}.tar.gz`
-      : `https://github.com/commercialhaskell/stack/releases/download/v${version}/stack-${version}-${build}.tar.gz`;
+  const url = `https://github.com/commercialhaskell/stack/releases/download/v${version}/stack-${version}-${build}.tar.gz`;
   const p = await tc.downloadTool(`${url}`).then(tc.extractTar);
   const [stackPath] = await glob(`${p}/stack*`, {
     implicitDescendants: false
