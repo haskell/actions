@@ -63,6 +63,7 @@ jobs:
         with:
           ghc-version: '8.8.3' # Exact version of ghc to use
           # cabal-version: 'latest'. Omitted, but defalts to 'latest'
+          enable-stack: true
           stack-version: 'latest'
       - run: runhaskell Hello.hs
 ```
