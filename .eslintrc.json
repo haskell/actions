@@ -1,7 +1,7 @@
 {
   "root": true,
   "plugins": ["jest", "@typescript-eslint"],
-  "extends": ["plugin:github/es6"],
+  "extends": ["plugin:github/typescript"],
   "parser": "@typescript-eslint/parser",
   "parserOptions": {
     "ecmaVersion": 2019,
@@ -20,7 +20,6 @@
     "@typescript-eslint/no-require-imports": "error",
     "@typescript-eslint/array-type": "warn",
     "@typescript-eslint/await-thenable": "error",
-    "@typescript-eslint/ban-ts-ignore": "error",
     "camelcase": "off",
     "@typescript-eslint/explicit-function-return-type": [
       "warn",

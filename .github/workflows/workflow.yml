@@ -35,12 +35,15 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        ghc: ['8.8', '8.4.4']
-        cabal: ['3.0.0.0']
+        ghc: ['latest', '8.4.4']
+        cabal: ['latest']
         include:
           - os: ubuntu-latest
             ghc: '7.10.3'
             cabal: '3.0.0.0'
+          - os: ubuntu-latest
+            ghc: '8.2.2'
+            cabal: '2.0'
 
     steps:
       - uses: actions/checkout@v2
@@ -56,6 +59,11 @@ jobs:
       - run: |
           cabal --version
           ghc --version
+      - shell: bash
+        if: matrix.ghc != 'latest'
+        # this check depends on the ghc versions being "exact" in the matrix
+        run: |
+          [[ $(ghc --numeric-version) == ${{ matrix.ghc }} ]]
 
   install-stack:
     name: Stack ${{ matrix.stack }} ${{ matrix.os }}
