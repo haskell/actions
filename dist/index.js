@@ -8733,7 +8733,6 @@ async function cabalConfig() {
             await core.group('Setting up cabal', async () => {
                 await exec_1.exec('cabal', ['user-config', 'update'], { silent: true });
                 const configFile = await cabalConfig();
-                fs.appendFileSync(configFile, 'http-transport: plain-http\n');
                 if (process.platform === 'win32') {
                     fs.appendFileSync(configFile, 'store-dir: C:\\sr\n');
                     core.setOutput('cabal-store', 'C:\\sr');
