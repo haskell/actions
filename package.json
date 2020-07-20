@@ -1,0 +1,38 @@
+{
+  "name": "@rwe/actions-hlint-setup",
+  "version": "1.0.0",
+  "description": "GitHub Action: Set up hlint",
+  "main": "dist/index.js",
+  "scripts": {
+    "lint": "true",
+    "test": "true",
+    "compile": "tsc",
+    "package": "ncc build --source-map",
+    "all": "npm run lint && npm run compile && npm run test"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rwe/actions-hlint-setup.git"
+  },
+  "keywords": [
+    "Actions",
+    "GitHub",
+    "Haskell",
+    "Lint",
+    "HLint"
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/rwe/actions-hlint-setup/issues"
+  },
+  "homepage": "https://github.com/rwe/actions-hlint-setup#readme",
+  "dependencies": {
+    "@actions/core": "^1.1.1",
+    "@actions/tool-cache": "^1.6.0"
+  },
+  "devDependencies": {
+    "@types/node": "^14.0.24",
+    "@zeit/ncc": "^0.22.3",
+    "typescript": "^3.9.7"
+  }
+}
