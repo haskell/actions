@@ -1,0 +1,17 @@
+name: 'Set up HLint'
+description: 'Cached download of hlint binary release'
+inputs:
+  version:
+    description: 'hlint version'
+    required: true
+    default: '3.1.6'
+outputs:
+  hlint-dir:
+    description: 'Directory containing the hlint executable'
+  hlint-path:
+    description: 'Location of the hlint executable'
+  version:
+    description: 'Version of the hlint tool (same as input, if provided)'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
