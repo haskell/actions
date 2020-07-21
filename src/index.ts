@@ -19,6 +19,12 @@ const HLINT_PLATFORM_ARCHIVE_CONFIG: Record<string, PlatformArchiveConfig> = {
   win32: {toolType: {pkgPlatform: 'windows', ext: 'exe'}, archiveType: ZIP_ARCHIVE},
 };
 
+// os.arch() gives x64. The package archs are identified as x86_64.
+  // At least as of hlint 3.1.6, all platforms are x86_64.
+const HLINT_ARCH_CONFIG: Record<string, string> = {
+  x64: 'x86_64',
+};
+
 interface ToolConfig {
   arch: string,
   name: string,
@@ -39,21 +45,24 @@ interface HLintReleaseConfig {
   archive: ArchiveConfig,
 };
 
-function mkHlintReleaseConfig(nodeOsPlatform: string, hlintVersion: string): HLintReleaseConfig {
+function mkHlintReleaseConfig(nodeOsPlatform: string, nodeArch: string, hlintVersion: string): HLintReleaseConfig {
   const config = HLINT_PLATFORM_ARCHIVE_CONFIG[nodeOsPlatform];
   if (!config) {
     throw Error(`Invalid platform for hlint: ${nodeOsPlatform}`);
   }
+  const pkgArch = HLINT_ARCH_CONFIG[nodeArch];
+  if (!pkgArch) {
+    throw Error(`Unsupported architecture hlint: ${nodeArch}`);
+  }
+
   const {toolType: {pkgPlatform, ext: exeExt}, archiveType: {ext: archiveExt, extract}} = config;
 
-  // At least as of hlint 3.1.6, all platforms are x86_64.
-  const arch = 'x86_64';
   const toolName = 'hlint';
   const releaseName = `${toolName}-${hlintVersion}`;
-  const archiveName = `${releaseName}-${arch}-${pkgPlatform}.${archiveExt}`;
+  const archiveName = `${releaseName}-${pkgArch}-${pkgPlatform}.${archiveExt}`;
   return {
     tool: {
-      arch,
+      arch: nodeArch,
       name: toolName,
       exeName: exeExt ? `${toolName}.${exeExt}` : toolName,
       platform: nodeOsPlatform,
@@ -110,7 +119,7 @@ const OUTPUT_KEY_HLINT_VERSION = 'version';
 async function run() {
   try {
     const hlintVersion = core.getInput(INPUT_KEY_HLINT_VERSION) || HLINT_DEFAULT_VERSION;
-    const config = mkHlintReleaseConfig(process.platform, hlintVersion);
+    const config = mkHlintReleaseConfig(process.platform, os.arch(), hlintVersion);
     const hlintDir = await findOrDownloadHlint(config);
     core.addPath(hlintDir);
     core.info(`hlint ${config.tool.version} is now set up at ${hlintDir}`);
