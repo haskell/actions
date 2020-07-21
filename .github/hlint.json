@@ -1,0 +1,19 @@
+{
+  "problemMatcher": [
+    {
+      "owner": "hlint",
+      "pattern": [
+        {
+          "regexp": "^hlint\\t(?<file>[^\\t]*)\\t(?<fromPath>[^\\t]*)\\t(?<line>[^\\t]*)\\t(?<column>[^\\t]*)\\t(?<severity>[^\\t]*)\\t(?<code>[^\\t]*)\\t(?<message>[^\\t]*)$",
+          "file": 1,
+          "fromPath": 2,
+          "line": 3,
+          "column": 4,
+          "severity": 5,
+          "code": 6,
+          "message": 7
+        }
+      ]
+    }
+  ]
+}

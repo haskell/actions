@@ -1,0 +1,3 @@
+hlint	test/Example.hs		1	1	warning	Use module export list	Ignore in module Foo: Use module export list ▫︎ Found: "module Foo where" ▫︎ Perhaps: "module Foo (\n module Foo\n ) where" ▫︎ Note: an explicit list is usually better
+hlint	test/Example.hs		7	13	warning	Redundant do	Warning in someStr in module Foo: Redundant do ▫︎ Found: "do show" ▫︎ Perhaps: "show"
+hlint	test/Example.hs		7	13	warning	Redundant bracket	Suggestion in someStr in module Foo: Redundant bracket ▫︎ Found: "do show $ ((map (x +) xs))" ▫︎ Perhaps: "do show $ map (x +) xs"

@@ -1,0 +1,29 @@
+name: test
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - 'releases/*'
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: yarn
+    - run: yarn test
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up HLint
+      uses: rwe/actions-hlint-setup@v1
+
+    - run: hlint --version
+
+    - uses: ./
+      with:
+        path: test/Example.hs
