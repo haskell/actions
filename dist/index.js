@@ -3050,25 +3050,32 @@ const ZIP_ARCHIVE = { ext: 'zip', extract: tc.extractZip };
 // process.platform are (linux, darwin, win32, …)
 // hlint releases are (linux, osx, windows, …)
 const HLINT_PLATFORM_ARCHIVE_CONFIG = {
-    darwin: { toolType: { platform: 'osx', ext: '' }, archiveType: TAR_ARCHIVE },
-    linux: { toolType: { platform: 'linux', ext: '' }, archiveType: TAR_ARCHIVE },
-    win32: { toolType: { platform: 'windows', ext: 'exe' }, archiveType: ZIP_ARCHIVE },
+    darwin: { toolType: { pkgPlatform: 'osx', ext: '' }, archiveType: TAR_ARCHIVE },
+    linux: { toolType: { pkgPlatform: 'linux', ext: '' }, archiveType: TAR_ARCHIVE },
+    win32: { toolType: { pkgPlatform: 'windows', ext: 'exe' }, archiveType: ZIP_ARCHIVE },
+};
+// os.arch() gives x64. The package archs are identified as x86_64.
+// At least as of hlint 3.1.6, all platforms are x86_64.
+const HLINT_ARCH_CONFIG = {
+    x64: 'x86_64',
 };
 ;
-function mkHlintReleaseConfig(nodeOsPlatform, hlintVersion) {
+function mkHlintReleaseConfig(nodeOsPlatform, nodeArch, hlintVersion) {
     const config = HLINT_PLATFORM_ARCHIVE_CONFIG[nodeOsPlatform];
     if (!config) {
         throw Error(`Invalid platform for hlint: ${nodeOsPlatform}`);
     }
-    const { toolType: { platform, ext: exeExt }, archiveType: { ext: archiveExt, extract } } = config;
-    // At least as of hlint 3.1.6, all platforms are x86_64.
-    const arch = 'x86_64';
+    const pkgArch = HLINT_ARCH_CONFIG[nodeArch];
+    if (!pkgArch) {
+        throw Error(`Unsupported architecture hlint: ${nodeArch}`);
+    }
+    const { toolType: { pkgPlatform, ext: exeExt }, archiveType: { ext: archiveExt, extract } } = config;
     const toolName = 'hlint';
     const releaseName = `${toolName}-${hlintVersion}`;
-    const archiveName = `${releaseName}-${arch}-${platform}.${archiveExt}`;
+    const archiveName = `${releaseName}-${pkgArch}-${pkgPlatform}.${archiveExt}`;
     return {
         tool: {
-            arch,
+            arch: nodeArch,
             name: toolName,
             exeName: exeExt ? `${toolName}.${exeExt}` : toolName,
             platform: nodeOsPlatform,
@@ -3127,7 +3134,7 @@ function run() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
             const hlintVersion = core.getInput(INPUT_KEY_HLINT_VERSION) || HLINT_DEFAULT_VERSION;
-            const config = mkHlintReleaseConfig(process.platform, hlintVersion);
+            const config = mkHlintReleaseConfig(process.platform, os.arch(), hlintVersion);
             const hlintDir = yield findOrDownloadHlint(config);
             core.addPath(hlintDir);
             core.info(`hlint ${config.tool.version} is now set up at ${hlintDir}`);
