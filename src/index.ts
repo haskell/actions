@@ -7,16 +7,16 @@ const TAR_ARCHIVE = {ext: 'tar.gz', extract: tc.extractTar};
 const ZIP_ARCHIVE = {ext: 'zip', extract: tc.extractZip};
 
 interface PlatformArchiveConfig {
-  toolType: {platform: string, ext: string},
+  toolType: {pkgPlatform: string, ext: string},
   archiveType: {ext: string, extract: (archivePath: string, toDir: string) => Promise<string>},
 };
 
 // process.platform are (linux, darwin, win32, …)
 // hlint releases are (linux, osx, windows, …)
 const HLINT_PLATFORM_ARCHIVE_CONFIG: Record<string, PlatformArchiveConfig> = {
-  darwin: {toolType: {platform: 'osx', ext: ''}, archiveType: TAR_ARCHIVE},
-  linux: {toolType: {platform: 'linux', ext: ''}, archiveType: TAR_ARCHIVE},
-  win32: {toolType: {platform: 'windows', ext: 'exe'}, archiveType: ZIP_ARCHIVE},
+  darwin: {toolType: {pkgPlatform: 'osx', ext: ''}, archiveType: TAR_ARCHIVE},
+  linux: {toolType: {pkgPlatform: 'linux', ext: ''}, archiveType: TAR_ARCHIVE},
+  win32: {toolType: {pkgPlatform: 'windows', ext: 'exe'}, archiveType: ZIP_ARCHIVE},
 };
 
 interface ToolConfig {
@@ -44,13 +44,13 @@ function mkHlintReleaseConfig(nodeOsPlatform: string, hlintVersion: string): HLi
   if (!config) {
     throw Error(`Invalid platform for hlint: ${nodeOsPlatform}`);
   }
-  const {toolType: {platform, ext: exeExt}, archiveType: {ext: archiveExt, extract}} = config;
+  const {toolType: {pkgPlatform, ext: exeExt}, archiveType: {ext: archiveExt, extract}} = config;
 
   // At least as of hlint 3.1.6, all platforms are x86_64.
   const arch = 'x86_64';
   const toolName = 'hlint';
   const releaseName = `${toolName}-${hlintVersion}`;
-  const archiveName = `${releaseName}-${arch}-${platform}.${archiveExt}`;
+  const archiveName = `${releaseName}-${arch}-${pkgPlatform}.${archiveExt}`;
   return {
     tool: {
       arch,
