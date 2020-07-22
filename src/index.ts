@@ -20,7 +20,7 @@ const HLINT_PLATFORM_ARCHIVE_CONFIG: Record<string, PlatformArchiveConfig> = {
 };
 
 // os.arch() gives x64. The package archs are identified as x86_64.
-  // At least as of hlint 3.1.6, all platforms are x86_64.
+// At least as of hlint 3.1.6, all platforms are x86_64.
 const HLINT_ARCH_CONFIG: Record<string, string> = {
   x64: 'x86_64',
 };
@@ -87,7 +87,6 @@ async function getHlintExistingPath(hlintReleaseConfig: HLintReleaseConfig): Pro
   return tc.find(tool.name, tool.version, tool.arch);
 }
 
-// https://github.com/actions/toolkit/tree/main/packages/tool-cache
 async function downloadHlint(hlintReleaseConfig: HLintReleaseConfig): Promise<string> {
   const {tool, archive} = hlintReleaseConfig;
   const {extract: extractArchive, extractionSubdir} = archive;
