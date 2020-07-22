@@ -8,7 +8,7 @@ inputs:
 outputs:
   hlint-dir:
     description: 'Directory containing the hlint executable'
-  hlint-path:
+  hlint-bin:
     description: 'Location of the hlint executable'
   version:
     description: 'Version of the hlint tool (same as input, if provided)'

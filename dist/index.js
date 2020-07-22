@@ -3100,7 +3100,6 @@ function getHlintExistingPath(hlintReleaseConfig) {
         return tc.find(tool.name, tool.version, tool.arch);
     });
 }
-// https://github.com/actions/toolkit/tree/main/packages/tool-cache
 function downloadHlint(hlintReleaseConfig) {
     return __awaiter(this, void 0, void 0, function* () {
         const { tool, archive } = hlintReleaseConfig;
@@ -3128,7 +3127,7 @@ function findOrDownloadHlint(hlintReleaseConfig) {
 const HLINT_DEFAULT_VERSION = '3.1.6';
 const INPUT_KEY_HLINT_VERSION = 'version';
 const OUTPUT_KEY_HLINT_DIR = 'hlint-dir';
-const OUTPUT_KEY_HLINT_PATH = 'hlint-path';
+const OUTPUT_KEY_HLINT_PATH = 'hlint-bin';
 const OUTPUT_KEY_HLINT_VERSION = 'version';
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
