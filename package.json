@@ -1,6 +1,6 @@
 {
   "name": "@rwe/actions-hlint",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "description": "GitHub Action: Run HLint",
   "main": "dist/index.js",
   "scripts": {

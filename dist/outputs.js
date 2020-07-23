@@ -20,10 +20,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
-const OUTPUT_KEY_HLINT_HINTS = 'hints';
+const OUTPUT_KEY_HLINT_IDEAS = 'ideas';
 function setOutputs(result) {
-    const { ok, hints, statusCode, hintSummary } = result;
-    core.setOutput(OUTPUT_KEY_HLINT_HINTS, hints);
+    const { ok, ideas, statusCode, hintSummary } = result;
+    core.setOutput(OUTPUT_KEY_HLINT_IDEAS, ideas);
     if (ok) {
         if (hintSummary.length) {
             core.info(`HLint finished with hints: ${hintSummary}`);

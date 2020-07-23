@@ -29,53 +29,60 @@ const HLINT_SEV_TO_GITHUB_SEV = {
     Suggestion: 'warning',
     Ignore: 'warning',
 };
-// Use JSON escaping to turn messages with newlines and such into a single line
+/**
+ * Use JSON escaping to turn messages with newlines and such into a single line.
+ */
 function escapeString(str, quote) {
     const jsonEscaped = JSON.stringify(str).replace(/\n/g, ' ');
     // Possibly drop the surrounding quotes
     return quote ? jsonEscaped : jsonEscaped.slice(1, jsonEscaped.length - 1);
 }
-function getNiceMessage(hint) {
+/**
+ * Combine the non-"poblemMatcher" fields of an "idea" into
+ * a single line as a human-readable message.
+ *
+ * Fields are visually separated by a box character (' ▫︎ ').
+ */
+function getNiceMessage(idea) {
     const prefixParts = [];
-    prefixParts.push(hint.severity);
-    if (hint.decl && hint.decl.length) {
-        prefixParts.push(`in ${hint.decl.join(', ')}`);
+    prefixParts.push(idea.severity);
+    if (idea.decl && idea.decl.length) {
+        prefixParts.push(`in ${idea.decl.join(', ')}`);
     }
-    if (hint.module && hint.module.length) {
-        prefixParts.push(`in module ${hint.module.join('.')}`);
+    if (idea.module && idea.module.length) {
+        prefixParts.push(`in module ${idea.module.join('.')}`);
     }
     const prefix = prefixParts.join(' ');
     const messageParts = [];
-    messageParts.push();
-    messageParts.push(hint.hint);
-    if (hint.from) {
-        messageParts.push(`Found: ${escapeString(hint.from, true)}`);
+    messageParts.push(idea.hint);
+    if (idea.from) {
+        messageParts.push(`Found: ${escapeString(idea.from, true)}`);
     }
-    if (hint.to) {
-        messageParts.push(`Perhaps: ${escapeString(hint.to, true)}`);
+    if (idea.to) {
+        messageParts.push(`Perhaps: ${escapeString(idea.to, true)}`);
     }
-    if (hint.note && hint.note.length) {
-        messageParts.push(`Note: ${hint.note.map(n => escapeString(n, false)).join(' ')}`);
+    if (idea.note && idea.note.length) {
+        messageParts.push(`Note: ${idea.note.map(n => escapeString(n, false)).join(' ')}`);
     }
     const message = messageParts.join(' ▫︎ ');
     return [prefix, message].filter(Boolean).join(': ');
 }
-function toMatchableProblem(hint) {
-    const { file, startLine: line, startColumn: column, hint: code, severity: hlintSev } = hint;
+function toMatchableProblem(idea) {
+    const { file, startLine: line, startColumn: column, hint: code, severity: hlintSev } = idea;
     return {
         file,
         line,
         column,
         severity: HLINT_SEV_TO_GITHUB_SEV[hlintSev],
         code,
-        message: getNiceMessage(hint),
+        message: getNiceMessage(idea),
     };
 }
 exports.MATCHER = new github_1.SingleLineMatcherFormat('hlint');
 // NOTE: Because ncc compiles all the files, take not to use __dirname here.
 // This path is relative to the repo root. (Possibly meaning cwd, but not necessarily).
 exports.MATCHER_DEF_PATH = path.join('.github', 'hlint.json');
-function serializeProblem(hint) {
-    return exports.MATCHER.serialize(toMatchableProblem(hint));
+function serializeProblem(idea) {
+    return exports.MATCHER.serialize(toMatchableProblem(idea));
 }
 exports.serializeProblem = serializeProblem;

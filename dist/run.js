@@ -43,13 +43,13 @@ function runHLint(cmd, args) {
         core.info(`Running ${cmd} ${args.join(' ')}`);
         const { stdout: hlintOutputStr, statusCode } = yield bufferedExec_1.default(cmd, args);
         core.info(`hlint completed with status code ${statusCode}`);
-        const hints = JSON.parse(hlintOutputStr);
-        hints.map(hlint_1.serializeProblem).forEach(line => console.log(line));
-        return { hints, statusCode };
+        const ideas = JSON.parse(hlintOutputStr);
+        ideas.map(hlint_1.serializeProblem).forEach(line => console.log(line));
+        return { ideas, statusCode };
     });
 }
-function getOverallCheckResult(failOn, { hints, statusCode }) {
-    const hintsBySev = hlint_1.SEVERITY_LEVELS.map(sev => ([sev, hints.filter(hint => hint.severity === sev).length]));
+function getOverallCheckResult(failOn, { ideas, statusCode }) {
+    const hintsBySev = hlint_1.SEVERITY_LEVELS.map(sev => ([sev, ideas.filter(hint => hint.severity === sev).length]));
     const hintSummary = hintsBySev
         .filter(([_sevName, numHints]) => numHints > 0)
         .map(([sev, num]) => `${sev} (${num})`).join(', ');
@@ -75,9 +75,9 @@ function run({ baseDir, hlintCmd, pathList, failOn }) {
     return __awaiter(this, void 0, void 0, function* () {
         const hlintArgs = ['-j', '--json', '--', ...pathList];
         const matcherDefPath = path.join(baseDir, hlint_1.MATCHER_DEF_PATH);
-        const { hints, statusCode } = yield withMatcherAtPath_1.default(matcherDefPath, () => runHLint(hlintCmd, hlintArgs));
-        const { ok, hintSummary } = getOverallCheckResult(failOn, { hints, statusCode });
-        return { ok, statusCode, hints, hintSummary };
+        const { ideas, statusCode } = yield withMatcherAtPath_1.default(matcherDefPath, () => runHLint(hlintCmd, hlintArgs));
+        const { ok, hintSummary } = getOverallCheckResult(failOn, { ideas, statusCode });
+        return { ok, statusCode, ideas, hintSummary };
     });
 }
 exports.default = run;

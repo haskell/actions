@@ -1560,13 +1560,13 @@ function runHLint(cmd, args) {
         core.info(`Running ${cmd} ${args.join(' ')}`);
         const { stdout: hlintOutputStr, statusCode } = yield bufferedExec_1.default(cmd, args);
         core.info(`hlint completed with status code ${statusCode}`);
-        const hints = JSON.parse(hlintOutputStr);
-        hints.map(hlint_1.serializeProblem).forEach(line => console.log(line));
-        return { hints, statusCode };
+        const ideas = JSON.parse(hlintOutputStr);
+        ideas.map(hlint_1.serializeProblem).forEach(line => console.log(line));
+        return { ideas, statusCode };
     });
 }
-function getOverallCheckResult(failOn, { hints, statusCode }) {
-    const hintsBySev = hlint_1.SEVERITY_LEVELS.map(sev => ([sev, hints.filter(hint => hint.severity === sev).length]));
+function getOverallCheckResult(failOn, { ideas, statusCode }) {
+    const hintsBySev = hlint_1.SEVERITY_LEVELS.map(sev => ([sev, ideas.filter(hint => hint.severity === sev).length]));
     const hintSummary = hintsBySev
         .filter(([_sevName, numHints]) => numHints > 0)
         .map(([sev, num]) => `${sev} (${num})`).join(', ');
@@ -1592,9 +1592,9 @@ function run({ baseDir, hlintCmd, pathList, failOn }) {
     return __awaiter(this, void 0, void 0, function* () {
         const hlintArgs = ['-j', '--json', '--', ...pathList];
         const matcherDefPath = path.join(baseDir, hlint_1.MATCHER_DEF_PATH);
-        const { hints, statusCode } = yield withMatcherAtPath_1.default(matcherDefPath, () => runHLint(hlintCmd, hlintArgs));
-        const { ok, hintSummary } = getOverallCheckResult(failOn, { hints, statusCode });
-        return { ok, statusCode, hints, hintSummary };
+        const { ideas, statusCode } = yield withMatcherAtPath_1.default(matcherDefPath, () => runHLint(hlintCmd, hlintArgs));
+        const { ok, hintSummary } = getOverallCheckResult(failOn, { ideas, statusCode });
+        return { ok, statusCode, ideas, hintSummary };
     });
 }
 exports.default = run;
@@ -1635,10 +1635,10 @@ var __importStar = (this && this.__importStar) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
-const OUTPUT_KEY_HLINT_HINTS = 'hints';
+const OUTPUT_KEY_HLINT_IDEAS = 'ideas';
 function setOutputs(result) {
-    const { ok, hints, statusCode, hintSummary } = result;
-    core.setOutput(OUTPUT_KEY_HLINT_HINTS, hints);
+    const { ok, ideas, statusCode, hintSummary } = result;
+    core.setOutput(OUTPUT_KEY_HLINT_IDEAS, ideas);
     if (ok) {
         if (hintSummary.length) {
             core.info(`HLint finished with hints: ${hintSummary}`);
@@ -2010,7 +2010,7 @@ function getMatchLineRegexString(toolName) {
 }
 const MATCH_LINE_REGEX_GROUPS = (exports.MATCH_LINE_KEYS
     .map((key, index) => ([key, index + 1]))
-    .reduce((obj, keyAndMatchGroup) => (Object.assign(Object.assign({}, obj), { [keyAndMatchGroup[0]]: keyAndMatchGroup[1] })), {}));
+    .reduce((obj, [key, matchGroup]) => (Object.assign(Object.assign({}, obj), { [key]: matchGroup })), {}));
 function getMatcherPatternObj(toolName) {
     return Object.assign({ regexp: getMatchLineRegexString(toolName) }, MATCH_LINE_REGEX_GROUPS);
 }
@@ -2080,54 +2080,61 @@ const HLINT_SEV_TO_GITHUB_SEV = {
     Suggestion: 'warning',
     Ignore: 'warning',
 };
-// Use JSON escaping to turn messages with newlines and such into a single line
+/**
+ * Use JSON escaping to turn messages with newlines and such into a single line.
+ */
 function escapeString(str, quote) {
     const jsonEscaped = JSON.stringify(str).replace(/\n/g, ' ');
     // Possibly drop the surrounding quotes
     return quote ? jsonEscaped : jsonEscaped.slice(1, jsonEscaped.length - 1);
 }
-function getNiceMessage(hint) {
+/**
+ * Combine the non-"poblemMatcher" fields of an "idea" into
+ * a single line as a human-readable message.
+ *
+ * Fields are visually separated by a box character (' ▫︎ ').
+ */
+function getNiceMessage(idea) {
     const prefixParts = [];
-    prefixParts.push(hint.severity);
-    if (hint.decl && hint.decl.length) {
-        prefixParts.push(`in ${hint.decl.join(', ')}`);
+    prefixParts.push(idea.severity);
+    if (idea.decl && idea.decl.length) {
+        prefixParts.push(`in ${idea.decl.join(', ')}`);
     }
-    if (hint.module && hint.module.length) {
-        prefixParts.push(`in module ${hint.module.join('.')}`);
+    if (idea.module && idea.module.length) {
+        prefixParts.push(`in module ${idea.module.join('.')}`);
     }
     const prefix = prefixParts.join(' ');
     const messageParts = [];
-    messageParts.push();
-    messageParts.push(hint.hint);
-    if (hint.from) {
-        messageParts.push(`Found: ${escapeString(hint.from, true)}`);
+    messageParts.push(idea.hint);
+    if (idea.from) {
+        messageParts.push(`Found: ${escapeString(idea.from, true)}`);
     }
-    if (hint.to) {
-        messageParts.push(`Perhaps: ${escapeString(hint.to, true)}`);
+    if (idea.to) {
+        messageParts.push(`Perhaps: ${escapeString(idea.to, true)}`);
     }
-    if (hint.note && hint.note.length) {
-        messageParts.push(`Note: ${hint.note.map(n => escapeString(n, false)).join(' ')}`);
+    if (idea.note && idea.note.length) {
+        messageParts.push(`Note: ${idea.note.map(n => escapeString(n, false)).join(' ')}`);
     }
     const message = messageParts.join(' ▫︎ ');
     return [prefix, message].filter(Boolean).join(': ');
 }
-function toMatchableProblem(hint) {
-    const { file, startLine: line, startColumn: column, hint: code, severity: hlintSev } = hint;
+function toMatchableProblem(idea) {
+    const { file, startLine: line, startColumn: column, hint: code, severity: hlintSev } = idea;
     return {
         file,
         line,
         column,
         severity: HLINT_SEV_TO_GITHUB_SEV[hlintSev],
         code,
-        message: getNiceMessage(hint),
+        message: getNiceMessage(idea),
     };
 }
 exports.MATCHER = new github_1.SingleLineMatcherFormat('hlint');
 // NOTE: Because ncc compiles all the files, take not to use __dirname here.
 // This path is relative to the repo root. (Possibly meaning cwd, but not necessarily).
 exports.MATCHER_DEF_PATH = path.join('.github', 'hlint.json');
-function serializeProblem(hint) {
-    return exports.MATCHER.serialize(toMatchableProblem(hint));
+function serializeProblem(idea) {
+    return exports.MATCHER.serialize(toMatchableProblem(idea));
 }
 exports.serializeProblem = serializeProblem;
 
