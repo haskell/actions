@@ -26,7 +26,7 @@ export interface Idea {
   endLine: number,
   endColumn: number,
   from: string,
-  to: string,
+  to?: string,
   note: string[],
   refactorings: string,
 }
