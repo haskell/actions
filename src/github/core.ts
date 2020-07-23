@@ -89,7 +89,7 @@ type MatcherGroups = Record<keyof Problem, number>
 const MATCH_LINE_REGEX_GROUPS: MatcherGroups = (
   MATCH_LINE_KEYS
   .map((key, index) => ([key, index + 1]))
-  .reduce((obj, keyAndMatchGroup) => ({...obj, [keyAndMatchGroup[0]]: keyAndMatchGroup[1]}), {} as MatcherGroups)
+  .reduce((obj, [key, matchGroup]) => ({...obj, [key]: matchGroup}), {} as MatcherGroups)
 );
 
 function getMatcherPatternObj(toolName: string): ProblemPattern {

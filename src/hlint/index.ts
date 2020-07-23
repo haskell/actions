@@ -12,22 +12,65 @@ export type Severity
   | 'Ignore'
   ;
 
-
 export const SEVERITY_LEVELS = ['Error', 'Warning', 'Suggestion', 'Ignore'] as const;
 
+/**
+ * An idea suggested by an hlint 'Hint'.
+ *
+ * Derived from `src/Idea.hs` in the hlint source code: ndmitchell/hlint@v3.1.6
+ */
 export interface Idea {
+  /**
+   * The modules the idea is for, usually a singleton.
+   */
   module: string[],
+  /**
+   * The declarations the idea is for, usually a singleton, typically the function name, but may be a type name.
+   */
   decl: string[],
+  /**
+   * The severity of the idea, e.g. 'Warning'.
+   */
   severity: Severity,
+  /**
+   * The name of the hint that generated the idea, e.g. @\"Use reverse\"@.
+   */
   hint: string,
+  /**
+   * The source code filename the idea relates to.
+   */
   file: string,
+  /**
+   * The start line in the source code the idea relates to.
+   */
   startLine: number,
+  /**
+   * The start column of the source code the idea relates to.
+   */
   startColumn: number,
+  /**
+   * The end line in the source code the idea relates to.
+   */
   endLine: number,
+  /**
+   * The end column of the source code the idea relates to.
+   */
   endColumn: number,
+  /**
+   * The contents of the source code the idea relates to.
+   */
   from: string,
+  /**
+   * The suggested replacement, or 'Nothing' for no replacement (e.g. on parse errors).
+   */
   to?: string,
+  /**
+   * Notes about the effect of applying the replacement.
+   */
   note: string[],
+  /**
+   * How to perform this idea.
+   */
   refactorings: string,
 }
 
@@ -38,13 +81,21 @@ const HLINT_SEV_TO_GITHUB_SEV: Record<Severity, GitHubSeverity> = {
   Ignore: 'warning',
 };
 
-// Use JSON escaping to turn messages with newlines and such into a single line
+/**
+ * Use JSON escaping to turn messages with newlines and such into a single line.
+ */
 function escapeString(str: string, quote: boolean): string {
   const jsonEscaped = JSON.stringify(str).replace(/\n/g, ' ');
   // Possibly drop the surrounding quotes
   return quote ? jsonEscaped : jsonEscaped.slice(1, jsonEscaped.length - 1);
 }
 
+/**
+ * Combine the non-"poblemMatcher" fields of an "idea" into
+ * a single line as a human-readable message.
+ *
+ * Fields are visually separated by a box character (' ▫︎ ').
+ */
 function getNiceMessage(idea: Idea): string {
   const prefixParts = [];
   prefixParts.push(idea.severity);
