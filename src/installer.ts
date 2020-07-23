@@ -161,7 +161,10 @@ async function apt(tool: Tool, version: string): Promise<void> {
   const toolName = tool === 'ghc' ? 'ghc' : 'cabal-install';
   const v = tool === 'cabal' ? version.slice(0, 3) : version;
   core.info(`Attempting to install ${toolName} ${v} using apt-get`);
-  await exec(`sudo -- sh -c "apt-get -y install ${toolName}-${v}"`);
+  // Ignore the return code so we can fall back to ghcup
+  await exec(`sudo -- sh -c "apt-get -y install ${toolName}-${v}"`, undefined, {
+    ignoreReturnCode: true
+  });
 }
 
 async function choco(tool: Tool, version: string): Promise<void> {
@@ -180,7 +183,7 @@ async function choco(tool: Tool, version: string): Promise<void> {
 }
 
 async function ghcupBin(os: OS): Promise<string> {
-  const v = '0.1.5';
+  const v = '0.1.8';
   const cachedBin = tc.find('ghcup', v);
   if (cachedBin) return join(cachedBin, 'ghcup');
 
