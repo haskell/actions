@@ -1,7 +1,7 @@
 import * as core from '@actions/core'
 import * as path from 'path'
 import {
-  Hint as HLintHint,
+  Idea as HLintIdea,
   Severity as HLintSeverity,
   SEVERITY_LEVELS as HLINT_SEV_LEVELS,
   MATCHER_DEF_PATH,
@@ -21,7 +21,7 @@ export interface RunArgs {
 
 export interface HLintResult {
   statusCode: number,
-  hints: HLintHint[],
+  ideas: HLintIdea[],
 }
 
 export interface CheckResult {
@@ -37,13 +37,13 @@ async function runHLint(cmd: string, args: string[]): Promise<HLintResult> {
   core.info(`Running ${cmd} ${args.join(' ')}`);
   const {stdout: hlintOutputStr, statusCode} = await bufferedExec(cmd, args);
   core.info(`hlint completed with status code ${statusCode}`);
-  const hints: HLintHint[] = JSON.parse(hlintOutputStr);
-  hints.map(serializeProblem).forEach(line => console.log(line));
-  return {hints, statusCode};
+  const ideas: HLintIdea[] = JSON.parse(hlintOutputStr);
+  ideas.map(serializeProblem).forEach(line => console.log(line));
+  return {ideas, statusCode};
 }
 
-function getOverallCheckResult(failOn: CheckMode, {hints, statusCode}: HLintResult): CheckResult {
-  const hintsBySev = HLINT_SEV_LEVELS.map(sev => ([sev, hints.filter(hint => hint.severity === sev).length]));
+function getOverallCheckResult(failOn: CheckMode, {ideas, statusCode}: HLintResult): CheckResult {
+  const hintsBySev = HLINT_SEV_LEVELS.map(sev => ([sev, ideas.filter(hint => hint.severity === sev).length]));
   const hintSummary = hintsBySev
     .filter(([_sevName, numHints]) => numHints > 0)
     .map(([sev, num]) => `${sev} (${num})`).join(', ');
@@ -69,7 +69,7 @@ function getOverallCheckResult(failOn: CheckMode, {hints, statusCode}: HLintResu
 export default async function run({baseDir, hlintCmd, pathList, failOn}: RunArgs): Promise<RunResult> {
   const hlintArgs = ['-j', '--json', '--', ...pathList]
   const matcherDefPath = path.join(baseDir, MATCHER_DEF_PATH);
-  const {hints, statusCode} = await withMatcherAtPath(matcherDefPath, () => runHLint(hlintCmd, hlintArgs));
-  const {ok, hintSummary} = getOverallCheckResult(failOn, {hints, statusCode});
-  return {ok, statusCode, hints, hintSummary};
+  const {ideas, statusCode} = await withMatcherAtPath(matcherDefPath, () => runHLint(hlintCmd, hlintArgs));
+  const {ok, hintSummary} = getOverallCheckResult(failOn, {ideas, statusCode});
+  return {ok, statusCode, ideas, hintSummary};
 }

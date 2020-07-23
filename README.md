@@ -23,7 +23,7 @@ so that the hints are displayed as GitHub annotations.
 
 The main purpose of this action currently is just to print out GitHub annotations, but it still provides an output.
 
-* `hints`: The generated HLint hints serialized to JSON.
+* `ideas`: The generated HLint ideas (warnings, errors, etc.) serialized to JSON.
 
 ## Example
 

@@ -13,8 +13,8 @@ inputs:
     required: true
     default: '.'
 outputs:
-  hints:
-    description: 'A JSON array of HLint output hints'
+  ideas:
+    description: 'A JSON array of HLint output ideas (errors, warnings, suggestions, and so on)'
 runs:
   using: 'node12'
   main: 'dist/index.js'

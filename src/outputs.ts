@@ -4,11 +4,11 @@ import type {
 } from './run';
 
 
-const OUTPUT_KEY_HLINT_HINTS = 'hints';
+const OUTPUT_KEY_HLINT_IDEAS = 'ideas';
 
 export default function setOutputs(result: RunResult) {
-  const {ok, hints, statusCode, hintSummary} = result;
-  core.setOutput(OUTPUT_KEY_HLINT_HINTS, hints);
+  const {ok, ideas, statusCode, hintSummary} = result;
+  core.setOutput(OUTPUT_KEY_HLINT_IDEAS, ideas);
   if (ok) {
     if (hintSummary.length) {
       core.info(`HLint finished with hints: ${hintSummary}`);
