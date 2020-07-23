@@ -57,7 +57,6 @@ function getNiceMessage(idea: Idea): string {
   const prefix = prefixParts.join(' ');
 
   const messageParts = [];
-  messageParts.push();
   messageParts.push(idea.hint);
 
   if (idea.from) {
