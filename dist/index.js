@@ -11111,7 +11111,9 @@ async function choco(tool, version) {
         '-m',
         '--no-progress',
         '-r'
-    ]);
+    ], {
+        ignoreReturnCode: true
+    });
 }
 async function ghcupBin(os) {
     const v = '0.1.8';
@@ -11125,8 +11127,10 @@ async function ghcupBin(os) {
 async function ghcup(tool, version, os) {
     core.info(`Attempting to install ${tool} ${version} using ghcup`);
     const bin = await ghcupBin(os);
-    await exec_1.exec(bin, [tool === 'ghc' ? 'install' : 'install-cabal', version]);
-    if (tool === 'ghc')
+    const returnCode = await exec_1.exec(bin, [tool === 'ghc' ? 'install' : 'install-cabal', version], {
+        ignoreReturnCode: true
+    });
+    if (returnCode === 0 && tool === 'ghc')
         await exec_1.exec(bin, ['set', version]);
 }
 
