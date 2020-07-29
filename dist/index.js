@@ -4334,7 +4334,7 @@ function escapeProperty(s) {
 /***/ 447:
 /***/ (function(module) {
 
-module.exports = {"ghc":["8.10.1","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.2.0.0","3.0.0.0","2.4.1.0","2.4.0.0","2.2.0.0"],"stack":["2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"]};
+module.exports = {"ghc":["8.10.1","8.8.4","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.2.0.0","3.0.0.0","2.4.1.0","2.4.0.0","2.2.0.0"],"stack":["2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"]};
 
 /***/ }),
 
@@ -11095,7 +11095,10 @@ async function apt(tool, version) {
     const toolName = tool === 'ghc' ? 'ghc' : 'cabal-install';
     const v = tool === 'cabal' ? version.slice(0, 3) : version;
     core.info(`Attempting to install ${toolName} ${v} using apt-get`);
-    await exec_1.exec(`sudo -- sh -c "apt-get -y install ${toolName}-${v}"`);
+    // Ignore the return code so we can fall back to ghcup
+    await exec_1.exec(`sudo -- sh -c "apt-get -y install ${toolName}-${v}"`, undefined, {
+        ignoreReturnCode: true
+    });
 }
 async function choco(tool, version) {
     core.info(`Attempting to install ${tool} ${version} using chocolatey`);
@@ -11108,10 +11111,12 @@ async function choco(tool, version) {
         '-m',
         '--no-progress',
         '-r'
-    ]);
+    ], {
+        ignoreReturnCode: true
+    });
 }
 async function ghcupBin(os) {
-    const v = '0.1.5';
+    const v = '0.1.8';
     const cachedBin = tc.find('ghcup', v);
     if (cachedBin)
         return path_1.join(cachedBin, 'ghcup');
@@ -11122,8 +11127,10 @@ async function ghcupBin(os) {
 async function ghcup(tool, version, os) {
     core.info(`Attempting to install ${tool} ${version} using ghcup`);
     const bin = await ghcupBin(os);
-    await exec_1.exec(bin, [tool === 'ghc' ? 'install' : 'install-cabal', version]);
-    if (tool === 'ghc')
+    const returnCode = await exec_1.exec(bin, [tool === 'ghc' ? 'install' : 'install-cabal', version], {
+        ignoreReturnCode: true
+    });
+    if (returnCode === 0 && tool === 'ghc')
         await exec_1.exec(bin, ['set', version]);
 }
 

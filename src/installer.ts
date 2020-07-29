@@ -161,26 +161,35 @@ async function apt(tool: Tool, version: string): Promise<void> {
   const toolName = tool === 'ghc' ? 'ghc' : 'cabal-install';
   const v = tool === 'cabal' ? version.slice(0, 3) : version;
   core.info(`Attempting to install ${toolName} ${v} using apt-get`);
-  await exec(`sudo -- sh -c "apt-get -y install ${toolName}-${v}"`);
+  // Ignore the return code so we can fall back to ghcup
+  await exec(`sudo -- sh -c "apt-get -y install ${toolName}-${v}"`, undefined, {
+    ignoreReturnCode: true
+  });
 }
 
 async function choco(tool: Tool, version: string): Promise<void> {
   core.info(`Attempting to install ${tool} ${version} using chocolatey`);
 
-  await exec('powershell', [
-    'choco',
-    'install',
-    tool,
-    '--version',
-    version,
-    '-m',
-    '--no-progress',
-    '-r'
-  ]);
+  await exec(
+    'powershell',
+    [
+      'choco',
+      'install',
+      tool,
+      '--version',
+      version,
+      '-m',
+      '--no-progress',
+      '-r'
+    ],
+    {
+      ignoreReturnCode: true
+    }
+  );
 }
 
 async function ghcupBin(os: OS): Promise<string> {
-  const v = '0.1.5';
+  const v = '0.1.8';
   const cachedBin = tc.find('ghcup', v);
   if (cachedBin) return join(cachedBin, 'ghcup');
 
@@ -196,6 +205,12 @@ async function ghcupBin(os: OS): Promise<string> {
 async function ghcup(tool: Tool, version: string, os: OS): Promise<void> {
   core.info(`Attempting to install ${tool} ${version} using ghcup`);
   const bin = await ghcupBin(os);
-  await exec(bin, [tool === 'ghc' ? 'install' : 'install-cabal', version]);
-  if (tool === 'ghc') await exec(bin, ['set', version]);
+  const returnCode = await exec(
+    bin,
+    [tool === 'ghc' ? 'install' : 'install-cabal', version],
+    {
+      ignoreReturnCode: true
+    }
+  );
+  if (returnCode === 0 && tool === 'ghc') await exec(bin, ['set', version]);
 }
