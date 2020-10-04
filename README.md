@@ -48,7 +48,7 @@ jobs:
         version: '3.1.6'
 
     - name: 'Run HLint'
-      uses: rwe/actions-hlint-run@v1
+      uses: rwe/actions-hlint-run@v2
       with:
         path: src/
         fail-on: warning
