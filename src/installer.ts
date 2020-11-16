@@ -56,19 +56,7 @@ async function isInstalled(
   const v = tool === 'cabal' ? version.slice(0, 3) : version;
   const aptPath = `/opt/${tool}/${v}/bin`;
 
-  const chocoPathArray = version.split('.');
-  const chocoPathVersion =
-    chocoPathArray.length > 3
-      ? chocoPathArray.slice(0, chocoPathArray.length - 1).join('.')
-      : chocoPathArray.join('.');
-  const chocoPath = join(
-    `${process.env.ChocolateyInstall}`,
-    'lib',
-    `${tool}.${version}`,
-    'tools',
-    tool === 'ghc' ? `${tool}-${chocoPathVersion}` : `${tool}-${version}`, // choco trims the ghc version here
-    tool === 'ghc' ? 'bin' : ''
-  );
+  const chocoPath = getChocoPath(tool, version);
 
   const locations = {
     stack: [], // Always installed into the tool cache
@@ -191,21 +179,8 @@ async function choco(tool: Tool, version: string): Promise<void> {
       ignoreReturnCode: true
     }
   );
-  // Manually add the path because it won't happen until the end of the step normally
-  const pathArray = version.split('.');
-  const pathVersion =
-    pathArray.length > 3
-      ? pathArray.slice(0, pathArray.length - 1).join('.')
-      : pathArray.join('.');
-  const chocoPath = join(
-    `${process.env.ChocolateyInstall}`,
-    'lib',
-    `${tool}.${version}`,
-    'tools',
-    tool === 'ghc' ? `${tool}-${pathVersion}` : `${tool}-${version}`, // choco trims the ghc version here
-    tool === 'ghc' ? 'bin' : ''
-  );
-  core.addPath(chocoPath);
+  // Add to path automatically because it does not add until the end of the step.
+  core.addPath(getChocoPath(tool, version));
 }
 
 async function ghcupBin(os: OS): Promise<string> {
@@ -233,4 +208,22 @@ async function ghcup(tool: Tool, version: string, os: OS): Promise<void> {
     }
   );
   if (returnCode === 0 && tool === 'ghc') await exec(bin, ['set', version]);
+}
+
+function getChocoPath(tool: Tool, version: string): string {
+  // Manually add the path because it won't happen until the end of the step normally
+  const pathArray = version.split('.');
+  const pathVersion =
+    pathArray.length > 3
+      ? pathArray.slice(0, pathArray.length - 1).join('.')
+      : pathArray.join('.');
+  const chocoPath = join(
+    `${process.env.ChocolateyInstall}`,
+    'lib',
+    `${tool}.${version}`,
+    'tools',
+    tool === 'ghc' ? `${tool}-${pathVersion}` : `${tool}-${version}`, // choco trims the ghc version here
+    tool === 'ghc' ? 'bin' : ''
+  );
+  return chocoPath;
 }
