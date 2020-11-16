@@ -56,12 +56,17 @@ async function isInstalled(
   const v = tool === 'cabal' ? version.slice(0, 3) : version;
   const aptPath = `/opt/${tool}/${v}/bin`;
 
+  const chocoPathArray = version.split('.');
+  const chocoPathVersion =
+    chocoPathArray.length > 3
+      ? chocoPathArray.slice(0, chocoPathArray.length - 1).join('.')
+      : chocoPathArray.join('.');
   const chocoPath = join(
     `${process.env.ChocolateyInstall}`,
     'lib',
     `${tool}.${version}`,
     'tools',
-    `${tool}-${version}`,
+    tool === 'ghc' ? `${tool}-${chocoPathVersion}` : `${tool}-${version}`, // choco trims the ghc version here
     tool === 'ghc' ? 'bin' : ''
   );
 
