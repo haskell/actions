@@ -187,12 +187,17 @@ async function choco(tool: Tool, version: string): Promise<void> {
     }
   );
   // Manually add the path because it won't happen until the end of the step normally
+  const pathArray = version.split('.');
+  const pathVersion =
+    pathArray.length > 3
+      ? pathArray.slice(0, pathArray.length - 1).join('.')
+      : pathArray.join('.');
   const chocoPath = join(
     `${process.env.ChocolateyInstall}`,
     'lib',
     `${tool}.${version}`,
     'tools',
-    `${tool}-${version}`,
+    tool === 'ghc' ? `${tool}-${pathVersion}` : `${tool}-${version}`, // choco trims the ghc version here
     tool === 'ghc' ? 'bin' : ''
   );
   core.addPath(chocoPath);

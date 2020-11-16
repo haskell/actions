@@ -121,7 +121,7 @@ jobs:
 
 ## Version Support
 
-**GHC:**
+**GHC on Mac/Ubuntu:**
 
 - `latest` (default, recommended)
 - `8.10.1` `8.10`
@@ -140,6 +140,15 @@ jobs:
 - `8.2.2` `8.2`
 - `8.0.2` `8.0`
 - `7.10.3` `7.10`
+
+**GHC on Windows:**
+
+- `latest` (default, recommended)
+- `8.10.2.2`
+- `8.10.1.1`
+- `8.8.4.1`
+- `8.8.3.2`
+- `8.8.2.1`
 
 Suggestion: Try to support the three latest major versions of GHC.
 

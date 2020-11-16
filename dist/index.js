@@ -4291,7 +4291,7 @@ function escapeProperty(s) {
 /***/ 447:
 /***/ (function(module) {
 
-module.exports = {"ghc":["8.10.2","8.10.2.2","8.10.1.1","8.10.1","8.8.4.1","8.8.4","8.8.3.2","8.8.3","8.8.2.1","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.2.0.0","3.0.0.0","2.4.1.0","2.4.0.0","2.2.0.0"],"stack":["2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"]};
+module.exports = {"ghc":["8.10.2","8.10.2.2","8.10.1","8.10.1.1","8.8.4","8.8.4.1","8.8.3","8.8.3.2","8.8.2","8.8.2.1","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.2.0.0","3.0.0.0","2.4.1.0","2.4.0.0","2.2.0.0"],"stack":["2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"]};
 
 /***/ }),
 
@@ -11184,7 +11184,12 @@ async function choco(tool, version) {
         ignoreReturnCode: true
     });
     // Manually add the path because it won't happen until the end of the step normally
-    const chocoPath = path_1.join(`${process.env.ChocolateyInstall}`, 'lib', `${tool}.${version}`, 'tools', `${tool}-${version}`, tool === 'ghc' ? 'bin' : '');
+    let pathArray = version.split('.');
+    let pathVersion = pathArray.length > 3
+        ? pathArray.slice(0, pathArray.length - 1).join('.')
+        : pathArray.join('.');
+    const chocoPath = path_1.join(`${process.env.ChocolateyInstall}`, 'lib', `${tool}.${version}`, 'tools', tool === 'ghc' ? `${tool}-${pathVersion}` : `${tool}-${version}`, // choco trims the ghc version here
+    tool === 'ghc' ? 'bin' : '');
     core.addPath(chocoPath);
 }
 async function ghcupBin(os) {
