@@ -186,6 +186,16 @@ async function choco(tool: Tool, version: string): Promise<void> {
       ignoreReturnCode: true
     }
   );
+  // Manually add the path because it won't happen until the end of the step normally
+  const chocoPath = join(
+    `${process.env.ChocolateyInstall}`,
+    'lib',
+    `${tool}.${version}`,
+    'tools',
+    `${tool}-${version}`,
+    tool === 'ghc' ? 'bin' : ''
+  );
+  core.addPath(chocoPath);
 }
 
 async function ghcupBin(os: OS): Promise<string> {

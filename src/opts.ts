@@ -28,7 +28,7 @@ export function getDefaults(): Defaults {
   ).inputs;
 
   const mkVersion = (v: string, vs: string[]): Version => ({
-    version: resolve(inpts[v].default, vs),
+    version: resolve(inpts[v].default, vs, v),
     supported: vs
   });
 
@@ -39,7 +39,11 @@ export function getDefaults(): Defaults {
   };
 }
 
-function resolve(version: string, supported: string[]): string {
+function resolve(version: string, supported: string[], type: string): string {
+  // Hard code default windows version to get around ghc-choco using the old add-path commands. Other cli tools don't have this issue and don't have the 8.10.2.2 version
+  if (process.platform === 'win32' && type === 'ghc-version') {
+    return '8.10.2.2';
+  }
   return version === 'latest'
     ? supported[0]
     : supported.find(v => v.startsWith(version)) ?? version;
@@ -71,17 +75,17 @@ export function getOpts({ghc, cabal, stack}: Defaults): Options {
   const opts: Options = {
     ghc: {
       raw: verInpt.ghc,
-      resolved: resolve(verInpt.ghc, ghc.supported),
+      resolved: resolve(verInpt.ghc, ghc.supported, 'ghc-version'),
       enable: !stackNoGlobal
     },
     cabal: {
       raw: verInpt.cabal,
-      resolved: resolve(verInpt.cabal, cabal.supported),
+      resolved: resolve(verInpt.cabal, cabal.supported, 'cabal-version'),
       enable: !stackNoGlobal
     },
     stack: {
       raw: verInpt.stack,
-      resolved: resolve(verInpt.stack, stack.supported),
+      resolved: resolve(verInpt.stack, stack.supported, 'stack-version)'),
       enable: stackEnable,
       setup: core.getInput('stack-setup-ghc') !== ''
     }
