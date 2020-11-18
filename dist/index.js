@@ -877,7 +877,7 @@ const supported_versions = __importStar(__webpack_require__(447));
 function getDefaults() {
     const inpts = js_yaml_1.safeLoad(fs_1.readFileSync(__webpack_require__.ab + "action.yml", 'utf8')).inputs;
     const mkVersion = (v, vs) => ({
-        version: resolve(inpts[v].default, vs, v),
+        version: resolve(inpts[v].default, vs),
         supported: vs
     });
     return {
@@ -887,12 +887,8 @@ function getDefaults() {
     };
 }
 exports.getDefaults = getDefaults;
-function resolve(version, supported, type) {
+function resolve(version, supported) {
     var _a;
-    // Hard code default windows version to get around ghc-choco using the old add-path commands. Other cli tools don't have this issue and don't have the 8.10.2.2 version
-    if (process.platform === 'win32' && type === 'ghc-version') {
-        return '8.10.2.2';
-    }
     return version === 'latest'
         ? supported[0]
         : (_a = supported.find(v => v.startsWith(version))) !== null && _a !== void 0 ? _a : version;
@@ -919,17 +915,17 @@ function getOpts({ ghc, cabal, stack }) {
     const opts = {
         ghc: {
             raw: verInpt.ghc,
-            resolved: resolve(verInpt.ghc, ghc.supported, 'ghc-version'),
+            resolved: resolve(verInpt.ghc, ghc.supported),
             enable: !stackNoGlobal
         },
         cabal: {
             raw: verInpt.cabal,
-            resolved: resolve(verInpt.cabal, cabal.supported, 'cabal-version'),
+            resolved: resolve(verInpt.cabal, cabal.supported),
             enable: !stackNoGlobal
         },
         stack: {
             raw: verInpt.stack,
-            resolved: resolve(verInpt.stack, stack.supported, 'stack-version)'),
+            resolved: resolve(verInpt.stack, stack.supported),
             enable: stackEnable,
             setup: core.getInput('stack-setup-ghc') !== ''
         }
@@ -4291,7 +4287,7 @@ function escapeProperty(s) {
 /***/ 447:
 /***/ (function(module) {
 
-module.exports = {"ghc":["8.10.2","8.10.2.2","8.10.1","8.10.1.1","8.8.4","8.8.4.1","8.8.3","8.8.3.2","8.8.2","8.8.2.1","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.2.0.0","3.0.0.0","2.4.1.0","2.4.0.0","2.2.0.0"],"stack":["2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"]};
+module.exports = {"ghc":["8.10.2","8.10.1","8.8.4","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.2.0.0","3.0.0.0","2.4.1.0","2.4.0.0","2.2.0.0"],"stack":["2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"]};
 
 /***/ }),
 
@@ -11171,6 +11167,8 @@ async function apt(tool, version) {
 }
 async function choco(tool, version) {
     core.info(`Attempting to install ${tool} ${version} using chocolatey`);
+    // Choco tries to invoke `add-path` command on earlier versions of ghc, which has been deprecated and fails the step, so disable command execution during this.
+    console.log('::stop-commands::SetupHaskellStopCommands');
     await exec_1.exec('powershell', [
         'choco',
         'install',
@@ -11183,8 +11181,11 @@ async function choco(tool, version) {
     ], {
         ignoreReturnCode: true
     });
-    // Add to path automatically because it does not add until the end of the step.
-    core.addPath(getChocoPath(tool, version));
+    console.log('::SetupHaskellStopCommands::'); // Re-enable command execution
+    // Add GHC to path automatically because it does not add until the end of the step and we check the path.
+    if (tool == 'ghc') {
+        core.addPath(getChocoPath(tool, version));
+    }
 }
 async function ghcupBin(os) {
     const v = '0.1.8';

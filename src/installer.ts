@@ -162,7 +162,8 @@ async function apt(tool: Tool, version: string): Promise<void> {
 
 async function choco(tool: Tool, version: string): Promise<void> {
   core.info(`Attempting to install ${tool} ${version} using chocolatey`);
-
+  // Choco tries to invoke `add-path` command on earlier versions of ghc, which has been deprecated and fails the step, so disable command execution during this.
+  console.log('::stop-commands::SetupHaskellStopCommands');
   await exec(
     'powershell',
     [
@@ -179,8 +180,11 @@ async function choco(tool: Tool, version: string): Promise<void> {
       ignoreReturnCode: true
     }
   );
-  // Add to path automatically because it does not add until the end of the step.
-  core.addPath(getChocoPath(tool, version));
+  console.log('::SetupHaskellStopCommands::'); // Re-enable command execution
+  // Add GHC to path automatically because it does not add until the end of the step and we check the path.
+  if (tool == 'ghc') {
+    core.addPath(getChocoPath(tool, version));
+  }
 }
 
 async function ghcupBin(os: OS): Promise<string> {
