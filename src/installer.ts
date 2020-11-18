@@ -56,14 +56,7 @@ async function isInstalled(
   const v = tool === 'cabal' ? version.slice(0, 3) : version;
   const aptPath = `/opt/${tool}/${v}/bin`;
 
-  const chocoPath = join(
-    `${process.env.ChocolateyInstall}`,
-    'lib',
-    `${tool}.${version}`,
-    'tools',
-    `${tool}-${version}`,
-    tool === 'ghc' ? 'bin' : ''
-  );
+  const chocoPath = getChocoPath(tool, version);
 
   const locations = {
     stack: [], // Always installed into the tool cache
@@ -169,7 +162,8 @@ async function apt(tool: Tool, version: string): Promise<void> {
 
 async function choco(tool: Tool, version: string): Promise<void> {
   core.info(`Attempting to install ${tool} ${version} using chocolatey`);
-
+  // Choco tries to invoke `add-path` command on earlier versions of ghc, which has been deprecated and fails the step, so disable command execution during this.
+  console.log('::stop-commands::SetupHaskellStopCommands');
   await exec(
     'powershell',
     [
@@ -186,6 +180,11 @@ async function choco(tool: Tool, version: string): Promise<void> {
       ignoreReturnCode: true
     }
   );
+  console.log('::SetupHaskellStopCommands::'); // Re-enable command execution
+  // Add GHC to path automatically because it does not add until the end of the step and we check the path.
+  if (tool == 'ghc') {
+    core.addPath(getChocoPath(tool, version));
+  }
 }
 
 async function ghcupBin(os: OS): Promise<string> {
@@ -213,4 +212,22 @@ async function ghcup(tool: Tool, version: string, os: OS): Promise<void> {
     }
   );
   if (returnCode === 0 && tool === 'ghc') await exec(bin, ['set', version]);
+}
+
+function getChocoPath(tool: Tool, version: string): string {
+  // Manually add the path because it won't happen until the end of the step normally
+  const pathArray = version.split('.');
+  const pathVersion =
+    pathArray.length > 3
+      ? pathArray.slice(0, pathArray.length - 1).join('.')
+      : pathArray.join('.');
+  const chocoPath = join(
+    `${process.env.ChocolateyInstall}`,
+    'lib',
+    `${tool}.${version}`,
+    'tools',
+    tool === 'ghc' ? `${tool}-${pathVersion}` : `${tool}-${version}`, // choco trims the ghc version here
+    tool === 'ghc' ? 'bin' : ''
+  );
+  return chocoPath;
 }
