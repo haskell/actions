@@ -1,13 +1,18 @@
-name: build-test
+name: Setup
 on:
   push:
     branches:
       - main
     paths-ignore:
-      - '**.md'
+      - "**.md"
   pull_request:
     paths-ignore:
-      - '**.md'
+      - "**.md"
+
+defaults:
+  run:
+    working-directory: setup
+
 jobs:
   test:
     name: Unit Tests - ${{ matrix.os }}
@@ -35,19 +40,19 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        ghc: ['latest', '8.4.4']
-        cabal: ['latest']
+        ghc: ["latest", "8.4.4"]
+        cabal: ["latest"]
         include:
           - os: ubuntu-latest
-            ghc: '7.10.3'
-            cabal: '3.0.0.0'
+            ghc: "7.10.3"
+            cabal: "3.0.0.0"
           - os: ubuntu-latest
-            ghc: '8.2.2'
-            cabal: '2.0'
+            ghc: "8.2.2"
+            cabal: "2.0"
 
     steps:
       - uses: actions/checkout@v2
-      - uses: ./
+      - uses: ./setup
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
@@ -72,12 +77,11 @@ jobs:
       fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        stack: ['latest', '1.9.1']
+        stack: ["latest", "1.9.1"]
 
     steps:
       - uses: actions/checkout@v2
-
-      - uses: ./
+      - uses: ./setup
         with:
           enable-stack: true
           stack-no-global: true

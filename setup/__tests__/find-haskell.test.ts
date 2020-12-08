@@ -18,7 +18,7 @@ const setupEnv = (o: Record<string, unknown>): void =>
 const forAll = (fn: (t: Tool) => any) =>
   (['ghc', 'cabal', 'stack'] as const).forEach(fn);
 
-describe('actions/setup-haskell', () => {
+describe('haskell/actions/setup', () => {
   const OLD_ENV = process.env;
 
   beforeEach(() => {
