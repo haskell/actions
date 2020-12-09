@@ -11188,7 +11188,7 @@ async function choco(tool, version) {
     }
 }
 async function ghcupBin(os) {
-    const v = '0.1.8';
+    const v = '0.1.12';
     const cachedBin = tc.find('ghcup', v);
     if (cachedBin)
         return path_1.join(cachedBin, 'ghcup');
