@@ -58,7 +58,7 @@ jobs:
             expect-fail: true
     steps:
       - uses: actions/checkout@v2
-      - uses: ./
+      - uses: ./setup
         continue-on-error: ${{ matrix.expect-fail }}
         with:
           ghc-version: ${{ matrix.ghc }}
@@ -67,10 +67,10 @@ jobs:
           runhaskell --version
           runhaskell __tests__/hello.hs
         continue-on-error: ${{ matrix.expect-fail }}
-      - working-directory: __tests__/project
+      - working-directory: setup/__tests__/project
         run: cabal build
         continue-on-error: ${{ matrix.expect-fail }}
-      - working-directory: __tests__/project
+      - working-directory: setup/__tests__/project
         run: cabal run
         continue-on-error: ${{ matrix.expect-fail }}
       - run: |
@@ -96,7 +96,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - uses: ./
+      - uses: ./setup
         with:
           enable-stack: true
           stack-no-global: true
