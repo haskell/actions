@@ -72,6 +72,7 @@ describe('haskell/actions/setup', () => {
   it('Versions resolve correctly', () => {
     const v = {ghc: '8.6.5', cabal: '2.4.1.0', stack: '2.1.3'};
     setupEnv({
+      'enable-stack': 'true',
       'stack-version': '2.1',
       'ghc-version': '8.6',
       'cabal-version': '2.4'
@@ -84,6 +85,7 @@ describe('haskell/actions/setup', () => {
 
   it('"latest" Versions resolve correctly', () => {
     setupEnv({
+      'enable-stack': 'true',
       'stack-version': 'latest',
       'ghc-version': 'latest',
       'cabal-version': 'latest'
