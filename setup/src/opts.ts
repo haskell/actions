@@ -23,9 +23,11 @@ type Version = {version: string; supported: string[]};
 export type Defaults = Record<Tool, Version>;
 
 export function getDefaults(): Defaults {
-  const inpts = safeLoad(
+  const inpts = (safeLoad(
     readFileSync(join(__dirname, '..', 'action.yml'), 'utf8')
-  ).inputs;
+    // The action.yml file structure is statically known.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ) as any).inputs;
 
   const mkVersion = (v: string, vs: string[]): Version => ({
     version: resolve(inpts[v].default, vs),
