@@ -18,11 +18,12 @@ async function cabalConfig(): Promise<string> {
 (async () => {
   try {
     core.info('Preparing to setup a Haskell environment');
-    const opts = getOpts(getDefaults());
+    const os = process.platform as OS;
+    const opts = getOpts(getDefaults(os), os);
 
     for (const [t, {resolved}] of Object.entries(opts).filter(o => o[1].enable))
       await core.group(`Installing ${t} version ${resolved}`, async () =>
-        installTool(t as Tool, resolved, process.platform as OS)
+        installTool(t as Tool, resolved, os)
       );
 
     if (opts.stack.setup)
