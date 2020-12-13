@@ -36,35 +36,49 @@ jobs:
   install-haskell:
     name: GHC ${{ matrix.ghc }}, Cabal ${{ matrix.cabal }} - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.expect-fail }}
     strategy:
-      fail-fast: false
+      fail-fast: true
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         ghc: ["latest", "8.4.4"]
         cabal: ["latest"]
+        expect-fail: [false]
         include:
           - os: ubuntu-latest
             ghc: "7.10.3"
             cabal: "3.0.0.0"
+            expect-fail: false
           - os: ubuntu-latest
             ghc: "8.2.2"
             cabal: "2.0"
-
+            expect-fail: false
+          - os: ubuntu-latest
+            ghc: "8.12.0" # A version that will never exist.
+            expect-fail: true
     steps:
       - uses: actions/checkout@v2
       - uses: ./setup
+        continue-on-error: ${{ matrix.expect-fail }}
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
       - run: |
           runhaskell --version
           runhaskell __tests__/hello.hs
-      - shell: bash
-        run: cd __tests__/project && cabal build && cabal run
+        continue-on-error: ${{ matrix.expect-fail }}
+      - working-directory: setup/__tests__/project
+        run: cabal build
+        continue-on-error: ${{ matrix.expect-fail }}
+      - working-directory: setup/__tests__/project
+        run: cabal run
+        continue-on-error: ${{ matrix.expect-fail }}
       - run: |
           cabal --version
           ghc --version
+        continue-on-error: ${{ matrix.expect-fail }}
       - shell: bash
+        continue-on-error: ${{ matrix.expect-fail }}
         if: matrix.ghc != 'latest'
         # this check depends on the ghc versions being "exact" in the matrix
         run: |
@@ -81,6 +95,7 @@ jobs:
 
     steps:
       - uses: actions/checkout@v2
+
       - uses: ./setup
         with:
           enable-stack: true

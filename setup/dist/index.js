@@ -863,7 +863,7 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -874,26 +874,32 @@ const fs_1 = __webpack_require__(747);
 const js_yaml_1 = __webpack_require__(414);
 const path_1 = __webpack_require__(622);
 const supported_versions = __importStar(__webpack_require__(447));
-function getDefaults() {
-    const inpts = js_yaml_1.safeLoad(fs_1.readFileSync(__webpack_require__.ab + "action.yml", 'utf8')).inputs;
-    const mkVersion = (v, vs) => ({
-        version: resolve(inpts[v].default, vs),
+const rv = __importStar(__webpack_require__(859));
+const release_revisions = rv;
+function getDefaults(os) {
+    const inpts = js_yaml_1.safeLoad(fs_1.readFileSync(__webpack_require__.ab + "action.yml", 'utf8')
+    // The action.yml file structure is statically known.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ).inputs;
+    const mkVersion = (v, vs, t) => ({
+        version: resolve(inpts[v].default, vs, t, os),
         supported: vs
     });
     return {
-        ghc: mkVersion('ghc-version', supported_versions.ghc),
-        cabal: mkVersion('cabal-version', supported_versions.cabal),
-        stack: mkVersion('stack-version', supported_versions.stack)
+        ghc: mkVersion('ghc-version', supported_versions.ghc, 'ghc'),
+        cabal: mkVersion('cabal-version', supported_versions.cabal, 'cabal'),
+        stack: mkVersion('stack-version', supported_versions.stack, 'stack')
     };
 }
 exports.getDefaults = getDefaults;
-function resolve(version, supported) {
-    var _a;
-    return version === 'latest'
+function resolve(version, supported, tool, os) {
+    var _a, _b, _c, _d, _e;
+    const resolved = version === 'latest'
         ? supported[0]
         : (_a = supported.find(v => v.startsWith(version))) !== null && _a !== void 0 ? _a : version;
+    return ((_e = (_d = (_c = (_b = release_revisions === null || release_revisions === void 0 ? void 0 : release_revisions[os]) === null || _b === void 0 ? void 0 : _b[tool]) === null || _c === void 0 ? void 0 : _c.find(({ from }) => from === resolved)) === null || _d === void 0 ? void 0 : _d.to) !== null && _e !== void 0 ? _e : resolved);
 }
-function getOpts({ ghc, cabal, stack }) {
+function getOpts({ ghc, cabal, stack }, os) {
     const stackNoGlobal = core.getInput('stack-no-global') !== '';
     const stackSetupGhc = core.getInput('stack-setup-ghc') !== '';
     const stackEnable = core.getInput('enable-stack') !== '';
@@ -915,17 +921,17 @@ function getOpts({ ghc, cabal, stack }) {
     const opts = {
         ghc: {
             raw: verInpt.ghc,
-            resolved: resolve(verInpt.ghc, ghc.supported),
+            resolved: resolve(verInpt.ghc, ghc.supported, 'ghc', os),
             enable: !stackNoGlobal
         },
         cabal: {
             raw: verInpt.cabal,
-            resolved: resolve(verInpt.cabal, cabal.supported),
+            resolved: resolve(verInpt.cabal, cabal.supported, 'cabal', os),
             enable: !stackNoGlobal
         },
         stack: {
             raw: verInpt.stack,
-            resolved: resolve(verInpt.stack, stack.supported),
+            resolved: resolve(verInpt.stack, stack.supported, 'stack', os),
             enable: stackEnable,
             setup: core.getInput('stack-setup-ghc') !== ''
         }
@@ -1438,17 +1444,27 @@ module.exports = require("https");
 
 "use strict";
 
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const assert = __webpack_require__(357);
-const os = __webpack_require__(87);
-const path = __webpack_require__(622);
-const pathHelper = __webpack_require__(972);
+const os = __importStar(__webpack_require__(87));
+const path = __importStar(__webpack_require__(622));
+const pathHelper = __importStar(__webpack_require__(972));
+const assert_1 = __importDefault(__webpack_require__(357));
 const minimatch_1 = __webpack_require__(595);
 const internal_match_kind_1 = __webpack_require__(327);
 const internal_path_1 = __webpack_require__(383);
 const IS_WINDOWS = process.platform === 'win32';
 class Pattern {
-    constructor(patternOrNegate, segments) {
+    constructor(patternOrNegate, segments, homedir) {
         /**
          * Indicates whether matches should be excluded from the result set
          */
@@ -1462,9 +1478,9 @@ class Pattern {
         else {
             // Convert to pattern
             segments = segments || [];
-            assert(segments.length, `Parameter 'segments' must not empty`);
+            assert_1.default(segments.length, `Parameter 'segments' must not empty`);
             const root = Pattern.getLiteral(segments[0]);
-            assert(root && pathHelper.hasAbsoluteRoot(root), `Parameter 'segments' first element must be a root path`);
+            assert_1.default(root && pathHelper.hasAbsoluteRoot(root), `Parameter 'segments' first element must be a root path`);
             pattern = new internal_path_1.Path(segments).toString().trim();
             if (patternOrNegate) {
                 pattern = `!${pattern}`;
@@ -1476,7 +1492,7 @@ class Pattern {
             pattern = pattern.substr(1).trim();
         }
         // Normalize slashes and ensures absolute root
-        pattern = Pattern.fixupPattern(pattern);
+        pattern = Pattern.fixupPattern(pattern, homedir);
         // Segments
         this.segments = new internal_path_1.Path(pattern).segments;
         // Trailing slash indicates the pattern should only match directories, not regular files
@@ -1513,11 +1529,11 @@ class Pattern {
             // Normalize slashes
             itemPath = pathHelper.normalizeSeparators(itemPath);
             // Append a trailing slash. Otherwise Minimatch will not match the directory immediately
-            // preceeding the globstar. For example, given the pattern `/foo/**`, Minimatch returns
+            // preceding the globstar. For example, given the pattern `/foo/**`, Minimatch returns
             // false for `/foo` but returns true for `/foo/`. Append a trailing slash to handle that quirk.
             if (!itemPath.endsWith(path.sep)) {
                 // Note, this is safe because the constructor ensures the pattern has an absolute root.
-                // For example, formats like C: and C:foo on Windows are resolved to an aboslute root.
+                // For example, formats like C: and C:foo on Windows are resolved to an absolute root.
                 itemPath = `${itemPath}${path.sep}`;
             }
         }
@@ -1555,15 +1571,15 @@ class Pattern {
     /**
      * Normalizes slashes and ensures absolute root
      */
-    static fixupPattern(pattern) {
+    static fixupPattern(pattern, homedir) {
         // Empty
-        assert(pattern, 'pattern cannot be empty');
+        assert_1.default(pattern, 'pattern cannot be empty');
         // Must not contain `.` segment, unless first segment
         // Must not contain `..` segment
         const literalSegments = new internal_path_1.Path(pattern).segments.map(x => Pattern.getLiteral(x));
-        assert(literalSegments.every((x, i) => (x !== '.' || i === 0) && x !== '..'), `Invalid pattern '${pattern}'. Relative pathing '.' and '..' is not allowed.`);
+        assert_1.default(literalSegments.every((x, i) => (x !== '.' || i === 0) && x !== '..'), `Invalid pattern '${pattern}'. Relative pathing '.' and '..' is not allowed.`);
         // Must not contain globs in root, e.g. Windows UNC path \\foo\b*r
-        assert(!pathHelper.hasRoot(pattern) || literalSegments[0], `Invalid pattern '${pattern}'. Root segment must not contain globs.`);
+        assert_1.default(!pathHelper.hasRoot(pattern) || literalSegments[0], `Invalid pattern '${pattern}'. Root segment must not contain globs.`);
         // Normalize slashes
         pattern = pathHelper.normalizeSeparators(pattern);
         // Replace leading `.` segment
@@ -1572,9 +1588,9 @@ class Pattern {
         }
         // Replace leading `~` segment
         else if (pattern === '~' || pattern.startsWith(`~${path.sep}`)) {
-            const homedir = os.homedir();
-            assert(homedir, 'Unable to determine HOME directory');
-            assert(pathHelper.hasAbsoluteRoot(homedir), `Expected HOME directory to be a rooted path. Actual '${homedir}'`);
+            homedir = homedir || os.homedir();
+            assert_1.default(homedir, 'Unable to determine HOME directory');
+            assert_1.default(pathHelper.hasAbsoluteRoot(homedir), `Expected HOME directory to be a rooted path. Actual '${homedir}'`);
             pattern = Pattern.globEscape(homedir) + pattern.substr(1);
         }
         // Replace relative drive root, e.g. pattern is C: or C:foo
@@ -3382,12 +3398,19 @@ var __asyncGenerator = (this && this.__asyncGenerator) || function (thisArg, _ar
     function reject(value) { resume("throw", value); }
     function settle(f, v) { if (f(v), q.shift(), q.length) resume(q[0][0], q[0][1]); }
 };
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const core = __webpack_require__(470);
-const fs = __webpack_require__(747);
-const globOptionsHelper = __webpack_require__(601);
-const path = __webpack_require__(622);
-const patternHelper = __webpack_require__(597);
+const core = __importStar(__webpack_require__(470));
+const fs = __importStar(__webpack_require__(747));
+const globOptionsHelper = __importStar(__webpack_require__(601));
+const path = __importStar(__webpack_require__(622));
+const patternHelper = __importStar(__webpack_require__(597));
 const internal_match_kind_1 = __webpack_require__(327);
 const internal_pattern_1 = __webpack_require__(223);
 const internal_search_state_1 = __webpack_require__(728);
@@ -3923,10 +3946,20 @@ module.exports = require("crypto");
 
 "use strict";
 
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const assert = __webpack_require__(357);
-const path = __webpack_require__(622);
-const pathHelper = __webpack_require__(972);
+const path = __importStar(__webpack_require__(622));
+const pathHelper = __importStar(__webpack_require__(972));
+const assert_1 = __importDefault(__webpack_require__(357));
 const IS_WINDOWS = process.platform === 'win32';
 /**
  * Helper class for parsing paths into segments
@@ -3940,7 +3973,7 @@ class Path {
         this.segments = [];
         // String
         if (typeof itemPath === 'string') {
-            assert(itemPath, `Parameter 'itemPath' must not be empty`);
+            assert_1.default(itemPath, `Parameter 'itemPath' must not be empty`);
             // Normalize slashes and trim unnecessary trailing slash
             itemPath = pathHelper.safeTrimTrailingSeparator(itemPath);
             // Not rooted
@@ -3967,24 +4000,24 @@ class Path {
         // Array
         else {
             // Must not be empty
-            assert(itemPath.length > 0, `Parameter 'itemPath' must not be an empty array`);
+            assert_1.default(itemPath.length > 0, `Parameter 'itemPath' must not be an empty array`);
             // Each segment
             for (let i = 0; i < itemPath.length; i++) {
                 let segment = itemPath[i];
                 // Must not be empty
-                assert(segment, `Parameter 'itemPath' must not contain any empty segments`);
+                assert_1.default(segment, `Parameter 'itemPath' must not contain any empty segments`);
                 // Normalize slashes
                 segment = pathHelper.normalizeSeparators(itemPath[i]);
                 // Root segment
                 if (i === 0 && pathHelper.hasRoot(segment)) {
                     segment = pathHelper.safeTrimTrailingSeparator(segment);
-                    assert(segment === pathHelper.dirname(segment), `Parameter 'itemPath' root segment contains information for multiple segments`);
+                    assert_1.default(segment === pathHelper.dirname(segment), `Parameter 'itemPath' root segment contains information for multiple segments`);
                     this.segments.push(segment);
                 }
                 // All other segments
                 else {
                     // Must not contain slash
-                    assert(!segment.includes(path.sep), `Parameter 'itemPath' contains unexpected path separators`);
+                    assert_1.default(!segment.includes(path.sep), `Parameter 'itemPath' contains unexpected path separators`);
                     this.segments.push(segment);
                 }
             }
@@ -4287,7 +4320,7 @@ function escapeProperty(s) {
 /***/ 447:
 /***/ (function(module) {
 
-module.exports = {"ghc":["8.10.2","8.10.1","8.8.4","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.2.0.0","3.0.0.0","2.4.1.0","2.4.0.0","2.2.0.0"],"stack":["2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"]};
+module.exports = {"ghc":["8.10.2","8.10.1","8.8.4","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.2.0.0","3.0.0.0","2.4.1.0","2.4.0.0","2.2.0.0"],"stack":["2.5.1","2.3.3","2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"]};
 
 /***/ }),
 
@@ -5569,7 +5602,7 @@ function readAlias(state) {
 
   alias = state.input.slice(_position, state.position);
 
-  if (!state.anchorMap.hasOwnProperty(alias)) {
+  if (!_hasOwnProperty.call(state.anchorMap, alias)) {
     throwError(state, 'unidentified alias "' + alias + '"');
   }
 
@@ -6236,6 +6269,7 @@ class HTTPError extends Error {
 }
 exports.HTTPError = HTTPError;
 const IS_WINDOWS = process.platform === 'win32';
+const IS_MAC = process.platform === 'darwin';
 const userAgent = 'actions/tool-cache';
 /**
  * Download a tool from an url and stream it into a file
@@ -6451,6 +6485,36 @@ function extractTar(file, dest, flags = 'xz') {
     });
 }
 exports.extractTar = extractTar;
+/**
+ * Extract a xar compatible archive
+ *
+ * @param file     path to the archive
+ * @param dest     destination directory. Optional.
+ * @param flags    flags for the xar. Optional.
+ * @returns        path to the destination directory
+ */
+function extractXar(file, dest, flags = []) {
+    return __awaiter(this, void 0, void 0, function* () {
+        assert_1.ok(IS_MAC, 'extractXar() not supported on current OS');
+        assert_1.ok(file, 'parameter "file" is required');
+        dest = yield _createExtractFolder(dest);
+        let args;
+        if (flags instanceof Array) {
+            args = flags;
+        }
+        else {
+            args = [flags];
+        }
+        args.push('-x', '-C', dest, '-f', file);
+        if (core.isDebug()) {
+            args.push('-v');
+        }
+        const xarPath = yield io.which('xar', true);
+        yield exec_1.exec(`"${xarPath}"`, _unique(args));
+        return dest;
+    });
+}
+exports.extractXar = extractXar;
 /**
  * Extract a zip
  *
@@ -6758,6 +6822,13 @@ function _getGlobal(key, defaultValue) {
     const value = global[key];
     /* eslint-enable @typescript-eslint/no-explicit-any */
     return value !== undefined ? value : defaultValue;
+}
+/**
+ * Returns an array of unique values.
+ * @param values Values to make unique.
+ */
+function _unique(values) {
+    return Array.from(new Set(values));
 }
 //# sourceMappingURL=tool-cache.js.map
 
@@ -8329,8 +8400,15 @@ function regExpEscape (s) {
 
 "use strict";
 
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const pathHelper = __webpack_require__(972);
+const pathHelper = __importStar(__webpack_require__(972));
 const internal_match_kind_1 = __webpack_require__(327);
 const IS_WINDOWS = process.platform === 'win32';
 /**
@@ -8410,8 +8488,15 @@ exports.partialMatch = partialMatch;
 
 "use strict";
 
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const core = __webpack_require__(470);
+const core = __importStar(__webpack_require__(470));
 /**
  * Returns a copy with defaults filled in.
  */
@@ -8671,7 +8756,7 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -8693,9 +8778,10 @@ async function cabalConfig() {
 (async () => {
     try {
         core.info('Preparing to setup a Haskell environment');
-        const opts = opts_1.getOpts(opts_1.getDefaults());
+        const os = process.platform;
+        const opts = opts_1.getOpts(opts_1.getDefaults(os), os);
         for (const [t, { resolved }] of Object.entries(opts).filter(o => o[1].enable))
-            await core.group(`Installing ${t} version ${resolved}`, async () => installer_1.installTool(t, resolved, process.platform));
+            await core.group(`Installing ${t} version ${resolved}`, async () => installer_1.installTool(t, resolved, os));
         if (opts.stack.setup)
             await core.group('Pre-installing GHC with stack', async () => exec_1.exec('stack', ['setup', opts.ghc.resolved]));
         if (opts.cabal.enable)
@@ -10796,6 +10882,13 @@ module.exports = new Type('tag:yaml.org,2002:omap', {
 
 /***/ }),
 
+/***/ 859:
+/***/ (function(module) {
+
+module.exports = {"win32":{"ghc":[{"from":"8.10.2","to":"8.10.2.2"},{"from":"8.10.1","to":"8.10.1.1"},{"from":"8.8.4","to":"8.8.4.1"},{"from":"8.8.3","to":"8.8.3.1"},{"from":"8.8.2","to":"8.8.2.1"},{"from":"8.6.1","to":"8.6.1.1"},{"from":"8.0.2","to":"8.0.2.2"},{"from":"7.8.4","to":"7.8.4.1"},{"from":"7.8.3","to":"7.8.3.1"},{"from":"7.8.2","to":"7.8.2.1"},{"from":"7.8.1","to":"7.8.1.1"},{"from":"7.6.3","to":"7.6.3.1"},{"from":"7.6.2","to":"7.6.2.1"},{"from":"7.6.1","to":"7.6.1.1"}]}};
+
+/***/ }),
+
 /***/ 896:
 /***/ (function(module) {
 
@@ -11031,7 +11124,7 @@ var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (
 var __importStar = (this && this.__importStar) || function (mod) {
     if (mod && mod.__esModule) return mod;
     var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
     __setModuleDefault(result, mod);
     return result;
 };
@@ -11044,13 +11137,27 @@ const glob_1 = __webpack_require__(281);
 const tc = __importStar(__webpack_require__(533));
 const fs_1 = __webpack_require__(747);
 const path_1 = __webpack_require__(622);
+// Don't throw on non-zero.
+const exec = async (cmd, args) => exec_1.exec(cmd, args, { ignoreReturnCode: true });
 function failed(tool, version) {
     throw new Error(`All install methods for ${tool} ${version} failed`);
 }
-async function success(tool, version, path) {
-    core.addPath(path);
+async function configureOutputs(tool, path, os) {
     core.setOutput(`${tool}-path`, path);
     core.setOutput(`${tool}-exe`, await io_1.which(tool));
+    if (tool == 'stack') {
+        if (os === 'win32') {
+            core.exportVariable('STACK_ROOT', 'C:\\sr');
+            core.setOutput('stack-root', 'C:\\sr');
+        }
+        else {
+            core.setOutput('stack-root', `${process.env.HOME}/.stack`);
+        }
+    }
+}
+async function success(tool, version, path, os) {
+    core.addPath(path);
+    await configureOutputs(tool, path, os);
     core.info(`Found ${tool} ${version} in cache at path ${path}. Setup successful.`);
     return true;
 }
@@ -11070,7 +11177,7 @@ function warn(tool, version) {
 async function isInstalled(tool, version, os) {
     const toolPath = tc.find(tool, version);
     if (toolPath)
-        return success(tool, version, toolPath);
+        return success(tool, version, toolPath, os);
     const ghcupPath = `${process.env.HOME}/.ghcup${tool === 'ghc' ? `/ghc/${version}` : ''}/bin`;
     const v = tool === 'cabal' ? version.slice(0, 3) : version;
     const aptPath = `/opt/${tool}/${v}/bin`;
@@ -11097,8 +11204,8 @@ async function isInstalled(tool, version, os) {
             // Make sure that the correct ghc is used, even if ghcup has set a
             // default prior to this action being ran.
             if (tool === 'ghc' && installedPath === ghcupPath)
-                await exec_1.exec(await ghcupBin(os), ['set', version]);
-            return success(tool, version, installedPath);
+                await exec(await ghcupBin(os), ['set', tool, version]);
+            return success(tool, version, installedPath, os);
         }
     }
     if (tool === 'cabal' && os !== 'win32') {
@@ -11106,8 +11213,10 @@ async function isInstalled(tool, version, os) {
             .access(`${ghcupPath}/cabal`)
             .then(() => ghcupPath)
             .catch(() => undefined);
-        if (installedPath)
-            return success(tool, version, installedPath);
+        if (installedPath) {
+            await exec(await ghcupBin(os), ['set', tool, version]);
+            return success(tool, version, installedPath, os);
+        }
     }
     return false;
 }
@@ -11153,23 +11262,19 @@ async function stack(version, os) {
         implicitDescendants: false
     }).then(async (g) => g.glob());
     await tc.cacheDir(stackPath, 'stack', version);
-    if (os === 'win32')
-        core.exportVariable('STACK_ROOT', 'C:\\sr');
 }
 async function apt(tool, version) {
     const toolName = tool === 'ghc' ? 'ghc' : 'cabal-install';
     const v = tool === 'cabal' ? version.slice(0, 3) : version;
     core.info(`Attempting to install ${toolName} ${v} using apt-get`);
     // Ignore the return code so we can fall back to ghcup
-    await exec_1.exec(`sudo -- sh -c "apt-get -y install ${toolName}-${v}"`, undefined, {
-        ignoreReturnCode: true
-    });
+    await exec(`sudo -- sh -c "apt-get -y install ${toolName}-${v}"`);
 }
 async function choco(tool, version) {
     core.info(`Attempting to install ${tool} ${version} using chocolatey`);
     // Choco tries to invoke `add-path` command on earlier versions of ghc, which has been deprecated and fails the step, so disable command execution during this.
     console.log('::stop-commands::SetupHaskellStopCommands');
-    await exec_1.exec('powershell', [
+    await exec('powershell', [
         'choco',
         'install',
         tool,
@@ -11178,14 +11283,11 @@ async function choco(tool, version) {
         '-m',
         '--no-progress',
         '-r'
-    ], {
-        ignoreReturnCode: true
-    });
+    ]);
     console.log('::SetupHaskellStopCommands::'); // Re-enable command execution
     // Add GHC to path automatically because it does not add until the end of the step and we check the path.
-    if (tool == 'ghc') {
+    if (tool == 'ghc')
         core.addPath(getChocoPath(tool, version));
-    }
 }
 async function ghcupBin(os) {
     const v = '0.1.12';
@@ -11199,19 +11301,16 @@ async function ghcupBin(os) {
 async function ghcup(tool, version, os) {
     core.info(`Attempting to install ${tool} ${version} using ghcup`);
     const bin = await ghcupBin(os);
-    const returnCode = await exec_1.exec(bin, [tool === 'ghc' ? 'install' : 'install-cabal', version], {
-        ignoreReturnCode: true
-    });
-    if (returnCode === 0 && tool === 'ghc')
-        await exec_1.exec(bin, ['set', version]);
+    const returnCode = await exec(bin, ['install', tool, version]);
+    if (returnCode === 0)
+        await exec(bin, ['set', tool, version]);
 }
 function getChocoPath(tool, version) {
-    // Manually add the path because it won't happen until the end of the step normally
-    const pathArray = version.split('.');
-    const pathVersion = pathArray.length > 3
-        ? pathArray.slice(0, pathArray.length - 1).join('.')
-        : pathArray.join('.');
-    const chocoPath = path_1.join(`${process.env.ChocolateyInstall}`, 'lib', `${tool}.${version}`, 'tools', tool === 'ghc' ? `${tool}-${pathVersion}` : `${tool}-${version}`, // choco trims the ghc version here
+    // If chocolatey has a patch release for GHC, 'version' will be a.b.c.d
+    // but GHC's version is still a.b.c and the chocolatey path contains both
+    // (This is only valid for GHC. cabal-install has 4-segment versions)
+    const ghcVersion = version.split('.').slice(0, 3).join('.');
+    const chocoPath = path_1.join(`${process.env.ChocolateyInstall}`, 'lib', `${tool}.${version}`, 'tools', tool === 'ghc' ? `${tool}-${ghcVersion}` : `${tool}-${version}`, // choco trims the ghc version here
     tool === 'ghc' ? 'bin' : '');
     return chocoPath;
 }
@@ -11420,9 +11519,19 @@ exports.checkBypass = checkBypass;
 
 "use strict";
 
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (Object.hasOwnProperty.call(mod, k)) result[k] = mod[k];
+    result["default"] = mod;
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-const assert = __webpack_require__(357);
-const path = __webpack_require__(622);
+const path = __importStar(__webpack_require__(622));
+const assert_1 = __importDefault(__webpack_require__(357));
 const IS_WINDOWS = process.platform === 'win32';
 /**
  * Similar to path.dirname except normalizes the path separators and slightly better handling for Windows UNC paths.
@@ -11462,8 +11571,8 @@ exports.dirname = dirname;
  * or `C:` are expanded based on the current working directory.
  */
 function ensureAbsoluteRoot(root, itemPath) {
-    assert(root, `ensureAbsoluteRoot parameter 'root' must not be empty`);
-    assert(itemPath, `ensureAbsoluteRoot parameter 'itemPath' must not be empty`);
+    assert_1.default(root, `ensureAbsoluteRoot parameter 'root' must not be empty`);
+    assert_1.default(itemPath, `ensureAbsoluteRoot parameter 'itemPath' must not be empty`);
     // Already rooted
     if (hasAbsoluteRoot(itemPath)) {
         return itemPath;
@@ -11473,7 +11582,7 @@ function ensureAbsoluteRoot(root, itemPath) {
         // Check for itemPath like C: or C:foo
         if (itemPath.match(/^[A-Z]:[^\\/]|^[A-Z]:$/i)) {
             let cwd = process.cwd();
-            assert(cwd.match(/^[A-Z]:\\/i), `Expected current directory to start with an absolute drive root. Actual '${cwd}'`);
+            assert_1.default(cwd.match(/^[A-Z]:\\/i), `Expected current directory to start with an absolute drive root. Actual '${cwd}'`);
             // Drive letter matches cwd? Expand to cwd
             if (itemPath[0].toUpperCase() === cwd[0].toUpperCase()) {
                 // Drive only, e.g. C:
@@ -11498,11 +11607,11 @@ function ensureAbsoluteRoot(root, itemPath) {
         // Check for itemPath like \ or \foo
         else if (normalizeSeparators(itemPath).match(/^\\$|^\\[^\\]/)) {
             const cwd = process.cwd();
-            assert(cwd.match(/^[A-Z]:\\/i), `Expected current directory to start with an absolute drive root. Actual '${cwd}'`);
+            assert_1.default(cwd.match(/^[A-Z]:\\/i), `Expected current directory to start with an absolute drive root. Actual '${cwd}'`);
             return `${cwd[0]}:\\${itemPath.substr(1)}`;
         }
     }
-    assert(hasAbsoluteRoot(root), `ensureAbsoluteRoot parameter 'root' must have an absolute root`);
+    assert_1.default(hasAbsoluteRoot(root), `ensureAbsoluteRoot parameter 'root' must have an absolute root`);
     // Otherwise ensure root ends with a separator
     if (root.endsWith('/') || (IS_WINDOWS && root.endsWith('\\'))) {
         // Intentionally empty
@@ -11519,7 +11628,7 @@ exports.ensureAbsoluteRoot = ensureAbsoluteRoot;
  * `\\hello\share` and `C:\hello` (and using alternate separator).
  */
 function hasAbsoluteRoot(itemPath) {
-    assert(itemPath, `hasAbsoluteRoot parameter 'itemPath' must not be empty`);
+    assert_1.default(itemPath, `hasAbsoluteRoot parameter 'itemPath' must not be empty`);
     // Normalize separators
     itemPath = normalizeSeparators(itemPath);
     // Windows
@@ -11536,7 +11645,7 @@ exports.hasAbsoluteRoot = hasAbsoluteRoot;
  * `\`, `\hello`, `\\hello\share`, `C:`, and `C:\hello` (and using alternate separator).
  */
 function hasRoot(itemPath) {
-    assert(itemPath, `isRooted parameter 'itemPath' must not be empty`);
+    assert_1.default(itemPath, `isRooted parameter 'itemPath' must not be empty`);
     // Normalize separators
     itemPath = normalizeSeparators(itemPath);
     // Windows

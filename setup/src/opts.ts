@@ -3,7 +3,14 @@ import {readFileSync} from 'fs';
 import {safeLoad} from 'js-yaml';
 import {join} from 'path';
 import * as supported_versions from './versions.json';
+import * as rv from './release-revisions.json';
 
+const release_revisions = rv as Revisions;
+
+export type Revisions = Record<
+  OS,
+  Record<Tool, Array<{from: string; to: string}>>
+>;
 export type OS = 'linux' | 'darwin' | 'win32';
 export type Tool = 'cabal' | 'ghc' | 'stack';
 
@@ -22,30 +29,42 @@ export interface Options {
 type Version = {version: string; supported: string[]};
 export type Defaults = Record<Tool, Version>;
 
-export function getDefaults(): Defaults {
-  const inpts = safeLoad(
+export function getDefaults(os: OS): Defaults {
+  const inpts = (safeLoad(
     readFileSync(join(__dirname, '..', 'action.yml'), 'utf8')
-  ).inputs;
+    // The action.yml file structure is statically known.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ) as any).inputs;
 
-  const mkVersion = (v: string, vs: string[]): Version => ({
-    version: resolve(inpts[v].default, vs),
+  const mkVersion = (v: string, vs: string[], t: Tool): Version => ({
+    version: resolve(inpts[v].default, vs, t, os),
     supported: vs
   });
 
   return {
-    ghc: mkVersion('ghc-version', supported_versions.ghc),
-    cabal: mkVersion('cabal-version', supported_versions.cabal),
-    stack: mkVersion('stack-version', supported_versions.stack)
+    ghc: mkVersion('ghc-version', supported_versions.ghc, 'ghc'),
+    cabal: mkVersion('cabal-version', supported_versions.cabal, 'cabal'),
+    stack: mkVersion('stack-version', supported_versions.stack, 'stack')
   };
 }
 
-function resolve(version: string, supported: string[]): string {
-  return version === 'latest'
-    ? supported[0]
-    : supported.find(v => v.startsWith(version)) ?? version;
+function resolve(
+  version: string,
+  supported: string[],
+  tool: Tool,
+  os: OS
+): string {
+  const resolved =
+    version === 'latest'
+      ? supported[0]
+      : supported.find(v => v.startsWith(version)) ?? version;
+  return (
+    release_revisions?.[os]?.[tool]?.find(({from}) => from === resolved)?.to ??
+    resolved
+  );
 }
 
-export function getOpts({ghc, cabal, stack}: Defaults): Options {
+export function getOpts({ghc, cabal, stack}: Defaults, os: OS): Options {
   const stackNoGlobal = core.getInput('stack-no-global') !== '';
   const stackSetupGhc = core.getInput('stack-setup-ghc') !== '';
   const stackEnable = core.getInput('enable-stack') !== '';
@@ -71,17 +90,17 @@ export function getOpts({ghc, cabal, stack}: Defaults): Options {
   const opts: Options = {
     ghc: {
       raw: verInpt.ghc,
-      resolved: resolve(verInpt.ghc, ghc.supported),
+      resolved: resolve(verInpt.ghc, ghc.supported, 'ghc', os),
       enable: !stackNoGlobal
     },
     cabal: {
       raw: verInpt.cabal,
-      resolved: resolve(verInpt.cabal, cabal.supported),
+      resolved: resolve(verInpt.cabal, cabal.supported, 'cabal', os),
       enable: !stackNoGlobal
     },
     stack: {
       raw: verInpt.stack,
-      resolved: resolve(verInpt.stack, stack.supported),
+      resolved: resolve(verInpt.stack, stack.supported, 'stack', os),
       enable: stackEnable,
       setup: core.getInput('stack-setup-ghc') !== ''
     }

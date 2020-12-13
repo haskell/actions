@@ -1,6 +1,9 @@
 module.exports = {
-  '!(*test).{js,ts}': 'eslint --cache --fix',
-  '!(*test).ts': () => ['ncc build', 'git add dist'],
-  'src/**/*.ts': () => 'tsc -p tsconfig.json',
-  '*.{js,ts,json,md}': 'prettier --write'
+  'setup/!(*test).{js,ts,json}': [
+    'eslint --cache --fix',
+    () => 'ncc build',
+    () => 'git add dist'
+  ],
+  'setup/src/**/*.ts': () => 'tsc -p tsconfig.json',
+  'setup/*.{js,ts,json,md}': 'prettier --write'
 };
