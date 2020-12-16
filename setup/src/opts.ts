@@ -29,15 +29,15 @@ export interface Options {
 type Version = {version: string; supported: string[]};
 export type Defaults = Record<Tool, Version>;
 
-export function getDefaults(os: OS): Defaults {
-  const inpts = (safeLoad(
-    readFileSync(join(__dirname, '..', 'action.yml'), 'utf8')
-    // The action.yml file structure is statically known.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  ) as any).inputs;
+export const yamlInputs: Record<string, {default: string}> = (safeLoad(
+  readFileSync(join(__dirname, '..', 'action.yml'), 'utf8')
+  // The action.yml file structure is statically known.
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+) as any).inputs;
 
+export function getDefaults(os: OS): Defaults {
   const mkVersion = (v: string, vs: string[], t: Tool): Version => ({
-    version: resolve(inpts[v].default, vs, t, os),
+    version: resolve(yamlInputs[v].default, vs, t, os),
     supported: vs
   });
 
@@ -64,14 +64,20 @@ function resolve(
   );
 }
 
-export function getOpts({ghc, cabal, stack}: Defaults, os: OS): Options {
-  const stackNoGlobal = core.getInput('stack-no-global') !== '';
-  const stackSetupGhc = core.getInput('stack-setup-ghc') !== '';
-  const stackEnable = core.getInput('enable-stack') !== '';
+export function getOpts(
+  {ghc, cabal, stack}: Defaults,
+  os: OS,
+  inputs: Record<string, string>
+): Options {
+  core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
+  const stackNoGlobal = (inputs['stack-no-global'] || '') !== '';
+  const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
+  const stackEnable = (inputs['enable-stack'] || '') !== '';
+  core.debug(`${stackNoGlobal}/${stackSetupGhc}/${stackEnable}`);
   const verInpt = {
-    ghc: core.getInput('ghc-version') || ghc.version,
-    cabal: core.getInput('cabal-version') || cabal.version,
-    stack: core.getInput('stack-version') || stack.version
+    ghc: inputs['ghc-version'] || ghc.version,
+    cabal: inputs['cabal-version'] || cabal.version,
+    stack: inputs['stack-version'] || stack.version
   };
 
   const errors = [];
@@ -102,7 +108,7 @@ export function getOpts({ghc, cabal, stack}: Defaults, os: OS): Options {
       raw: verInpt.stack,
       resolved: resolve(verInpt.stack, stack.supported, 'stack', os),
       enable: stackEnable,
-      setup: core.getInput('stack-setup-ghc') !== ''
+      setup: stackSetupGhc
     }
   };
 

@@ -1,10 +1,12 @@
 {
   "name": "setup-haskell",
-  "version": "1.0.0",
+  "version": "1.1.5",
   "private": true,
   "description": "setup haskell action",
-  "main": "src/setup-haskell.ts",
+  "main": "lib/setup-haskell",
+  "types": "lib/setup-haskell",
   "scripts": {
+    "bundle": "ncc build src/main.ts  && tsc -p tsconfig-lib.json",
     "test": "jest"
   },
   "repository": {
@@ -20,6 +22,13 @@
   ],
   "author": "GitHub",
   "license": "MIT",
+  "directories": {
+    "lib": "lib",
+    "test": "__tests__"
+  },
+  "files": [
+    "lib"
+  ],
   "dependencies": {
     "@actions/core": "^1.2.6",
     "@actions/exec": "^1.0.4",

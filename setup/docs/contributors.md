@@ -4,6 +4,7 @@
 
 - Do checkin source (src)
 - Do checkin build output (dist)
+- Do checkin library build output (lib)
 
 ### Dependencies
 
@@ -16,7 +17,8 @@ git add abc.ext                             # Add the files you've changed. This
 git commit -m "Informative commit message"  # Commit. This will run Husky
 ```
 
-During the commit step, Husky will take care of formatting all files with [Prettier](https://github.com/prettier/prettier). It will also bundle the code into a single `dist/index.js` file.
+During the commit step, Husky will take care of formatting all files with [Prettier](https://github.com/prettier/prettier).
+It will also bundle the code into a single `dist/index.js` file and output the transpiled library under `lib/`.
 Finally, it will make sure these changes are appropriately included in your commit--no further work is needed.
 
 ## Versions
