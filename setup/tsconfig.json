@@ -8,15 +8,15 @@
       "es2020.symbol.wellknown"
     ],
     "module": "commonjs",
-    "outDir": ".out",
-    "tsBuildInfoFile": ".out/tsbuildinfo",
     "incremental": true,
-    "rootDir": "./src",
     "strict": true,
     "noImplicitAny": true,
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "resolveJsonModule": true
+    "resolveJsonModule": true,
+    "rootDir": "./src",
+    "outDir": ".out",
+    "tsBuildInfoFile": ".out/tsbuildinfo"
   },
-  "exclude": ["node_modules", "**/*.test.ts"]
+  "exclude": ["**/*.test.ts"]
 }

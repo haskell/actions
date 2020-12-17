@@ -1,0 +1,10 @@
+{
+  "extends": "./tsconfig.json",
+  "compilerOptions": {
+    "declaration": true,
+    "outDir": "lib/",
+    "tsBuildInfoFile": "lib/tsbuildinfo",
+    "baseUrl": "./"
+  },
+  "exclude": ["src/main.ts", "**/*.test.ts", "lib"]
+}

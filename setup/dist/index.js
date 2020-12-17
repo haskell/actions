@@ -40,7 +40,7 @@ module.exports =
 /******/ 	// the startup function
 /******/ 	function startup() {
 /******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(661);
+/******/ 		return __webpack_require__(131);
 /******/ 	};
 /******/
 /******/ 	// run startup
@@ -868,7 +868,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOpts = exports.getDefaults = void 0;
+exports.getOpts = exports.getDefaults = exports.yamlInputs = void 0;
 const core = __importStar(__webpack_require__(470));
 const fs_1 = __webpack_require__(747);
 const js_yaml_1 = __webpack_require__(414);
@@ -876,13 +876,13 @@ const path_1 = __webpack_require__(622);
 const supported_versions = __importStar(__webpack_require__(447));
 const rv = __importStar(__webpack_require__(859));
 const release_revisions = rv;
+exports.yamlInputs = js_yaml_1.safeLoad(fs_1.readFileSync(__webpack_require__.ab + "action.yml", 'utf8')
+// The action.yml file structure is statically known.
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+).inputs;
 function getDefaults(os) {
-    const inpts = js_yaml_1.safeLoad(fs_1.readFileSync(__webpack_require__.ab + "action.yml", 'utf8')
-    // The action.yml file structure is statically known.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ).inputs;
     const mkVersion = (v, vs, t) => ({
-        version: resolve(inpts[v].default, vs, t, os),
+        version: resolve(exports.yamlInputs[v].default, vs, t, os),
         supported: vs
     });
     return {
@@ -899,14 +899,16 @@ function resolve(version, supported, tool, os) {
         : (_a = supported.find(v => v.startsWith(version))) !== null && _a !== void 0 ? _a : version;
     return ((_e = (_d = (_c = (_b = release_revisions === null || release_revisions === void 0 ? void 0 : release_revisions[os]) === null || _b === void 0 ? void 0 : _b[tool]) === null || _c === void 0 ? void 0 : _c.find(({ from }) => from === resolved)) === null || _d === void 0 ? void 0 : _d.to) !== null && _e !== void 0 ? _e : resolved);
 }
-function getOpts({ ghc, cabal, stack }, os) {
-    const stackNoGlobal = core.getInput('stack-no-global') !== '';
-    const stackSetupGhc = core.getInput('stack-setup-ghc') !== '';
-    const stackEnable = core.getInput('enable-stack') !== '';
+function getOpts({ ghc, cabal, stack }, os, inputs) {
+    core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
+    const stackNoGlobal = (inputs['stack-no-global'] || '') !== '';
+    const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
+    const stackEnable = (inputs['enable-stack'] || '') !== '';
+    core.debug(`${stackNoGlobal}/${stackSetupGhc}/${stackEnable}`);
     const verInpt = {
-        ghc: core.getInput('ghc-version') || ghc.version,
-        cabal: core.getInput('cabal-version') || cabal.version,
-        stack: core.getInput('stack-version') || stack.version
+        ghc: inputs['ghc-version'] || ghc.version,
+        cabal: inputs['cabal-version'] || cabal.version,
+        stack: inputs['stack-version'] || stack.version
     };
     const errors = [];
     if (stackNoGlobal && !stackEnable) {
@@ -933,7 +935,7 @@ function getOpts({ ghc, cabal, stack }, os) {
             raw: verInpt.stack,
             resolved: resolve(verInpt.stack, stack.supported, 'stack', os),
             enable: stackEnable,
-            setup: core.getInput('stack-setup-ghc') !== ''
+            setup: stackSetupGhc
         }
     };
     // eslint-disable-next-line github/array-foreach
@@ -1142,6 +1144,42 @@ exports.issueCommand = issueCommand;
 /***/ (function(module) {
 
 module.exports = require("child_process");
+
+/***/ }),
+
+/***/ 131:
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || function (mod) {
+    if (mod && mod.__esModule) return mod;
+    var result = {};
+    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
+    __setModuleDefault(result, mod);
+    return result;
+};
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const core = __importStar(__webpack_require__(470));
+const opts_1 = __webpack_require__(54);
+const setup_haskell_1 = __importDefault(__webpack_require__(661));
+setup_haskell_1.default(Object.fromEntries(Object.keys(opts_1.yamlInputs).map(k => [k, core.getInput(k)])));
+
 
 /***/ }),
 
@@ -8775,11 +8813,11 @@ async function cabalConfig() {
     });
     return out.toString().trim().split('\n').slice(-1)[0].trim();
 }
-(async () => {
+async function run(inputs) {
     try {
         core.info('Preparing to setup a Haskell environment');
         const os = process.platform;
-        const opts = opts_1.getOpts(opts_1.getDefaults(os), os);
+        const opts = opts_1.getOpts(opts_1.getDefaults(os), os, inputs);
         for (const [t, { resolved }] of Object.entries(opts).filter(o => o[1].enable))
             await core.group(`Installing ${t} version ${resolved}`, async () => installer_1.installTool(t, resolved, os));
         if (opts.stack.setup)
@@ -8803,7 +8841,8 @@ async function cabalConfig() {
     catch (error) {
         core.setFailed(error.message);
     }
-})();
+}
+exports.default = run;
 
 
 /***/ }),
