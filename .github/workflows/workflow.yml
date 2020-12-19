@@ -18,18 +18,13 @@ jobs:
     name: Unit Tests - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
-      - name: Set Node.js 12
-        uses: actions/setup-node@v1
+      - uses: actions/checkout@v2
+      - uses: actions/setup-node@v2
         with:
-          node-version: 12
-      # http://www.tiernok.com/posts/2019/faster-npm-installs-during-ci/
+          node-version: "12"
       - run: npm ci --prefer-offline --no-audit --progress=false
       - run: npm test
 
@@ -88,14 +83,12 @@ jobs:
     name: Stack ${{ matrix.stack }} ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
-      fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         stack: ["latest", "1.9.1"]
 
     steps:
       - uses: actions/checkout@v2
-
       - uses: ./setup
         with:
           enable-stack: true
