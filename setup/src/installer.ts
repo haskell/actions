@@ -14,32 +14,18 @@ const exec = async (cmd: string, args?: string[]): Promise<number> =>
 function failed(tool: Tool, version: string): void {
   throw new Error(`All install methods for ${tool} ${version} failed`);
 }
-
-async function configureOutputs(
-  tool: Tool,
-  path: string,
-  os: OS
-): Promise<void> {
+async function configureOutputs(tool: Tool, path: string): Promise<void> {
   core.setOutput(`${tool}-path`, path);
   core.setOutput(`${tool}-exe`, await which(tool));
-  if (tool == 'stack') {
-    if (os === 'win32') {
-      core.exportVariable('STACK_ROOT', 'C:\\sr');
-      core.setOutput('stack-root', 'C:\\sr');
-    } else {
-      core.setOutput('stack-root', `${process.env.HOME}/.stack`);
-    }
-  }
 }
 
 async function success(
   tool: Tool,
   version: string,
-  path: string,
-  os: OS
+  path: string
 ): Promise<true> {
   core.addPath(path);
-  await configureOutputs(tool, path, os);
+  await configureOutputs(tool, path);
   core.info(
     `Found ${tool} ${version} in cache at path ${path}. Setup successful.`
   );
@@ -69,7 +55,7 @@ async function isInstalled(
   os: OS
 ): Promise<boolean> {
   const toolPath = tc.find(tool, version);
-  if (toolPath) return success(tool, version, toolPath, os);
+  if (toolPath) return success(tool, version, toolPath);
 
   const ghcupPath = `${process.env.HOME}/.ghcup${
     tool === 'ghc' ? `/ghc/${version}` : ''
@@ -105,7 +91,7 @@ async function isInstalled(
       if (tool === 'ghc' && installedPath === ghcupPath)
         await exec(await ghcupBin(os), ['set', tool, version]);
 
-      return success(tool, version, installedPath, os);
+      return success(tool, version, installedPath);
     }
   }
 
@@ -117,7 +103,7 @@ async function isInstalled(
 
     if (installedPath) {
       await exec(await ghcupBin(os), ['set', tool, version]);
-      return success(tool, version, installedPath, os);
+      return success(tool, version, installedPath);
     }
   }
 

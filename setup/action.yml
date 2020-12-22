@@ -23,6 +23,15 @@ inputs:
   stack-setup-ghc:
     required: false
     description: 'If specified, enable-stack must be set. Will run stack setup to install the specified GHC'
+  cache:
+    required: false
+    description: 'If specified, automatically caches cabal/stack-related directories.'
+  cache-keys:
+    required: false
+    description: 'List of caching keys, where the first is the "primary" key and the rest are "restore" keys to fall back on.'
+  cache-paths:
+    required: false
+    description: 'List of directories to cache.'
 outputs:
   ghc-path:
     description: 'The path of the ghc executable _directory_'
@@ -32,6 +41,8 @@ outputs:
     description: 'The path of the stack executable _directory_'
   cabal-store:
     description: 'The path to the cabal store'
+  stack-root:
+    description: 'The path to the stack root'
   ghc-exe:
     description: 'The path of the ghc _executable_'
   cabal-exe:
@@ -41,3 +52,5 @@ outputs:
 runs:
   using: 'node12'
   main: 'dist/index.js'
+  post: 'dist/save-cache.js'
+  post-if: success()

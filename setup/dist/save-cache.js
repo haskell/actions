@@ -40,7 +40,7 @@ module.exports =
 /******/ 	// the startup function
 /******/ 	function startup() {
 /******/ 		// Load entry module and return exports
-/******/ 		return __webpack_require__(131);
+/******/ 		return __webpack_require__(517);
 /******/ 	};
 /******/
 /******/ 	// run startup
@@ -3054,41 +3054,7 @@ module.exports = require("child_process");
 
 /***/ }),
 /* 130 */,
-/* 131 */
-/***/ (function(__unusedmodule, exports, __webpack_require__) {
-
-"use strict";
-
-var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
-}) : (function(o, m, k, k2) {
-    if (k2 === undefined) k2 = k;
-    o[k2] = m[k];
-}));
-var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
-    Object.defineProperty(o, "default", { enumerable: true, value: v });
-}) : function(o, v) {
-    o["default"] = v;
-});
-var __importStar = (this && this.__importStar) || function (mod) {
-    if (mod && mod.__esModule) return mod;
-    var result = {};
-    if (mod != null) for (var k in mod) if (k !== "default" && Object.prototype.hasOwnProperty.call(mod, k)) __createBinding(result, mod, k);
-    __setModuleDefault(result, mod);
-    return result;
-};
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
-Object.defineProperty(exports, "__esModule", { value: true });
-const core = __importStar(__webpack_require__(470));
-const opts_1 = __webpack_require__(54);
-const setup_haskell_1 = __importDefault(__webpack_require__(661));
-setup_haskell_1.default(Object.fromEntries(Object.keys(opts_1.yamlInputs).map(k => [k, core.getInput(k)])));
-
-
-/***/ }),
+/* 131 */,
 /* 132 */,
 /* 133 */,
 /* 134 */,
@@ -17241,7 +17207,17 @@ module.exports = {"application/1d-interleaved-parityfec":{"source":"iana"},"appl
 
 /***/ }),
 /* 516 */,
-/* 517 */,
+/* 517 */
+/***/ (function(__unusedmodule, exports, __webpack_require__) {
+
+"use strict";
+
+Object.defineProperty(exports, "__esModule", { value: true });
+const setup_haskell_1 = __webpack_require__(661);
+setup_haskell_1.saveCache();
+
+
+/***/ }),
 /* 518 */,
 /* 519 */,
 /* 520 */,
