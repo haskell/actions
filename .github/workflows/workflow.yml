@@ -58,6 +58,7 @@ jobs:
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
+          cache: true
       - run: |
           runhaskell --version
           runhaskell __tests__/hello.hs
@@ -94,6 +95,7 @@ jobs:
           enable-stack: true
           stack-no-global: true
           stack-version: ${{ matrix.stack }}
+          cache: true
       - run: |
           stack --version
           stack

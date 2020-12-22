@@ -6,7 +6,7 @@
   "main": "lib/setup-haskell",
   "types": "lib/setup-haskell",
   "scripts": {
-    "bundle": "ncc build src/main.ts  && tsc -p tsconfig-lib.json",
+    "bundle": "ncc build src/save-cache.ts && mv dist/index.js dist/save-cache.js && ncc build src/main.ts && tsc -p tsconfig-lib.json",
     "test": "jest"
   },
   "repository": {
@@ -30,11 +30,14 @@
     "lib"
   ],
   "dependencies": {
+    "@actions/cache": "^1.0.4",
     "@actions/core": "^1.2.6",
     "@actions/exec": "^1.0.4",
     "@actions/glob": "^0.1.1",
     "@actions/io": "^1.0.2",
     "@actions/tool-cache": "^1.6.1",
+    "@types/folder-hash": "^3.3.0",
+    "folder-hash": "^4.0.0",
     "js-yaml": "^3.14.1"
   },
   "devDependencies": {

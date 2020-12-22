@@ -24,6 +24,9 @@ export interface Options {
   ghc: ProgramOpt;
   cabal: ProgramOpt;
   stack: ProgramOpt & {setup: boolean};
+  cache: boolean;
+  cacheKeys: string[];
+  cachePaths: string[];
 }
 
 type Version = {version: string; supported: string[]};
@@ -70,9 +73,11 @@ export function getOpts(
   inputs: Record<string, string>
 ): Options {
   core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
-  const stackNoGlobal = (inputs['stack-no-global'] || '') !== '';
-  const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
-  const stackEnable = (inputs['enable-stack'] || '') !== '';
+  const isEnabled = (s: string): boolean => (inputs[s] || '') !== '';
+  const readList = (s: string): string[] => (inputs[s] || '').split('\n');
+  const stackNoGlobal = isEnabled('stack-no-global');
+  const stackSetupGhc = isEnabled('stack-setup-ghc');
+  const stackEnable = isEnabled('enable-stack');
   core.debug(`${stackNoGlobal}/${stackSetupGhc}/${stackEnable}`);
   const verInpt = {
     ghc: inputs['ghc-version'] || ghc.version,
@@ -109,7 +114,10 @@ export function getOpts(
       resolved: resolve(verInpt.stack, stack.supported, 'stack', os),
       enable: stackEnable,
       setup: stackSetupGhc
-    }
+    },
+    cache: isEnabled('cache'),
+    cacheKeys: readList('cache-keys'),
+    cachePaths: readList('cache-paths')
   };
 
   // eslint-disable-next-line github/array-foreach

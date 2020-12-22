@@ -15,6 +15,9 @@ export interface Options {
     stack: ProgramOpt & {
         setup: boolean;
     };
+    cache: boolean;
+    cacheKeys: string[];
+    cachePaths: string[];
 }
 declare type Version = {
     version: string;
