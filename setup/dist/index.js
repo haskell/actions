@@ -11249,7 +11249,7 @@ async function isInstalled(tool, version, os) {
     }
     if (tool === 'cabal' && os !== 'win32') {
         const installedPath = await fs_1.promises
-            .access(`${ghcupPath}/cabal`)
+            .access(`${ghcupPath}/cabal-${version}`)
             .then(() => ghcupPath)
             .catch(() => undefined);
         if (installedPath) {
