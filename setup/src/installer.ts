@@ -1,11 +1,12 @@
 import * as core from '@actions/core';
 import {exec as e} from '@actions/exec';
 import {which} from '@actions/io';
-import {create as glob} from '@actions/glob';
 import * as tc from '@actions/tool-cache';
-import {promises as fs} from 'fs';
-import {join} from 'path';
+import {promises as afs} from 'fs';
+import {join, dirname} from 'path';
 import type {OS, Tool} from './opts';
+import process from 'process';
+import * as glob from '@actions/glob';
 
 // Don't throw on non-zero.
 const exec = async (cmd: string, args?: string[]): Promise<number> =>
@@ -77,7 +78,7 @@ async function isInstalled(
   const v = tool === 'cabal' ? version.slice(0, 3) : version;
   const aptPath = `/opt/${tool}/${v}/bin`;
 
-  const chocoPath = getChocoPath(tool, version);
+  const chocoPath = await getChocoPath(tool, version);
 
   const locations = {
     stack: [], // Always installed into the tool cache
@@ -94,7 +95,7 @@ async function isInstalled(
   };
 
   for (const p of locations[tool]) {
-    const installedPath = await fs
+    const installedPath = await afs
       .access(p)
       .then(() => p)
       .catch(() => undefined);
@@ -110,7 +111,7 @@ async function isInstalled(
   }
 
   if (tool === 'cabal' && os !== 'win32') {
-    const installedPath = await fs
+    const installedPath = await afs
       .access(`${ghcupPath}/cabal-${version}`)
       .then(() => ghcupPath)
       .catch(() => undefined);
@@ -166,9 +167,11 @@ async function stack(version: string, os: OS): Promise<void> {
 
   const url = `https://github.com/commercialhaskell/stack/releases/download/v${version}/stack-${version}-${build}.tar.gz`;
   const p = await tc.downloadTool(`${url}`).then(tc.extractTar);
-  const [stackPath] = await glob(`${p}/stack*`, {
-    implicitDescendants: false
-  }).then(async g => g.glob());
+  const [stackPath] = await glob
+    .create(`${p}/stack*`, {
+      implicitDescendants: false
+    })
+    .then(async g => g.glob());
   await tc.cacheDir(stackPath, 'stack', version);
 }
 
@@ -196,7 +199,10 @@ async function choco(tool: Tool, version: string): Promise<void> {
   ]);
   console.log('::SetupHaskellStopCommands::'); // Re-enable command execution
   // Add GHC to path automatically because it does not add until the end of the step and we check the path.
-  if (tool == 'ghc') core.addPath(getChocoPath(tool, version));
+
+  const chocoPath = await getChocoPath(tool, version);
+
+  if (tool == 'ghc') core.addPath(chocoPath);
 }
 
 async function ghcupBin(os: OS): Promise<string> {
@@ -209,7 +215,7 @@ async function ghcupBin(os: OS): Promise<string> {
       os === 'darwin' ? 'apple-darwin' : 'linux'
     }-ghcup-${v}`
   );
-  await fs.chmod(bin, 0o755);
+  await afs.chmod(bin, 0o755);
   return join(await tc.cacheFile(bin, 'ghcup', 'ghcup', v), 'ghcup');
 }
 
@@ -220,18 +226,19 @@ async function ghcup(tool: Tool, version: string, os: OS): Promise<void> {
   if (returnCode === 0) await exec(bin, ['set', tool, version]);
 }
 
-function getChocoPath(tool: Tool, version: string): string {
-  // If chocolatey has a patch release for GHC, 'version' will be a.b.c.d
-  // but GHC's version is still a.b.c and the chocolatey path contains both
-  // (This is only valid for GHC. cabal-install has 4-segment versions)
-  const ghcVersion = version.split('.').slice(0, 3).join('.');
-  const chocoPath = join(
+async function getChocoPath(tool: Tool, version: string): Promise<string> {
+  const chocoToolPath = join(
     `${process.env.ChocolateyInstall}`,
     'lib',
-    `${tool}.${version}`,
-    'tools',
-    tool === 'ghc' ? `${tool}-${ghcVersion}` : `${tool}-${version}`, // choco trims the ghc version here
-    tool === 'ghc' ? 'bin' : ''
+    `${tool}.${version}`
   );
-  return chocoPath;
+
+  const pattern = `${chocoToolPath}/**/${tool}.exe`;
+  const globber = await glob.create(pattern);
+
+  for await (const file of globber.globGenerator()) {
+    return dirname(file);
+  }
+
+  return '<not-found>';
 }
