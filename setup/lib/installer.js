@@ -18,15 +18,19 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.installTool = void 0;
 const core = __importStar(require("@actions/core"));
 const exec_1 = require("@actions/exec");
 const io_1 = require("@actions/io");
-const glob_1 = require("@actions/glob");
 const tc = __importStar(require("@actions/tool-cache"));
 const fs_1 = require("fs");
 const path_1 = require("path");
+const process_1 = __importDefault(require("process"));
+const glob = __importStar(require("@actions/glob"));
 // Don't throw on non-zero.
 const exec = async (cmd, args) => exec_1.exec(cmd, args, { ignoreReturnCode: true });
 function failed(tool, version) {
@@ -41,7 +45,7 @@ async function configureOutputs(tool, path, os) {
             core.setOutput('stack-root', 'C:\\sr');
         }
         else {
-            core.setOutput('stack-root', `${process.env.HOME}/.stack`);
+            core.setOutput('stack-root', `${process_1.default.env.HOME}/.stack`);
         }
     }
 }
@@ -68,10 +72,10 @@ async function isInstalled(tool, version, os) {
     const toolPath = tc.find(tool, version);
     if (toolPath)
         return success(tool, version, toolPath, os);
-    const ghcupPath = `${process.env.HOME}/.ghcup${tool === 'ghc' ? `/ghc/${version}` : ''}/bin`;
+    const ghcupPath = `${process_1.default.env.HOME}/.ghcup${tool === 'ghc' ? `/ghc/${version}` : ''}/bin`;
     const v = tool === 'cabal' ? version.slice(0, 3) : version;
     const aptPath = `/opt/${tool}/${v}/bin`;
-    const chocoPath = getChocoPath(tool, version);
+    const chocoPath = await getChocoPath(tool, version);
     const locations = {
         stack: [],
         cabal: {
@@ -148,9 +152,11 @@ async function stack(version, os) {
     }[os];
     const url = `https://github.com/commercialhaskell/stack/releases/download/v${version}/stack-${version}-${build}.tar.gz`;
     const p = await tc.downloadTool(`${url}`).then(tc.extractTar);
-    const [stackPath] = await glob_1.create(`${p}/stack*`, {
+    const [stackPath] = await glob
+        .create(`${p}/stack*`, {
         implicitDescendants: false
-    }).then(async (g) => g.glob());
+    })
+        .then(async (g) => g.glob());
     await tc.cacheDir(stackPath, 'stack', version);
 }
 async function apt(tool, version) {
@@ -176,8 +182,9 @@ async function choco(tool, version) {
     ]);
     console.log('::SetupHaskellStopCommands::'); // Re-enable command execution
     // Add GHC to path automatically because it does not add until the end of the step and we check the path.
+    const chocoPath = await getChocoPath(tool, version);
     if (tool == 'ghc')
-        core.addPath(getChocoPath(tool, version));
+        core.addPath(chocoPath);
 }
 async function ghcupBin(os) {
     const v = '0.1.12';
@@ -195,12 +202,12 @@ async function ghcup(tool, version, os) {
     if (returnCode === 0)
         await exec(bin, ['set', tool, version]);
 }
-function getChocoPath(tool, version) {
-    // If chocolatey has a patch release for GHC, 'version' will be a.b.c.d
-    // but GHC's version is still a.b.c and the chocolatey path contains both
-    // (This is only valid for GHC. cabal-install has 4-segment versions)
-    const ghcVersion = version.split('.').slice(0, 3).join('.');
-    const chocoPath = path_1.join(`${process.env.ChocolateyInstall}`, 'lib', `${tool}.${version}`, 'tools', tool === 'ghc' ? `${tool}-${ghcVersion}` : `${tool}-${version}`, // choco trims the ghc version here
-    tool === 'ghc' ? 'bin' : '');
-    return chocoPath;
+async function getChocoPath(tool, version) {
+    const chocoToolPath = path_1.join(`${process_1.default.env.ChocolateyInstall}`, 'lib', `${tool}.${version}`);
+    const pattern = `${chocoToolPath}/**/${tool}.exe`;
+    const globber = await glob.create(pattern);
+    for await (const file of globber.globGenerator()) {
+        return path_1.dirname(file);
+    }
+    return '<not-found>';
 }

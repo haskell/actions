@@ -43,6 +43,10 @@ jobs:
           - os: windows-latest
             cabal: "3.4.0.0-rc4"
         include:
+          - os: windows-latest
+            cabal: "3.4.0.0-rc5"
+            ghc: "8.10.2"
+            expect-fail: false
           - os: ubuntu-latest
             ghc: "7.10.3"
             cabal: "3.0.0.0"
@@ -61,26 +65,31 @@ jobs:
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
-      - run: |
+      - name: Test runhaskell
+        run: |
           runhaskell --version
           runhaskell __tests__/hello.hs
         continue-on-error: ${{ matrix.expect-fail }}
-      - working-directory: setup/__tests__/project
+      - name: Build test project
+        working-directory: setup/__tests__/project
         run: cabal build
         continue-on-error: ${{ matrix.expect-fail }}
-      - working-directory: setup/__tests__/project
+      - name: Run test project
+        working-directory: setup/__tests__/project
         run: cabal run
         continue-on-error: ${{ matrix.expect-fail }}
-      - run: |
+      - name: Check installed versions
+        run: |
           cabal --version
           ghc --version
         continue-on-error: ${{ matrix.expect-fail }}
-      - shell: bash
+      - name: Confirm GHC version
+        shell: bash
         continue-on-error: ${{ matrix.expect-fail }}
         if: matrix.ghc != 'latest'
         # this check depends on the ghc versions being "exact" in the matrix
         run: |
-          [[ $(ghc --numeric-version) == ${{ matrix.ghc }} ]]
+          [[ $(ghc --numeric-version) == "${{ matrix.ghc }}" ]]
 
   install-stack:
     name: Stack ${{ matrix.stack }} ${{ matrix.os }}
