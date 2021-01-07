@@ -1,6 +1,6 @@
 # haskell/actions/setup
 
-[![GitHub Actions status](https://github.com/haskell/actions/workflows/Setup%20workflow/badge.svg)](https://github.com/haskell/actions)
+[![GitHub Actions status](https://github.com/haskell/actions/workflows/Setup/badge.svg)](https://github.com/haskell/actions)
 
 This action sets up a Haskell environment for use in actions by:
 
