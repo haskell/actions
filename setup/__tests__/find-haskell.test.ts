@@ -1,19 +1,21 @@
-import {getOpts, getDefaults} from '../src/opts';
-import type {OS, Revisions, Tool} from '../src/opts';
-import * as supported_versions from '../src/versions.json';
-import * as rv from '../src/release-revisions.json';
+import {
+  getOpts,
+  getDefaults,
+  release_revisions,
+  supported_versions
+} from '../src/opts';
+import type {OS, Tool} from '../src/opts';
 
-const release_revisions = rv as Revisions;
 const def = (os: OS) => getDefaults(os);
 const latestVersions = {
   ghc: supported_versions.ghc[0],
   cabal: supported_versions.cabal[0],
   stack: supported_versions.stack[0]
 };
-const latestRevisions = (os: OS) => ({
-  ghc: release_revisions?.[os]?.ghc?.[0]?.to,
-  cabal: release_revisions?.[os]?.cabal?.[0]?.to,
-  stack: release_revisions?.[os]?.stack?.[0]?.to
+const latestRevisions = (os: OS, version: string) => ({
+  ghc: release_revisions?.[os]?.ghc?.find(v => v.from === version)?.to,
+  cabal: release_revisions?.[os]?.cabal?.find(v => v.from === version)?.to,
+  stack: release_revisions?.[os]?.stack?.find(v => v.from === version)?.to
 });
 
 const forAllOS = (fn: (t: OS) => any) =>
@@ -27,7 +29,7 @@ describe('haskell/actions/setup', () => {
     forAllOS(os =>
       forAllTools(t =>
         expect(def(os)[t].version).toBe(
-          latestRevisions(os)[t] ?? latestVersions[t]
+          latestRevisions(os, latestVersions[t])[t] ?? latestVersions[t]
         )
       )
     );
@@ -68,7 +70,7 @@ describe('haskell/actions/setup', () => {
       });
       forAllTools(t =>
         expect(options[t].resolved).toBe(
-          latestRevisions(os)[t] ?? latestVersions[t]
+          latestRevisions(os, latestVersions[t])[t] ?? latestVersions[t]
         )
       );
     });
@@ -85,6 +87,18 @@ describe('haskell/actions/setup', () => {
         cabal: cabal.enable
       }).toStrictEqual({ghc: true, cabal: true, stack: true});
     });
+  });
+
+  it('Resolves revisions correctly on Windows', () => {
+    // Test the case where there is a revision in chocolatey
+    expect(
+      getOpts(def('win32'), 'win32', {'ghc-version': '8.10.2'}).ghc.resolved
+    ).toBe('8.10.2.2');
+
+    // Test the case where there is not a revision in chocolatey
+    expect(
+      getOpts(def('win32'), 'win32', {'ghc-version': '8.8.1'}).ghc.resolved
+    ).toBe('8.8.1');
   });
 
   it('Enabling stack-no-global disables GHC and Cabal', () => {

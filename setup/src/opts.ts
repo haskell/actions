@@ -2,10 +2,11 @@ import * as core from '@actions/core';
 import {readFileSync} from 'fs';
 import {safeLoad} from 'js-yaml';
 import {join} from 'path';
-import * as supported_versions from './versions.json';
+import * as sv from './versions.json';
 import * as rv from './release-revisions.json';
 
-const release_revisions = rv as Revisions;
+export const release_revisions = rv as Revisions;
+export const supported_versions = sv as Record<Tool, string[]>;
 
 export type Revisions = Record<
   OS,

@@ -868,14 +868,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOpts = exports.getDefaults = exports.yamlInputs = void 0;
+exports.getOpts = exports.getDefaults = exports.yamlInputs = exports.supported_versions = exports.release_revisions = void 0;
 const core = __importStar(__webpack_require__(470));
 const fs_1 = __webpack_require__(747);
 const js_yaml_1 = __webpack_require__(414);
 const path_1 = __webpack_require__(622);
-const supported_versions = __importStar(__webpack_require__(447));
+const sv = __importStar(__webpack_require__(447));
 const rv = __importStar(__webpack_require__(859));
-const release_revisions = rv;
+exports.release_revisions = rv;
+exports.supported_versions = sv;
 exports.yamlInputs = js_yaml_1.safeLoad(fs_1.readFileSync(__webpack_require__.ab + "action.yml", 'utf8')
 // The action.yml file structure is statically known.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -886,9 +887,9 @@ function getDefaults(os) {
         supported: vs
     });
     return {
-        ghc: mkVersion('ghc-version', supported_versions.ghc, 'ghc'),
-        cabal: mkVersion('cabal-version', supported_versions.cabal, 'cabal'),
-        stack: mkVersion('stack-version', supported_versions.stack, 'stack')
+        ghc: mkVersion('ghc-version', exports.supported_versions.ghc, 'ghc'),
+        cabal: mkVersion('cabal-version', exports.supported_versions.cabal, 'cabal'),
+        stack: mkVersion('stack-version', exports.supported_versions.stack, 'stack')
     };
 }
 exports.getDefaults = getDefaults;
@@ -897,7 +898,7 @@ function resolve(version, supported, tool, os) {
     const resolved = version === 'latest'
         ? supported[0]
         : (_a = supported.find(v => v.startsWith(version))) !== null && _a !== void 0 ? _a : version;
-    return ((_e = (_d = (_c = (_b = release_revisions === null || release_revisions === void 0 ? void 0 : release_revisions[os]) === null || _b === void 0 ? void 0 : _b[tool]) === null || _c === void 0 ? void 0 : _c.find(({ from }) => from === resolved)) === null || _d === void 0 ? void 0 : _d.to) !== null && _e !== void 0 ? _e : resolved);
+    return ((_e = (_d = (_c = (_b = exports.release_revisions === null || exports.release_revisions === void 0 ? void 0 : exports.release_revisions[os]) === null || _b === void 0 ? void 0 : _b[tool]) === null || _c === void 0 ? void 0 : _c.find(({ from }) => from === resolved)) === null || _d === void 0 ? void 0 : _d.to) !== null && _e !== void 0 ? _e : resolved);
 }
 function getOpts({ ghc, cabal, stack }, os, inputs) {
     core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
@@ -4358,7 +4359,7 @@ function escapeProperty(s) {
 /***/ 447:
 /***/ (function(module) {
 
-module.exports = {"ghc":["8.10.2","8.10.1","8.8.4","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.2.0.0","3.0.0.0","2.4.1.0","2.4.0.0","2.2.0.0"],"stack":["2.5.1","2.3.3","2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"]};
+module.exports = {"ghc":["8.10.3","8.10.2","8.10.1","8.8.4","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.2.0.0","3.0.0.0","2.4.1.0","2.4.0.0","2.2.0.0"],"stack":["2.5.1","2.3.3","2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"]};
 
 /***/ }),
 
