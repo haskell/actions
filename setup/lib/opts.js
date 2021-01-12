@@ -19,14 +19,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOpts = exports.getDefaults = exports.yamlInputs = void 0;
+exports.getOpts = exports.getDefaults = exports.yamlInputs = exports.supported_versions = exports.release_revisions = void 0;
 const core = __importStar(require("@actions/core"));
 const fs_1 = require("fs");
 const js_yaml_1 = require("js-yaml");
 const path_1 = require("path");
-const supported_versions = __importStar(require("./versions.json"));
+const sv = __importStar(require("./versions.json"));
 const rv = __importStar(require("./release-revisions.json"));
-const release_revisions = rv;
+exports.release_revisions = rv;
+exports.supported_versions = sv;
 exports.yamlInputs = js_yaml_1.safeLoad(fs_1.readFileSync(path_1.join(__dirname, '..', 'action.yml'), 'utf8')
 // The action.yml file structure is statically known.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,9 +38,9 @@ function getDefaults(os) {
         supported: vs
     });
     return {
-        ghc: mkVersion('ghc-version', supported_versions.ghc, 'ghc'),
-        cabal: mkVersion('cabal-version', supported_versions.cabal, 'cabal'),
-        stack: mkVersion('stack-version', supported_versions.stack, 'stack')
+        ghc: mkVersion('ghc-version', exports.supported_versions.ghc, 'ghc'),
+        cabal: mkVersion('cabal-version', exports.supported_versions.cabal, 'cabal'),
+        stack: mkVersion('stack-version', exports.supported_versions.stack, 'stack')
     };
 }
 exports.getDefaults = getDefaults;
@@ -48,7 +49,7 @@ function resolve(version, supported, tool, os) {
     const resolved = version === 'latest'
         ? supported[0]
         : (_a = supported.find(v => v.startsWith(version))) !== null && _a !== void 0 ? _a : version;
-    return ((_e = (_d = (_c = (_b = release_revisions === null || release_revisions === void 0 ? void 0 : release_revisions[os]) === null || _b === void 0 ? void 0 : _b[tool]) === null || _c === void 0 ? void 0 : _c.find(({ from }) => from === resolved)) === null || _d === void 0 ? void 0 : _d.to) !== null && _e !== void 0 ? _e : resolved);
+    return ((_e = (_d = (_c = (_b = exports.release_revisions === null || exports.release_revisions === void 0 ? void 0 : exports.release_revisions[os]) === null || _b === void 0 ? void 0 : _b[tool]) === null || _c === void 0 ? void 0 : _c.find(({ from }) => from === resolved)) === null || _d === void 0 ? void 0 : _d.to) !== null && _e !== void 0 ? _e : resolved);
 }
 function getOpts({ ghc, cabal, stack }, os, inputs) {
     core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
