@@ -62,7 +62,7 @@ jobs:
       - uses: haskell/actions/setup@v1
         with:
           ghc-version: '8.8.3' # Exact version of ghc to use
-          # cabal-version: 'latest'. Omitted, but defalts to 'latest'
+          # cabal-version: 'latest'. Omitted, but defaults to 'latest'
           enable-stack: true
           stack-version: 'latest'
       - run: runhaskell Hello.hs
@@ -102,7 +102,7 @@ jobs:
 | ----------------- | :------: | ---------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------- |
 | `ghc-version`     |          | GHC version to use, ex. `latest`                                                                                                               | string    | latest  |
 | `cabal-version`   |          | Cabal version to use, ex. `3.2`                                                                                                                | string    | latest  |
-| `stack-version`   |          | Stack version to use, ex. `latest`. Stack will only be installed if enable-stack is set.                                                       | string    | latest  |
+| `stack-version`   |          | Stack version to use, ex. `latest`. Stack will only be installed if `enable-stack` is set.                                                       | string    | latest  |
 | `enable-stack`    |          | If specified, will setup Stack.                                                                                                                | "boolean" | false   |
 | `stack-no-global` |          | If specified, enable-stack must be set. Prevents installing GHC and Cabal globally                                                             | "boolean" | false   |
 | `stack-setup-ghc` |          | If specified, enable-stack must be set. Runs stack setup to install the specified GHC. (Note: setting this does _not_ imply `stack-no-global`) | "boolean" | false   |
@@ -186,7 +186,7 @@ The full list of available versions of GHC, Cabal, and Stack are as follows:
 - [Windows - GHC](https://chocolatey.org/packages/ghc#versionhistory)
 - [Linux/macOS/Windows - Stack](https://github.com/commercialhaskell/stack/tags)
 
-Note: There are _technically_ some descrepencies here. For example, "8.10.1-alpha1" will work for a ghc version for windows but not for Linux and macOS. For your sanity, I suggest sticking with the version lists above which are supported across all three operating systems.
+Note: There are _technically_ some discrepancies here. For example, "8.10.1-alpha1" will work for a ghc version for windows but not for Linux and macOS. For your sanity, I suggest sticking with the version lists above which are supported across all three operating systems.
 
 ## License
 
