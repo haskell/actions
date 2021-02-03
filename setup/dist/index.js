@@ -8802,6 +8802,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const fs = __importStar(__webpack_require__(747));
+const path = __importStar(__webpack_require__(622));
 const opts_1 = __webpack_require__(54);
 const installer_1 = __webpack_require__(923);
 const exec_1 = __webpack_require__(986);
@@ -8838,6 +8839,7 @@ async function run(inputs) {
                 if (!opts.stack.enable)
                     await exec_1.exec('cabal update');
             });
+        core.info(`##[add-matcher]${path.join(__dirname, '..', 'matcher.json')}`);
     }
     catch (error) {
         core.setFailed(error.message);

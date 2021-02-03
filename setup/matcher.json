@@ -1,0 +1,20 @@
+{
+  "problemMatcher": [
+    {
+      "owner": "haskell",
+      "pattern": [
+        {
+          "regexp": "^(.+\\.hs):(\\d+):(\\d+): (\\w+):",
+          "file": 1,
+          "line": 2,
+          "column": 3,
+          "severity": 4
+        },
+        {
+          "regexp": "^    (.*)$",
+          "message": 1
+        }
+      ]
+    }
+  ]
+}
