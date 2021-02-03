@@ -21,6 +21,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
 Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
 const fs = __importStar(require("fs"));
+const path = __importStar(require("path"));
 const opts_1 = require("./opts");
 const installer_1 = require("./installer");
 const exec_1 = require("@actions/exec");
@@ -57,6 +58,7 @@ async function run(inputs) {
                 if (!opts.stack.enable)
                     await exec_1.exec('cabal update');
             });
+        core.info(`##[add-matcher]${path.join(__dirname, '..', 'matcher.json')}`);
     }
     catch (error) {
         core.setFailed(error.message);

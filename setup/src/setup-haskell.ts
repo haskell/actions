@@ -1,5 +1,6 @@
 import * as core from '@actions/core';
 import * as fs from 'fs';
+import * as path from 'path';
 import {getOpts, getDefaults, Tool} from './opts';
 import {installTool} from './installer';
 import type {OS} from './opts';
@@ -48,6 +49,8 @@ export default async function run(
         await exec('cabal user-config update');
         if (!opts.stack.enable) await exec('cabal update');
       });
+
+    core.info(`##[add-matcher]${path.join(__dirname, '..', 'matcher.json')}`);
   } catch (error) {
     core.setFailed(error.message);
   }
