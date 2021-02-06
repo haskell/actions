@@ -1,6 +1,6 @@
 {
   "name": "setup-haskell",
-  "version": "1.1.6",
+  "version": "1.1.8",
   "private": true,
   "description": "setup haskell action",
   "main": "lib/setup-haskell",
