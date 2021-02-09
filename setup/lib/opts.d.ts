@@ -20,12 +20,23 @@ export interface Options {
     stack: ProgramOpt & {
         setup: boolean;
     };
+    general: {
+        matcher: {
+            enable: boolean;
+        };
+    };
 }
 declare type Version = {
     version: string;
     supported: string[];
 };
-export declare type Defaults = Record<Tool, Version>;
+export declare type Defaults = Record<Tool, Version> & {
+    general: {
+        matcher: {
+            enable: boolean;
+        };
+    };
+};
 export declare const yamlInputs: Record<string, {
     default: string;
 }>;

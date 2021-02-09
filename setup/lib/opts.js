@@ -40,7 +40,8 @@ function getDefaults(os) {
     return {
         ghc: mkVersion('ghc-version', exports.supported_versions.ghc, 'ghc'),
         cabal: mkVersion('cabal-version', exports.supported_versions.cabal, 'cabal'),
-        stack: mkVersion('stack-version', exports.supported_versions.stack, 'stack')
+        stack: mkVersion('stack-version', exports.supported_versions.stack, 'stack'),
+        general: { matcher: { enable: true } }
     };
 }
 exports.getDefaults = getDefaults;
@@ -56,6 +57,7 @@ function getOpts({ ghc, cabal, stack }, os, inputs) {
     const stackNoGlobal = (inputs['stack-no-global'] || '') !== '';
     const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
     const stackEnable = (inputs['enable-stack'] || '') !== '';
+    const matcherDisable = (inputs['disable-matcher'] || '') !== '';
     core.debug(`${stackNoGlobal}/${stackSetupGhc}/${stackEnable}`);
     const verInpt = {
         ghc: inputs['ghc-version'] || ghc.version,
@@ -88,7 +90,8 @@ function getOpts({ ghc, cabal, stack }, os, inputs) {
             resolved: resolve(verInpt.stack, stack.supported, 'stack', os),
             enable: stackEnable,
             setup: stackSetupGhc
-        }
+        },
+        general: { matcher: { enable: !matcherDisable } }
     };
     // eslint-disable-next-line github/array-foreach
     Object.values(opts)

@@ -25,10 +25,13 @@ export interface Options {
   ghc: ProgramOpt;
   cabal: ProgramOpt;
   stack: ProgramOpt & {setup: boolean};
+  general: {matcher: {enable: boolean}};
 }
 
 type Version = {version: string; supported: string[]};
-export type Defaults = Record<Tool, Version>;
+export type Defaults = Record<Tool, Version> & {
+  general: {matcher: {enable: boolean}};
+};
 
 export const yamlInputs: Record<string, {default: string}> = (safeLoad(
   readFileSync(join(__dirname, '..', 'action.yml'), 'utf8')
@@ -45,7 +48,8 @@ export function getDefaults(os: OS): Defaults {
   return {
     ghc: mkVersion('ghc-version', supported_versions.ghc, 'ghc'),
     cabal: mkVersion('cabal-version', supported_versions.cabal, 'cabal'),
-    stack: mkVersion('stack-version', supported_versions.stack, 'stack')
+    stack: mkVersion('stack-version', supported_versions.stack, 'stack'),
+    general: {matcher: {enable: true}}
   };
 }
 
@@ -74,6 +78,7 @@ export function getOpts(
   const stackNoGlobal = (inputs['stack-no-global'] || '') !== '';
   const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
   const stackEnable = (inputs['enable-stack'] || '') !== '';
+  const matcherDisable = (inputs['disable-matcher'] || '') !== '';
   core.debug(`${stackNoGlobal}/${stackSetupGhc}/${stackEnable}`);
   const verInpt = {
     ghc: inputs['ghc-version'] || ghc.version,
@@ -110,7 +115,8 @@ export function getOpts(
       resolved: resolve(verInpt.stack, stack.supported, 'stack', os),
       enable: stackEnable,
       setup: stackSetupGhc
-    }
+    },
+    general: {matcher: {enable: !matcherDisable}}
   };
 
   // eslint-disable-next-line github/array-foreach
