@@ -4359,7 +4359,7 @@ function escapeProperty(s) {
 /***/ 447:
 /***/ (function(module) {
 
-module.exports = {"ghc":["8.10.3","8.10.2","8.10.1","8.8.4","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.2.0.0","3.0.0.0","2.4.1.0","2.4.0.0","2.2.0.0"],"stack":["2.5.1","2.3.3","2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"]};
+module.exports = {"ghc":["9.0.1","8.10.3","8.10.2","8.10.1","8.8.4","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.2.0.0","3.0.0.0","2.4.1.0","2.4.0.0","2.2.0.0"],"stack":["2.5.1","2.3.3","2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"]};
 
 /***/ }),
 
@@ -10934,7 +10934,7 @@ module.exports = new Type('tag:yaml.org,2002:omap', {
 /***/ 859:
 /***/ (function(module) {
 
-module.exports = {"win32":{"ghc":[{"from":"8.10.2","to":"8.10.2.2"},{"from":"8.10.1","to":"8.10.1.1"},{"from":"8.8.4","to":"8.8.4.1"},{"from":"8.8.3","to":"8.8.3.1"},{"from":"8.8.2","to":"8.8.2.1"},{"from":"8.6.1","to":"8.6.1.1"},{"from":"8.0.2","to":"8.0.2.2"},{"from":"7.8.4","to":"7.8.4.1"},{"from":"7.8.3","to":"7.8.3.1"},{"from":"7.8.2","to":"7.8.2.1"},{"from":"7.8.1","to":"7.8.1.1"},{"from":"7.6.3","to":"7.6.3.1"},{"from":"7.6.2","to":"7.6.2.1"},{"from":"7.6.1","to":"7.6.1.1"}]}};
+module.exports = {"win32":{"ghc":[{"from":"9.0.1","to":"9.0.1-rc1"},{"from":"8.10.2","to":"8.10.2.2"},{"from":"8.10.1","to":"8.10.1.1"},{"from":"8.8.4","to":"8.8.4.1"},{"from":"8.8.3","to":"8.8.3.1"},{"from":"8.8.2","to":"8.8.2.1"},{"from":"8.6.1","to":"8.6.1.1"},{"from":"8.0.2","to":"8.0.2.2"},{"from":"7.8.4","to":"7.8.4.1"},{"from":"7.8.3","to":"7.8.3.1"},{"from":"7.8.2","to":"7.8.2.1"},{"from":"7.8.1","to":"7.8.1.1"},{"from":"7.6.3","to":"7.6.3.1"},{"from":"7.6.2","to":"7.6.2.1"},{"from":"7.6.1","to":"7.6.1.1"}]}};
 
 /***/ }),
 
@@ -11329,7 +11329,7 @@ async function choco(tool, version) {
     core.info(`Attempting to install ${tool} ${version} using chocolatey`);
     // Choco tries to invoke `add-path` command on earlier versions of ghc, which has been deprecated and fails the step, so disable command execution during this.
     console.log('::stop-commands::SetupHaskellStopCommands');
-    await exec('powershell', [
+    const args = [
         'choco',
         'install',
         tool,
@@ -11338,7 +11338,9 @@ async function choco(tool, version) {
         '-m',
         '--no-progress',
         '-r'
-    ]);
+    ];
+    if ((await exec('powershell', args)) !== 0)
+        await exec('powershell', [...args, '--pre']);
     console.log('::SetupHaskellStopCommands::'); // Re-enable command execution
     // Add GHC to path automatically because it does not add until the end of the step and we check the path.
     const chocoPath = await getChocoPath(tool, version);

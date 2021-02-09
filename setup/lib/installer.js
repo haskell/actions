@@ -170,7 +170,7 @@ async function choco(tool, version) {
     core.info(`Attempting to install ${tool} ${version} using chocolatey`);
     // Choco tries to invoke `add-path` command on earlier versions of ghc, which has been deprecated and fails the step, so disable command execution during this.
     console.log('::stop-commands::SetupHaskellStopCommands');
-    await exec('powershell', [
+    const args = [
         'choco',
         'install',
         tool,
@@ -179,7 +179,9 @@ async function choco(tool, version) {
         '-m',
         '--no-progress',
         '-r'
-    ]);
+    ];
+    if ((await exec('powershell', args)) !== 0)
+        await exec('powershell', [...args, '--pre']);
     console.log('::SetupHaskellStopCommands::'); // Re-enable command execution
     // Add GHC to path automatically because it does not add until the end of the step and we check the path.
     const chocoPath = await getChocoPath(tool, version);
