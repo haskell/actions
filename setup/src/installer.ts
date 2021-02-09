@@ -24,12 +24,11 @@ async function configureOutputs(
   core.setOutput(`${tool}-path`, path);
   core.setOutput(`${tool}-exe`, await which(tool));
   if (tool == 'stack') {
-    if (os === 'win32') {
-      core.exportVariable('STACK_ROOT', 'C:\\sr');
-      core.setOutput('stack-root', 'C:\\sr');
-    } else {
-      core.setOutput('stack-root', `${process.env.HOME}/.stack`);
-    }
+    const sr =
+      process.env['STACK_ROOT'] ??
+      (os === 'win32' ? 'C:\\sr' : `${process.env.HOME}/.stack`);
+    core.setOutput('stack-root', sr);
+    if (os === 'win32') core.exportVariable('STACK_ROOT', sr);
   }
 }
 
