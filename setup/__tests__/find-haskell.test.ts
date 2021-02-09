@@ -40,6 +40,22 @@ describe('haskell/actions/setup', () => {
       forAllTools(t => expect(def(os)[t].supported).toBe(supported_versions[t]))
     ));
 
+  it('Setting disable-matcher to true disables matcher', () => {
+    forAllOS(os => {
+      const options = getOpts(def(os), os, {
+        'disable-matcher': 'true'
+      });
+      expect(options.general.matcher.enable).toBe(false);
+    });
+  });
+
+  it('getOpts grabs default general settings correctly from environment', () => {
+    forAllOS(os => {
+      const options = getOpts(def(os), os, {});
+      expect(options.general.matcher.enable).toBe(true);
+    });
+  });
+
   it('getOpts grabs defaults correctly from environment', () => {
     forAllOS(os => {
       const options = getOpts(def(os), os, {});
