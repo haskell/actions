@@ -101,7 +101,7 @@ jobs:
 | Name              | Required | Description                                                                                                                              | Type      | Default     |
 | ----------------- | :------: | ---------------------------------------------------------------------------------------------------------------------------------------- | --------- | ----------- |
 | `ghc-version`     |          | GHC version to use, ex. `latest`                                                                                                         | string    | latest      |
-| `cabal-version`   |          | Cabal version to use, ex. `3.2`                                                                                                          | string    | latest      |
+| `cabal-version`   |          | Cabal version to use, ex. `3.4`                                                                                                          | string    | latest      |
 | `stack-version`   |          | Stack version to use, ex. `latest`. Stack will only be installed if `enable-stack` is set.                                               | string    | latest      |
 | `enable-stack`    |          | If set, will setup Stack.                                                                                                                | "boolean" | false/unset |
 | `stack-no-global` |          | If set, enable-stack must be set. Prevents installing GHC and Cabal globally                                                             | "boolean" | false/unset |
@@ -153,6 +153,7 @@ Suggestion: Try to support the three latest major versions of GHC.
 **Cabal:**
 
 - `latest` (default, recommended)
+- `3.4.0.0` `3.4`
 - `3.2.0.0` `3.2`
 - `3.0.0.0` `3.0`
 - `2.4.1.0` `2.4`
