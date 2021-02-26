@@ -37,16 +37,9 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         ghc: ["latest", "8.4.4"]
-        cabal: ["latest", "3.2.0.0", "3.4.0.0-rc4"]
+        cabal: ["latest", "3.2.0.0", "3.4.0.0"]
         expect-fail: [false]
-        exclude:
-          - os: windows-latest
-            cabal: "3.4.0.0-rc4"
         include:
-          - os: windows-latest
-            cabal: "3.4.0.0-rc5"
-            ghc: "8.10.2"
-            expect-fail: false
           - os: ubuntu-latest
             ghc: "7.10.3"
             cabal: "3.0.0.0"
