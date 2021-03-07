@@ -11235,7 +11235,7 @@ async function isInstalled(tool, version, os) {
     const ghcupPath = `${process_1.default.env.HOME}/.ghcup${tool === 'ghc' ? `/ghc/${version}` : ''}/bin`;
     const v = tool === 'cabal' ? version.slice(0, 3) : version;
     const aptPath = `/opt/${tool}/${v}/bin`;
-    const chocoPath = await getChocoPath(tool, version);
+    const chocoPath = await getChocoPath(tool, version, os);
     const locations = {
         stack: [],
         cabal: {
@@ -11344,7 +11344,7 @@ async function choco(tool, version) {
         await exec('powershell', [...args, '--pre']);
     console.log('::SetupHaskellStopCommands::'); // Re-enable command execution
     // Add GHC to path automatically because it does not add until the end of the step and we check the path.
-    const chocoPath = await getChocoPath(tool, version);
+    const chocoPath = await getChocoPath(tool, version, 'win32');
     if (tool == 'ghc')
         core.addPath(chocoPath);
 }
@@ -11364,14 +11364,33 @@ async function ghcup(tool, version, os) {
     if (returnCode === 0)
         await exec(bin, ['set', tool, version]);
 }
-async function getChocoPath(tool, version) {
-    const chocoToolPath = path_1.join(`${process_1.default.env.ChocolateyInstall}`, 'lib', `${tool}.${version}`);
-    const pattern = `${chocoToolPath}/**/${tool}.exe`;
+async function getChocoPath(tool, version, os) {
+    if (os !== 'win32')
+        return '<invalid-os>';
+    const chocoToolPaths = [
+        path_1.join(`${process_1.default.env.ChocolateyInstall}`, 'lib', `${tool}.${version}`),
+        path_1.join(`${await getChocoToolsLocation()}`, `${tool}-${version}`)
+    ];
+    const pattern = chocoToolPaths
+        .map(chocoToolPath => `${chocoToolPath}/**/${tool}.exe`)
+        .join('\n');
     const globber = await glob.create(pattern);
     for await (const file of globber.globGenerator()) {
         return path_1.dirname(file);
     }
     return '<not-found>';
+}
+async function getChocoToolsLocation() {
+    let out = Buffer.from('');
+    const append = (b) => (out = Buffer.concat([out, b]));
+    await exec_1.exec('powershell', [
+        'Import-Module $env:ChocolateyInstall\\helpers\\chocolateyInstaller.psm1;',
+        'Get-ToolsLocation'
+    ], {
+        silent: true,
+        listeners: { stdout: append, stderr: append }
+    });
+    return out.toString().trim();
 }
 
 
