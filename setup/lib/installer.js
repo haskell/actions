@@ -204,8 +204,13 @@ async function ghcup(tool, version, os) {
         await exec(bin, ['set', tool, version]);
 }
 async function getChocoPath(tool, version) {
-    // GHC 9.x choco packages are installed on different path (C:\\tools\ghc-9.0.1)
-    let chocoToolPath = path_1.join(`${process_1.default.env.SystemDrive}`, 'tools', `${tool}-${version}`);
+    var _a;
+    // Environment variable 'ChocolateyToolsLocation' will be added to Hosted images soon
+    // fallback to C:\\tools for now until variable is available
+    const chocoToolsLocation = (_a = process_1.default.env.ChocolateyToolsLocation) !== null && _a !== void 0 ? _a : path_1.join(`${process_1.default.env.SystemDrive}`, 'tools');
+    // choco packages GHC 9.x are installed on different path (C:\\tools\ghc-9.0.1)
+    let chocoToolPath = path_1.join(chocoToolsLocation, `${tool}-${version}`);
+    // choco packages GHC < 9.x
     if (!fs.existsSync(chocoToolPath)) {
         chocoToolPath = path_1.join(`${process_1.default.env.ChocolateyInstall}`, 'lib', `${tool}.${version}`);
     }

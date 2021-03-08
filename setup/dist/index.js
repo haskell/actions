@@ -10937,7 +10937,7 @@ module.exports = new Type('tag:yaml.org,2002:omap', {
 /***/ 859:
 /***/ (function(module) {
 
-module.exports = {"win32":{"ghc":[{"from":"9.0.1","to":"9.0.1"},{"from":"8.10.2","to":"8.10.2.2"},{"from":"8.10.1","to":"8.10.1.1"},{"from":"8.8.4","to":"8.8.4.1"},{"from":"8.8.3","to":"8.8.3.1"},{"from":"8.8.2","to":"8.8.2.1"},{"from":"8.6.1","to":"8.6.1.1"},{"from":"8.0.2","to":"8.0.2.2"},{"from":"7.8.4","to":"7.8.4.1"},{"from":"7.8.3","to":"7.8.3.1"},{"from":"7.8.2","to":"7.8.2.1"},{"from":"7.8.1","to":"7.8.1.1"},{"from":"7.6.3","to":"7.6.3.1"},{"from":"7.6.2","to":"7.6.2.1"},{"from":"7.6.1","to":"7.6.1.1"}]}};
+module.exports = {"win32":{"ghc":[{"from":"8.10.2","to":"8.10.2.2"},{"from":"8.10.1","to":"8.10.1.1"},{"from":"8.8.4","to":"8.8.4.1"},{"from":"8.8.3","to":"8.8.3.1"},{"from":"8.8.2","to":"8.8.2.1"},{"from":"8.6.1","to":"8.6.1.1"},{"from":"8.0.2","to":"8.0.2.2"},{"from":"7.8.4","to":"7.8.4.1"},{"from":"7.8.3","to":"7.8.3.1"},{"from":"7.8.2","to":"7.8.2.1"},{"from":"7.8.1","to":"7.8.1.1"},{"from":"7.6.3","to":"7.6.3.1"},{"from":"7.6.2","to":"7.6.2.1"},{"from":"7.6.1","to":"7.6.1.1"}]}};
 
 /***/ }),
 
@@ -11366,8 +11366,13 @@ async function ghcup(tool, version, os) {
         await exec(bin, ['set', tool, version]);
 }
 async function getChocoPath(tool, version) {
-    // GHC 9.x choco packages are installed on different path (C:\\tools\ghc-9.0.1)
-    let chocoToolPath = path_1.join(`${process_1.default.env.SystemDrive}`, 'tools', `${tool}-${version}`);
+    var _a;
+    // Environment variable 'ChocolateyToolsLocation' will be added to Hosted images soon
+    // fallback to C:\\tools for now until variable is available
+    const chocoToolsLocation = (_a = process_1.default.env.ChocolateyToolsLocation) !== null && _a !== void 0 ? _a : path_1.join(`${process_1.default.env.SystemDrive}`, 'tools');
+    // choco packages GHC 9.x are installed on different path (C:\\tools\ghc-9.0.1)
+    let chocoToolPath = path_1.join(chocoToolsLocation, `${tool}-${version}`);
+    // choco packages GHC < 9.x
     if (!fs.existsSync(chocoToolPath)) {
         chocoToolPath = path_1.join(`${process_1.default.env.ChocolateyInstall}`, 'lib', `${tool}.${version}`);
     }
