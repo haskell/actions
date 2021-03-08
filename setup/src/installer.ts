@@ -235,14 +235,21 @@ async function getChocoPath(tool: Tool, version: string): Promise<string> {
     `${tool}.${version}`
   );
 
+  console.log(chocoToolPath);
+
   if (!fs.existsSync(chocoToolPath)) {
+    console.log('not found');
     // GHC 9.x choco packages are installed on different path (C:\\tools\ghc-9.0.1)
     chocoToolPath = join(
       `${process.env.SystemDrive}`,
       'tools',
       `${tool}-${version}`
     );
+  } else {
+    console.log('found');
   }
+
+  console.log(chocoToolPath);
 
   const pattern = `${chocoToolPath}/**/${tool}.exe`;
   const globber = await glob.create(pattern);
