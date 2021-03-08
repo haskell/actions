@@ -11193,6 +11193,7 @@ const fs_1 = __webpack_require__(747);
 const path_1 = __webpack_require__(622);
 const process_1 = __importDefault(__webpack_require__(765));
 const glob = __importStar(__webpack_require__(281));
+const fs = __importStar(__webpack_require__(747));
 // Don't throw on non-zero.
 const exec = async (cmd, args) => exec_1.exec(cmd, args, { ignoreReturnCode: true });
 function failed(tool, version) {
@@ -11365,7 +11366,11 @@ async function ghcup(tool, version, os) {
         await exec(bin, ['set', tool, version]);
 }
 async function getChocoPath(tool, version) {
-    const chocoToolPath = path_1.join(`${process_1.default.env.ChocolateyInstall}`, 'lib', `${tool}.${version}`);
+    let chocoToolPath = path_1.join(`${process_1.default.env.ChocolateyInstall}`, 'lib', `${tool}.${version}`);
+    if (!fs.existsSync(chocoToolPath)) {
+        // GHC 9.x choco packages are installed on different path (C:\\tools\ghc-9.0.1)
+        chocoToolPath = path_1.join(`${process_1.default.env.SystemDrive}`, 'tools', `${tool}-${version}`);
+    }
     const pattern = `${chocoToolPath}/**/${tool}.exe`;
     const globber = await glob.create(pattern);
     for await (const file of globber.globGenerator()) {

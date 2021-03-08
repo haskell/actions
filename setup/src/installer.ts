@@ -7,6 +7,7 @@ import {join, dirname} from 'path';
 import type {OS, Tool} from './opts';
 import process from 'process';
 import * as glob from '@actions/glob';
+import * as fs from 'fs';
 
 // Don't throw on non-zero.
 const exec = async (cmd: string, args?: string[]): Promise<number> =>
@@ -228,11 +229,20 @@ async function ghcup(tool: Tool, version: string, os: OS): Promise<void> {
 }
 
 async function getChocoPath(tool: Tool, version: string): Promise<string> {
-  const chocoToolPath = join(
+  let chocoToolPath = join(
     `${process.env.ChocolateyInstall}`,
     'lib',
     `${tool}.${version}`
   );
+
+  if (!fs.existsSync(chocoToolPath)) {
+    // GHC 9.x choco packages are installed on different path (C:\\tools\ghc-9.0.1)
+    chocoToolPath = join(
+      `${process.env.SystemDrive}`,
+      'tools',
+      `${tool}-${version}`
+    );
+  }
 
   const pattern = `${chocoToolPath}/**/${tool}.exe`;
   const globber = await glob.create(pattern);
