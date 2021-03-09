@@ -46,7 +46,7 @@ jobs:
             expect-fail: false
           - os: ubuntu-latest
             ghc: "8.2.2"
-            cabal: "2.0"
+            cabal: "2.4.0.1"
             expect-fail: false
           - os: ubuntu-latest
             ghc: "8.12.0" # A version that will never exist.
@@ -72,9 +72,10 @@ jobs:
         run: cabal run
         continue-on-error: ${{ matrix.expect-fail }}
       - name: Check installed versions
+        shell: bash
         run: |
-          cabal --version
-          ghc --version
+          [[ "$(cabal --numeric-version)" == "${{ matrix.cabal }}" ]]
+          [[ "$(ghc --numeric-version)" == "${{ matrix.ghc }}" ]]
         continue-on-error: ${{ matrix.expect-fail }}
       - name: Confirm GHC version
         shell: bash
