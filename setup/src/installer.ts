@@ -54,7 +54,7 @@ function warn(tool: Tool, version: string): void {
     stack: `the latest release of ${tool} is commonly supported.`
   }[tool];
 
-  core.warning(
+  core.debug(
     `${tool} ${version} was not found in the cache. It will be downloaded.\n` +
       `If this is unexpected, please check if version ${version} is pre-installed.\n` +
       `The list of pre-installed versions is available here: https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners\n` +
