@@ -33,7 +33,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     continue-on-error: ${{ matrix.expect-fail }}
     strategy:
-      fail-fast: true
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         ghc: ["latest", "8.4.4"]
@@ -46,7 +46,7 @@ jobs:
             expect-fail: false
           - os: ubuntu-latest
             ghc: "8.2.2"
-            cabal: "2.0"
+            cabal: "2.4.0.1"
             expect-fail: false
           - os: ubuntu-latest
             ghc: "8.12.0" # A version that will never exist.
@@ -54,7 +54,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: ./setup
-        continue-on-error: ${{ matrix.expect-fail }}
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
@@ -62,27 +61,25 @@ jobs:
         run: |
           runhaskell --version
           runhaskell __tests__/hello.hs
-        continue-on-error: ${{ matrix.expect-fail }}
       - name: Build test project
         working-directory: setup/__tests__/project
         run: cabal build
-        continue-on-error: ${{ matrix.expect-fail }}
       - name: Run test project
         working-directory: setup/__tests__/project
         run: cabal run
-        continue-on-error: ${{ matrix.expect-fail }}
-      - name: Check installed versions
+      - name: Show installed versions
         run: |
           cabal --version
           ghc --version
-        continue-on-error: ${{ matrix.expect-fail }}
-      - name: Confirm GHC version
+      - name: Confirm installed and expected versions match
         shell: bash
-        continue-on-error: ${{ matrix.expect-fail }}
-        if: matrix.ghc != 'latest'
         # this check depends on the ghc versions being "exact" in the matrix
+        if: "matrix.ghc != 'latest' && matrix.ghc != '8.12.0'"
+        # pure bash startsWith
         run: |
-          [[ $(ghc --numeric-version) == "${{ matrix.ghc }}" ]]
+          [[ "${{ matrix.cabal }}" =~ ^([0-9]+\.[0-9]+)\. ]] && ver="${BASH_REMATCH[1]}"
+          [[ "$(cabal --numeric-version)" =~ ^"$ver" ]]
+          [[ "$(ghc --numeric-version)" == "${{ matrix.ghc }}" ]]
 
   install-stack:
     name: Stack ${{ matrix.stack }} ${{ matrix.os }}

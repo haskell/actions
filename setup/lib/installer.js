@@ -60,7 +60,7 @@ function warn(tool, version) {
         ghc: `the three latest major releases of ${tool} are commonly supported.`,
         stack: `the latest release of ${tool} is commonly supported.`
     }[tool];
-    core.warning(`${tool} ${version} was not found in the cache. It will be downloaded.\n` +
+    core.debug(`${tool} ${version} was not found in the cache. It will be downloaded.\n` +
         `If this is unexpected, please check if version ${version} is pre-installed.\n` +
         `The list of pre-installed versions is available here: https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners\n` +
         `The above list follows a common haskell convention that ${policy}\n` +
