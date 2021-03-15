@@ -36,17 +36,16 @@ export default async function run(
 
     if (opts.cabal.enable)
       await core.group('Setting up cabal', async () => {
-        await exec('cabal', ['user-config', 'update'], {silent: true});
-        const configFile = await cabalConfig();
-
         if (process.platform === 'win32') {
+          await exec('cabal', ['user-config', 'update'], {silent: true});
+          const configFile = await cabalConfig();
           fs.appendFileSync(configFile, 'store-dir: C:\\sr\n');
           core.setOutput('cabal-store', 'C:\\sr');
+          await exec('cabal user-config update');
         } else {
           core.setOutput('cabal-store', `${process.env.HOME}/.cabal/store`);
         }
 
-        await exec('cabal user-config update');
         if (!opts.stack.enable) await exec('cabal update');
       });
 
