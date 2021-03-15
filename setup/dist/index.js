@@ -11229,12 +11229,17 @@ function warn(tool, version) {
         'If the list is outdated, please file an issue here: https://github.com/actions/virtual-environments\n' +
         'by using the appropriate tool request template: https://github.com/actions/virtual-environments/issues/new/choose');
 }
+function aptVersion(tool, version) {
+    // For Cabal, extract the first two segments of the version number. This
+    // regex is intentionally liberal to accomodate unusual cases like "head".
+    return tool === 'cabal' ? /[^.]*\.?[^.]*/.exec(version)[0] : version;
+}
 async function isInstalled(tool, version, os) {
     const toolPath = tc.find(tool, version);
     if (toolPath)
         return success(tool, version, toolPath, os);
     const ghcupPath = `${process_1.default.env.HOME}/.ghcup${tool === 'ghc' ? `/ghc/${version}` : ''}/bin`;
-    const v = tool === 'cabal' ? version.slice(0, 3) : version;
+    const v = aptVersion(tool, version);
     const aptPath = `/opt/${tool}/${v}/bin`;
     const chocoPath = await getChocoPath(tool, version);
     const locations = {
@@ -11322,7 +11327,7 @@ async function stack(version, os) {
 }
 async function apt(tool, version) {
     const toolName = tool === 'ghc' ? 'ghc' : 'cabal-install';
-    const v = tool === 'cabal' ? version.slice(0, 3) : version;
+    const v = aptVersion(tool, version);
     core.info(`Attempting to install ${toolName} ${v} using apt-get`);
     // Ignore the return code so we can fall back to ghcup
     await exec(`sudo -- sh -c "apt-get -y install ${toolName}-${v}"`);

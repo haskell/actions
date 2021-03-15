@@ -64,6 +64,12 @@ function warn(tool: Tool, version: string): void {
   );
 }
 
+function aptVersion(tool: string, version: string): string {
+  // For Cabal, extract the first two segments of the version number. This
+  // regex is intentionally liberal to accomodate unusual cases like "head".
+  return tool === 'cabal' ? /[^.]*\.?[^.]*/.exec(version)![0] : version;
+}
+
 async function isInstalled(
   tool: Tool,
   version: string,
@@ -75,7 +81,7 @@ async function isInstalled(
   const ghcupPath = `${process.env.HOME}/.ghcup${
     tool === 'ghc' ? `/ghc/${version}` : ''
   }/bin`;
-  const v = tool === 'cabal' ? version.slice(0, 3) : version;
+  const v = aptVersion(tool, version);
   const aptPath = `/opt/${tool}/${v}/bin`;
 
   const chocoPath = await getChocoPath(tool, version);
@@ -177,7 +183,7 @@ async function stack(version: string, os: OS): Promise<void> {
 
 async function apt(tool: Tool, version: string): Promise<void> {
   const toolName = tool === 'ghc' ? 'ghc' : 'cabal-install';
-  const v = tool === 'cabal' ? version.slice(0, 3) : version;
+  const v = aptVersion(tool, version);
   core.info(`Attempting to install ${toolName} ${v} using apt-get`);
   // Ignore the return code so we can fall back to ghcup
   await exec(`sudo -- sh -c "apt-get -y install ${toolName}-${v}"`);
