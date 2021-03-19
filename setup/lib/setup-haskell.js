@@ -45,16 +45,16 @@ async function run(inputs) {
             await core.group('Pre-installing GHC with stack', async () => exec_1.exec('stack', ['setup', opts.ghc.resolved]));
         if (opts.cabal.enable)
             await core.group('Setting up cabal', async () => {
-                await exec_1.exec('cabal', ['user-config', 'update'], { silent: true });
-                const configFile = await cabalConfig();
                 if (process.platform === 'win32') {
+                    await exec_1.exec('cabal', ['user-config', 'update'], { silent: true });
+                    const configFile = await cabalConfig();
                     fs.appendFileSync(configFile, 'store-dir: C:\\sr\n');
                     core.setOutput('cabal-store', 'C:\\sr');
+                    await exec_1.exec('cabal user-config update');
                 }
                 else {
                     core.setOutput('cabal-store', `${process.env.HOME}/.cabal/store`);
                 }
-                await exec_1.exec('cabal user-config update');
                 if (!opts.stack.enable)
                     await exec_1.exec('cabal update');
             });
