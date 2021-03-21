@@ -154,11 +154,8 @@ export async function installTool(
         await ghcupGHCHead();
         break;
       }
-      if (tool !== 'cabal') {
-        // always use ghcup for cabal
-        await apt(tool, version);
-        if (await isInstalled(tool, version, os)) return;
-      }
+      await apt(tool, version);
+      if (await isInstalled(tool, version, os)) return;
       await ghcup(tool, version, os);
       break;
     case 'win32':
