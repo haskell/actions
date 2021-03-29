@@ -127,6 +127,7 @@ That is, setting any "boolean" to a value other than the empty string (`""`) wil
 
 **GHC:**
 
+- `head`<sup>[[1]](#ghc-head-note-1)</sup>
 - `latest` (default, recommended)
 - `9.0.1` `9.0`
 - `8.10.3` `8.10`
@@ -149,6 +150,8 @@ That is, setting any "boolean" to a value other than the empty string (`""`) wil
 - `7.10.3` `7.10`
 
 Suggestion: Try to support the three latest major versions of GHC.
+
+<a name="ghc-head-note-1">[1]</a>: Only supported on linux, using GHC HEAD requires libgmb-dev and libtinfo-dev to be installed.
 
 **Cabal:**
 
