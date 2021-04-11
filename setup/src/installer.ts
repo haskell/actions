@@ -214,7 +214,7 @@ async function choco(tool: Tool, version: string): Promise<void> {
 }
 
 async function ghcupBin(os: OS): Promise<string> {
-  const v = '0.1.12';
+  const v = '0.1.14';
   const cachedBin = tc.find('ghcup', v);
   if (cachedBin) return join(cachedBin, 'ghcup');
 
