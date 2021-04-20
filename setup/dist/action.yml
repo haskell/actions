@@ -4,7 +4,7 @@ author: 'GitHub'
 inputs:
   ghc-version:
     required: false
-    description: 'Version of GHC to use. If set to "latest", it will always get the latest stable version.'
+    description: 'Version of GHC to use. If set to "latest", it will always get the latest stable version. If set to "head", it will always get the latest build of GHC.'
     default: 'latest'
   cabal-version:
     required: false

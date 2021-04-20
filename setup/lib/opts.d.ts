@@ -1,7 +1,4 @@
-export declare const release_revisions: Record<OS, Record<Tool, {
-    from: string;
-    to: string;
-}[]>>;
+export declare const release_revisions: Revisions;
 export declare const supported_versions: Record<Tool, string[]>;
 export declare type Revisions = Record<OS, Record<Tool, Array<{
     from: string;

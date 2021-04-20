@@ -130,6 +130,12 @@ async function installTool(tool, version, os) {
     }
     switch (os) {
         case 'linux':
+            if (tool === 'ghc' && version === 'head') {
+                if (!await aptBuildEssential())
+                    break;
+                await ghcupGHCHead();
+                break;
+            }
             await apt(tool, version);
             if (await isInstalled(tool, version, os))
                 return;
@@ -162,6 +168,11 @@ async function stack(version, os) {
     })
         .then(async (g) => g.glob());
     await tc.cacheDir(stackPath, 'stack', version);
+}
+async function aptBuildEssential() {
+    core.info(`Installing build-essential using apt-get (for ghc-head)`);
+    const returnCode = await exec(`sudo -- sh -c "apt-get update && apt-get -y install build-essential"`);
+    return (returnCode === 0);
 }
 async function apt(tool, version) {
     const toolName = tool === 'ghc' ? 'ghc' : 'cabal-install';
@@ -207,6 +218,17 @@ async function ghcup(tool, version, os) {
     const returnCode = await exec(bin, ['install', tool, version]);
     if (returnCode === 0)
         await exec(bin, ['set', tool, version]);
+}
+async function ghcupGHCHead() {
+    core.info(`Attempting to install ghc head using ghcup`);
+    const bin = await ghcupBin('linux');
+    const returnCode = await exec(bin, [
+        'install', 'ghc', '-u',
+        'https://gitlab.haskell.org/ghc/ghc/-/jobs/artifacts/master/raw/ghc-x86_64-deb9-linux-integer-simple.tar.xz?job=validate-x86_64-linux-deb9-integer-simple',
+        'head'
+    ]);
+    if (returnCode === 0)
+        await exec(bin, ['set', 'ghc', 'head']);
 }
 async function getChocoPath(tool, version) {
     var _a;
