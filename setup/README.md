@@ -113,15 +113,16 @@ That is, setting any "boolean" to a value other than the empty string (`""`) wil
 
 ## Outputs
 
-| Name          | Description                                  | Type   |
-| ------------- | -------------------------------------------- | ------ |
-| `ghc-path`    | The path of the ghc executable _directory_   | string |
-| `cabal-path`  | The path of the cabal executable _directory_ | string |
-| `stack-path`  | The path of the stack executable _directory_ | string |
-| `cabal-store` | The path to the cabal store                  | string |
-| `ghc-exe`     | The path of the ghc _executable_             | string |
-| `cabal-exe`   | The path of the cabal _executable_           | string |
-| `stack-exe`   | The path of the stack _executable_           | string |
+| Name          | Description                                                                                                                | Type   |
+| ------------- | -------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `ghc-path`    | The path of the ghc executable _directory_                                                                                 | string |
+| `cabal-path`  | The path of the cabal executable _directory_                                                                               | string |
+| `stack-path`  | The path of the stack executable _directory_                                                                               | string |
+| `cabal-store` | The path to the cabal store                                                                                                | string |
+| `stack-root`  | The path to the stack root (equal to the `STACK_ROOT` environment variable if it is set; otherwise an OS-specific default) | string |
+| `ghc-exe`     | The path of the ghc _executable_                                                                                           | string |
+| `cabal-exe`   | The path of the cabal _executable_                                                                                         | string |
+| `stack-exe`   | The path of the stack _executable_                                                                                         | string |
 
 ## Version Support
 
