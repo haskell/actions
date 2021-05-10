@@ -24,6 +24,12 @@ export default async function run(
     const os = process.platform as OS;
     const opts = getOpts(getDefaults(os), os, inputs);
 
+    if (os === 'linux') {
+      await exec(
+        'sudo -- sh -c "add-apt-repository -y ppa:hvr/ghc && apt-get update"'
+      );
+    }
+
     for (const [t, {resolved}] of Object.entries(opts).filter(o => o[1].enable))
       await core.group(`Installing ${t} version ${resolved}`, async () =>
         installTool(t as Tool, resolved, os)
