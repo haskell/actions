@@ -148,8 +148,7 @@ export async function installTool(
   switch (os) {
     case 'linux':
       if (tool === 'ghc' && version === 'head') {
-        if (!await aptBuildEssential())
-          break;
+        if (!(await aptBuildEssential())) break;
 
         await ghcupGHCHead();
         break;
@@ -188,11 +187,13 @@ async function stack(version: string, os: OS): Promise<void> {
   await tc.cacheDir(stackPath, 'stack', version);
 }
 
-async function aptBuildEssential(): Promise<Boolean> {
+async function aptBuildEssential(): Promise<boolean> {
   core.info(`Installing build-essential using apt-get (for ghc-head)`);
 
-  const returnCode = await exec(`sudo -- sh -c "apt-get update && apt-get -y install build-essential"`);
-  return (returnCode === 0);
+  const returnCode = await exec(
+    `sudo -- sh -c "apt-get update && apt-get -y install build-essential"`
+  );
+  return returnCode === 0;
 }
 
 async function apt(tool: Tool, version: string): Promise<void> {
@@ -200,7 +201,9 @@ async function apt(tool: Tool, version: string): Promise<void> {
   const v = aptVersion(tool, version);
   core.info(`Attempting to install ${toolName} ${v} using apt-get`);
   // Ignore the return code so we can fall back to ghcup
-  await exec(`sudo -- sh -c "apt-get -y install ${toolName}-${v}"`);
+  await exec(
+    `sudo -- sh -c "add-apt-repository -y ppa:hvr/ghc && apt-get update && apt-get -y install ${toolName}-${v}"`
+  );
 }
 
 async function choco(tool: Tool, version: string): Promise<void> {
@@ -252,9 +255,12 @@ async function ghcupGHCHead(): Promise<void> {
   core.info(`Attempting to install ghc head using ghcup`);
   const bin = await ghcupBin('linux');
   const returnCode = await exec(bin, [
-    'install', 'ghc', '-u',
+    'install',
+    'ghc',
+    '-u',
     'https://gitlab.haskell.org/ghc/ghc/-/jobs/artifacts/master/raw/ghc-x86_64-deb9-linux-integer-simple.tar.xz?job=validate-x86_64-linux-deb9-integer-simple',
-    'head']);
+    'head'
+  ]);
   if (returnCode === 0) await exec(bin, ['set', 'ghc', 'head']);
 }
 
