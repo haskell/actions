@@ -131,7 +131,7 @@ async function installTool(tool, version, os) {
     switch (os) {
         case 'linux':
             if (tool === 'ghc' && version === 'head') {
-                if (!await aptBuildEssential())
+                if (!(await aptBuildEssential()))
                     break;
                 await ghcupGHCHead();
                 break;
@@ -172,14 +172,14 @@ async function stack(version, os) {
 async function aptBuildEssential() {
     core.info(`Installing build-essential using apt-get (for ghc-head)`);
     const returnCode = await exec(`sudo -- sh -c "apt-get update && apt-get -y install build-essential"`);
-    return (returnCode === 0);
+    return returnCode === 0;
 }
 async function apt(tool, version) {
     const toolName = tool === 'ghc' ? 'ghc' : 'cabal-install';
     const v = aptVersion(tool, version);
     core.info(`Attempting to install ${toolName} ${v} using apt-get`);
     // Ignore the return code so we can fall back to ghcup
-    await exec(`sudo -- sh -c "apt-get -y install ${toolName}-${v}"`);
+    await exec(`sudo -- sh -c "add-apt-repository -y ppa:hvr/ghc && apt-get update && apt-get -y install ${toolName}-${v}"`);
 }
 async function choco(tool, version) {
     core.info(`Attempting to install ${tool} ${version} using chocolatey`);
@@ -204,7 +204,7 @@ async function choco(tool, version) {
         core.addPath(chocoPath);
 }
 async function ghcupBin(os) {
-    const v = '0.1.12';
+    const v = '0.1.14';
     const cachedBin = tc.find('ghcup', v);
     if (cachedBin)
         return path_1.join(cachedBin, 'ghcup');
@@ -223,7 +223,9 @@ async function ghcupGHCHead() {
     core.info(`Attempting to install ghc head using ghcup`);
     const bin = await ghcupBin('linux');
     const returnCode = await exec(bin, [
-        'install', 'ghc', '-u',
+        'install',
+        'ghc',
+        '-u',
         'https://gitlab.haskell.org/ghc/ghc/-/jobs/artifacts/master/raw/ghc-x86_64-deb9-linux-integer-simple.tar.xz?job=validate-x86_64-linux-deb9-integer-simple',
         'head'
     ]);
