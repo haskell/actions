@@ -19,7 +19,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOpts = exports.getDefaults = exports.yamlInputs = exports.supported_versions = exports.release_revisions = void 0;
+exports.getOpts = exports.getDefaults = exports.yamlInputs = exports.ghcup_version = exports.supported_versions = exports.release_revisions = void 0;
 const core = __importStar(require("@actions/core"));
 const fs_1 = require("fs");
 const js_yaml_1 = require("js-yaml");
@@ -28,6 +28,7 @@ const sv = __importStar(require("./versions.json"));
 const rv = __importStar(require("./release-revisions.json"));
 exports.release_revisions = rv;
 exports.supported_versions = sv;
+exports.ghcup_version = sv.ghcup[0]; // Known to be an array of length 1
 exports.yamlInputs = js_yaml_1.safeLoad(fs_1.readFileSync(path_1.join(__dirname, '..', 'action.yml'), 'utf8')
 // The action.yml file structure is statically known.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
