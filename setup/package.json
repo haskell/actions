@@ -7,7 +7,8 @@
   "types": "lib/setup-haskell",
   "scripts": {
     "bundle": "ncc build src/main.ts  && tsc -p tsconfig-lib.json",
-    "test": "jest"
+    "test": "jest",
+    "prepare": "cd .. && husky install setup/.husky"
   },
   "repository": {
     "type": "git",
@@ -20,7 +21,7 @@
     "cabal",
     "setup"
   ],
-  "author": "GitHub",
+  "author": "jared-w",
   "license": "MIT",
   "directories": {
     "lib": "lib",
@@ -54,11 +55,5 @@
     "prettier": "^2.3.2",
     "ts-jest": "^27.0.4",
     "typescript": "^4.3.5"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged",
-      "pre-push": "npm test"
-    }
   }
 }
