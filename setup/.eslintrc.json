@@ -31,7 +31,7 @@
     "@typescript-eslint/no-for-in-array": "error",
     "@typescript-eslint/no-misused-new": "warn",
     "@typescript-eslint/no-namespace": "warn",
-    "@typescript-eslint/no-non-null-assertion": "warn",
+    "@typescript-eslint/no-non-null-assertion": "off",
     "@typescript-eslint/no-unnecessary-qualifier": "warn",
     "@typescript-eslint/no-unnecessary-type-assertion": "warn",
     "@typescript-eslint/no-useless-constructor": "warn",
