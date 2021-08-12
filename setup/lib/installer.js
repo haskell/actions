@@ -29,6 +29,7 @@ const io_1 = require("@actions/io");
 const tc = __importStar(require("@actions/tool-cache"));
 const fs_1 = require("fs");
 const path_1 = require("path");
+const opts_1 = require("./opts");
 const process_1 = __importDefault(require("process"));
 const glob = __importStar(require("@actions/glob"));
 const fs = __importStar(require("fs"));
@@ -204,13 +205,12 @@ async function choco(tool, version) {
         core.addPath(chocoPath);
 }
 async function ghcupBin(os) {
-    const v = '0.1.16.2';
-    const cachedBin = tc.find('ghcup', v);
+    const cachedBin = tc.find('ghcup', opts_1.ghcup_version);
     if (cachedBin)
         return path_1.join(cachedBin, 'ghcup');
-    const bin = await tc.downloadTool(`https://downloads.haskell.org/ghcup/${v}/x86_64-${os === 'darwin' ? 'apple-darwin' : 'linux'}-ghcup-${v}`);
+    const bin = await tc.downloadTool(`https://downloads.haskell.org/ghcup/${opts_1.ghcup_version}/x86_64-${os === 'darwin' ? 'apple-darwin' : 'linux'}-ghcup-${opts_1.ghcup_version}`);
     await fs_1.promises.chmod(bin, 0o755);
-    return path_1.join(await tc.cacheFile(bin, 'ghcup', 'ghcup', v), 'ghcup');
+    return path_1.join(await tc.cacheFile(bin, 'ghcup', 'ghcup', opts_1.ghcup_version), 'ghcup');
 }
 async function ghcup(tool, version, os) {
     core.info(`Attempting to install ${tool} ${version} using ghcup`);

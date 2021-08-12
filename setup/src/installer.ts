@@ -4,7 +4,7 @@ import {which} from '@actions/io';
 import * as tc from '@actions/tool-cache';
 import {promises as afs} from 'fs';
 import {join, dirname} from 'path';
-import type {OS, Tool} from './opts';
+import {ghcup_version, OS, Tool} from './opts';
 import process from 'process';
 import * as glob from '@actions/glob';
 import * as fs from 'fs';
@@ -231,17 +231,19 @@ async function choco(tool: Tool, version: string): Promise<void> {
 }
 
 async function ghcupBin(os: OS): Promise<string> {
-  const v = '0.1.16.2';
-  const cachedBin = tc.find('ghcup', v);
+  const cachedBin = tc.find('ghcup', ghcup_version);
   if (cachedBin) return join(cachedBin, 'ghcup');
 
   const bin = await tc.downloadTool(
-    `https://downloads.haskell.org/ghcup/${v}/x86_64-${
+    `https://downloads.haskell.org/ghcup/${ghcup_version}/x86_64-${
       os === 'darwin' ? 'apple-darwin' : 'linux'
-    }-ghcup-${v}`
+    }-ghcup-${ghcup_version}`
   );
   await afs.chmod(bin, 0o755);
-  return join(await tc.cacheFile(bin, 'ghcup', 'ghcup', v), 'ghcup');
+  return join(
+    await tc.cacheFile(bin, 'ghcup', 'ghcup', ghcup_version),
+    'ghcup'
+  );
 }
 
 async function ghcup(tool: Tool, version: string, os: OS): Promise<void> {

@@ -7,6 +7,7 @@ import * as rv from './release-revisions.json';
 
 export const release_revisions = rv as Revisions;
 export const supported_versions = sv as Record<Tool, string[]>;
+export const ghcup_version = sv.ghcup[0]; // Known to be an array of length 1
 
 export type Revisions = Record<
   OS,

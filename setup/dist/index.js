@@ -868,7 +868,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOpts = exports.getDefaults = exports.yamlInputs = exports.supported_versions = exports.release_revisions = void 0;
+exports.getOpts = exports.getDefaults = exports.yamlInputs = exports.ghcup_version = exports.supported_versions = exports.release_revisions = void 0;
 const core = __importStar(__webpack_require__(470));
 const fs_1 = __webpack_require__(747);
 const js_yaml_1 = __webpack_require__(414);
@@ -877,6 +877,7 @@ const sv = __importStar(__webpack_require__(447));
 const rv = __importStar(__webpack_require__(859));
 exports.release_revisions = rv;
 exports.supported_versions = sv;
+exports.ghcup_version = sv.ghcup[0]; // Known to be an array of length 1
 exports.yamlInputs = js_yaml_1.safeLoad(fs_1.readFileSync(__webpack_require__.ab + "action.yml", 'utf8')
 // The action.yml file structure is statically known.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -4362,7 +4363,7 @@ function escapeProperty(s) {
 /***/ 447:
 /***/ (function(module) {
 
-module.exports = {"ghc":["9.0.1","8.10.5","8.10.4","8.10.3","8.10.2","8.10.1","8.8.4","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.4.0.0","3.2.0.0","3.0.0.0","2.4.1.0","2.4.0.0","2.2.0.0"],"stack":["2.7.3","2.7.1","2.5.1","2.3.3","2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"]};
+module.exports = {"ghc":["9.0.1","8.10.5","8.10.4","8.10.3","8.10.2","8.10.1","8.8.4","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.4.0.0","3.2.0.0","3.0.0.0","2.4.1.0"],"stack":["2.7.3","2.7.1","2.5.1","2.3.3","2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"],"ghcup":["0.1.16.2"]};
 
 /***/ }),
 
@@ -11191,6 +11192,7 @@ const io_1 = __webpack_require__(1);
 const tc = __importStar(__webpack_require__(533));
 const fs_1 = __webpack_require__(747);
 const path_1 = __webpack_require__(622);
+const opts_1 = __webpack_require__(54);
 const process_1 = __importDefault(__webpack_require__(765));
 const glob = __importStar(__webpack_require__(281));
 const fs = __importStar(__webpack_require__(747));
@@ -11366,13 +11368,12 @@ async function choco(tool, version) {
         core.addPath(chocoPath);
 }
 async function ghcupBin(os) {
-    const v = '0.1.16.2';
-    const cachedBin = tc.find('ghcup', v);
+    const cachedBin = tc.find('ghcup', opts_1.ghcup_version);
     if (cachedBin)
         return path_1.join(cachedBin, 'ghcup');
-    const bin = await tc.downloadTool(`https://downloads.haskell.org/ghcup/${v}/x86_64-${os === 'darwin' ? 'apple-darwin' : 'linux'}-ghcup-${v}`);
+    const bin = await tc.downloadTool(`https://downloads.haskell.org/ghcup/${opts_1.ghcup_version}/x86_64-${os === 'darwin' ? 'apple-darwin' : 'linux'}-ghcup-${opts_1.ghcup_version}`);
     await fs_1.promises.chmod(bin, 0o755);
-    return path_1.join(await tc.cacheFile(bin, 'ghcup', 'ghcup', v), 'ghcup');
+    return path_1.join(await tc.cacheFile(bin, 'ghcup', 'ghcup', opts_1.ghcup_version), 'ghcup');
 }
 async function ghcup(tool, version, os) {
     core.info(`Attempting to install ${tool} ${version} using ghcup`);
