@@ -1,6 +1,6 @@
 import * as core from '@actions/core';
 import {readFileSync} from 'fs';
-import {safeLoad} from 'js-yaml';
+import {load} from 'js-yaml';
 import {join} from 'path';
 import * as sv from './versions.json';
 import * as rv from './release-revisions.json';
@@ -34,11 +34,13 @@ export type Defaults = Record<Tool, Version> & {
   general: {matcher: {enable: boolean}};
 };
 
-export const yamlInputs: Record<string, {default: string}> = (safeLoad(
-  readFileSync(join(__dirname, '..', 'action.yml'), 'utf8')
-  // The action.yml file structure is statically known.
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-) as any).inputs;
+export const yamlInputs: Record<string, {default: string}> = (
+  load(
+    readFileSync(join(__dirname, '..', 'action.yml'), 'utf8')
+    // The action.yml file structure is statically known.
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ) as any
+).inputs;
 
 export function getDefaults(os: OS): Defaults {
   const mkVersion = (v: string, vs: string[], t: Tool): Version => ({
