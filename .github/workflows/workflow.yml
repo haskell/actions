@@ -85,7 +85,7 @@ jobs:
         with:
           ghc-version: 8.21.5
       - name: Ensure failed
-        if: failed()
+        if: failure()
         run: |
           echo "ghc 8.21.5 failed to install, which is expected"
 
