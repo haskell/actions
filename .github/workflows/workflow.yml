@@ -82,12 +82,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: ./setup
+        id: setup
+        env:
+          RUNNER_DEBUG: "1"
         with:
           ghc-version: 8.21.5
-      - name: Ensure failed
-        if: failure()
+      - name: Error on success
+        if: steps.setup.outputs.failed == 'true'
         run: |
-          echo "ghc 8.21.5 failed to install, which is expected"
+          echo "Error: ghc 8.21.5 didn't fail to install"
 
   install-stack:
     name: Stack ${{ matrix.stack }} ${{ matrix.os }}

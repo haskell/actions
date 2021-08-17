@@ -51,6 +51,12 @@ export default async function run(
 
     core.info(`##[add-matcher]${path.join(__dirname, '..', 'matcher.json')}`);
   } catch (error) {
-    core.setFailed(error.message);
+    if (core.isDebug()) {
+      // we don't fail here so that the error path can be tested in CI
+      core.setOutput('failed', true);
+      core.debug(error.message);
+    } else {
+      core.setFailed(error.message);
+    }
   }
 }
