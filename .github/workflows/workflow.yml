@@ -31,26 +31,18 @@ jobs:
   install-haskell:
     name: GHC ${{ matrix.ghc }}, Cabal ${{ matrix.cabal }} - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
-    continue-on-error: ${{ matrix.expect-fail }}
     strategy:
-      fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         ghc: ["latest", "8.4.4"]
         cabal: ["latest", "3.2.0.0", "3.4.0.0"]
-        expect-fail: [false]
         include:
           - os: ubuntu-latest
             ghc: "7.10.3"
             cabal: "3.0.0.0"
-            expect-fail: false
           - os: ubuntu-latest
             ghc: "8.2.2"
             cabal: "2.4.0.1"
-            expect-fail: false
-          - os: ubuntu-latest
-            ghc: "8.21.5" # A version that will never exist.
-            expect-fail: true
     steps:
       - uses: actions/checkout@v2
       - uses: ./setup
@@ -74,12 +66,31 @@ jobs:
       - name: Confirm installed and expected versions match
         shell: bash
         # this check depends on the ghc versions being "exact" in the matrix
-        if: "matrix.ghc != 'latest' && matrix.ghc != '8.21.5'"
+        if: "matrix.ghc != 'latest'"
         # pure bash startsWith
         run: |
           [[ "${{ matrix.cabal }}" =~ ^([0-9]+\.[0-9]+)\. ]] && ver="${BASH_REMATCH[1]}"
           [[ "$(cabal --numeric-version)" =~ ^"$ver" ]]
           [[ "$(ghc --numeric-version)" == "${{ matrix.ghc }}" ]]
+
+  test-fallback:
+    name: Test GHC Installation Fallbacks - ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v2
+      - uses: ./setup
+        id: setup
+        env:
+          RUNNER_DEBUG: "1"
+        with:
+          ghc-version: 8.21.5
+      - name: Error on success
+        if: steps.setup.outputs.failed == 'true'
+        run: |
+          echo "Error: ghc 8.21.5 didn't fail to install"
 
   install-stack:
     name: Stack ${{ matrix.stack }} ${{ matrix.os }}
