@@ -38,9 +38,6 @@ jobs:
         cabal: ["latest", "3.2.0.0", "3.4.0.0"]
         include:
           - os: ubuntu-latest
-            ghc: "7.10.3"
-            cabal: "3.0.0.0"
-          - os: ubuntu-latest
             ghc: "8.2.2"
             cabal: "2.4.0.1"
     steps:
@@ -53,13 +50,8 @@ jobs:
         run: |
           runghc --version
           runghc __tests__/hello.hs
-      - name: Build test project (no PIE)
+      - name: Build test project
         working-directory: setup/__tests__/project
-        if: "matrix.ghc == '7.10.3'"
-        run: cabal build --ghc-option=-optc-no-pie --ghc-option=-optl-no-pie
-      - name: Build test project (with PIE)
-        working-directory: setup/__tests__/project
-        if: "matrix.ghc != '7.10.3'"
         run: cabal build
       - name: Run test project
         working-directory: setup/__tests__/project
