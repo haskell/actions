@@ -137,10 +137,10 @@ async function installTool(tool, version, os) {
                 await ghcupGHCHead();
                 break;
             }
-            await apt(tool, version);
+            await ghcup(tool, version, os);
             if (await isInstalled(tool, version, os))
                 return;
-            await ghcup(tool, version, os);
+            await apt(tool, version);
             break;
         case 'win32':
             await choco(tool, version);
