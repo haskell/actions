@@ -55,7 +55,12 @@ jobs:
           runghc __tests__/hello.hs
       - name: Build test project
         working-directory: setup/__tests__/project
-        run: cabal build
+        run: |
+          if [[ "${{ matrix.ghc }}" == "7.10.3" ]]; then
+            cabal build --ghc-option=-optc-no-pie --ghc-option=-optl-no-pie
+          else
+            cabal build
+          fi
       - name: Run test project
         working-directory: setup/__tests__/project
         run: cabal run
