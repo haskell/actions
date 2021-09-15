@@ -53,14 +53,14 @@ jobs:
         run: |
           runghc --version
           runghc __tests__/hello.hs
-      - name: Build test project
+      - name: Build test project (no PIE)
         working-directory: setup/__tests__/project
-        run: |
-          if [[ "${{ matrix.ghc }}" == "7.10.3" ]]; then
-            cabal build --ghc-option=-optc-no-pie --ghc-option=-optl-no-pie
-          else
-            cabal build
-          fi
+        if: "matrix.ghc == '7.10.3'"
+        run: cabal build --ghc-option=-optc-no-pie --ghc-option=-optl-no-pie
+      - name: Build test project (with PIE)
+        working-directory: setup/__tests__/project
+        if: "matrix.ghc != '7.10.3'"
+        run: cabal build
       - name: Run test project
         working-directory: setup/__tests__/project
         run: cabal run
