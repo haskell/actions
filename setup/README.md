@@ -131,12 +131,15 @@ That is, setting any "boolean" to a value other than the empty string (`""`) wil
 - `head`<sup>[[1]](#ghc-head-note-1)</sup>
 - `latest` (default, recommended)
 - `9.0.1` `9.0`
-- `8.10.5` `8.10`
+- `8.10.7` `8.10`
+- `8.10.6`
+- `8.10.5`
 - `8.10.4`
 - `8.10.3`
 - `8.10.2`
 - `8.10.1`
-- `8.8.3` `8.8`
+- `8.8.4` `8.8`
+- `8.8.3`
 - `8.8.2`
 - `8.8.1`
 - `8.6.5` `8.6`
@@ -169,6 +172,8 @@ Recommendation: Use the latest available version if possible.
 **Stack:**
 
 - `latest` (recommended) -- follows the latest release automatically.
+- `2.7.3` `2.7`
+- `2.7.1`
 - `2.5.1` `2.5`
 - `2.3.3` `2.3`
 - `2.3.1`
