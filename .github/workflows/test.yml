@@ -12,6 +12,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: yarn
+    - run: yarn compile
+    - run: yarn package
     - run: yarn test
 
   test:
