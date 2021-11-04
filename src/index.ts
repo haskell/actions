@@ -10,7 +10,7 @@ export default async function main() {
     const result = await core.group('hlint', () => run(inputs));
     setOutputs(result);
   } catch (error) {
-    core.setFailed(error);
+    core.setFailed(error instanceof Error ? error : String(error));
   }
 }
 

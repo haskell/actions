@@ -41,7 +41,7 @@ function runHLint(cmd, args) {
     return __awaiter(this, void 0, void 0, function* () {
         // In order to make regexable output without e.g. tripping over quotes, we need to transform the lines.
         core.info(`Running ${cmd} ${args.join(' ')}`);
-        const { stdout: hlintOutputStr, statusCode } = yield bufferedExec_1.default(cmd, args);
+        const { stdout: hlintOutputStr, statusCode } = yield (0, bufferedExec_1.default)(cmd, args);
         core.info(`hlint completed with status code ${statusCode}`);
         const ideas = JSON.parse(hlintOutputStr);
         ideas.map(hlint_1.serializeProblem).forEach(line => console.log(line));
@@ -75,7 +75,7 @@ function run({ baseDir, hlintCmd, pathList, failOn }) {
     return __awaiter(this, void 0, void 0, function* () {
         const hlintArgs = ['-j', '--json', '--', ...pathList];
         const matcherDefPath = path.join(baseDir, hlint_1.MATCHER_DEF_PATH);
-        const { ideas, statusCode } = yield withMatcherAtPath_1.default(matcherDefPath, () => runHLint(hlintCmd, hlintArgs));
+        const { ideas, statusCode } = yield (0, withMatcherAtPath_1.default)(matcherDefPath, () => runHLint(hlintCmd, hlintArgs));
         const { ok, hintSummary } = getOverallCheckResult(failOn, { ideas, statusCode });
         return { ok, statusCode, ideas, hintSummary };
     });

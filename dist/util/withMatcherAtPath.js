@@ -33,7 +33,7 @@ const core = __importStar(require("@actions/core"));
 const fs = __importStar(require("fs"));
 const util_1 = require("util");
 const command_1 = require("@actions/core/lib/command");
-const readFile = util_1.promisify(fs.readFile);
+const readFile = (0, util_1.promisify)(fs.readFile);
 function addMatcherAtPath(matcherPath) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug(`Adding problem matcher at ${matcherPath}`);
@@ -55,7 +55,7 @@ function addMatcherAtPath(matcherPath) {
         // to do this. That looks like the best choice for now.
         const fileContents = yield readFile(matcherPath, 'utf8');
         const problemMatcherDocument = JSON.parse(fileContents);
-        command_1.issueCommand('add-matcher', {}, matcherPath);
+        (0, command_1.issueCommand)('add-matcher', {}, matcherPath);
         return problemMatcherDocument;
     });
 }
@@ -63,7 +63,7 @@ exports.addMatcherAtPath = addMatcherAtPath;
 function removeMatcher(problemMatcherDocument) {
     return __awaiter(this, void 0, void 0, function* () {
         problemMatcherDocument.problemMatcher.forEach(({ owner }) => {
-            command_1.issueCommand('remove-matcher', { owner }, '');
+            (0, command_1.issueCommand)('remove-matcher', { owner }, '');
         });
     });
 }
@@ -76,7 +76,7 @@ function withMatcherAtPath(matcherPath, fn) {
                 return yield addMatcherAtPath(matcherPath);
             }
             catch (e) {
-                core.error(`Error adding problem matcher at path ${matcherPath}: ${e.message}`);
+                core.error(`Error adding problem matcher at path ${matcherPath}: ${e}`);
                 return null;
             }
         }))());
