@@ -1228,12 +1228,12 @@ const outputs_1 = __importDefault(__webpack_require__(616));
 function main() {
     return __awaiter(this, void 0, void 0, function* () {
         try {
-            const inputs = inputs_1.default();
-            const result = yield core.group('hlint', () => run_1.default(inputs));
-            outputs_1.default(result);
+            const inputs = (0, inputs_1.default)();
+            const result = yield core.group('hlint', () => (0, run_1.default)(inputs));
+            (0, outputs_1.default)(result);
         }
         catch (error) {
-            core.setFailed(error);
+            core.setFailed(error instanceof Error ? error : String(error));
         }
     });
 }
@@ -1623,7 +1623,7 @@ function runHLint(cmd, args) {
     return __awaiter(this, void 0, void 0, function* () {
         // In order to make regexable output without e.g. tripping over quotes, we need to transform the lines.
         core.info(`Running ${cmd} ${args.join(' ')}`);
-        const { stdout: hlintOutputStr, statusCode } = yield bufferedExec_1.default(cmd, args);
+        const { stdout: hlintOutputStr, statusCode } = yield (0, bufferedExec_1.default)(cmd, args);
         core.info(`hlint completed with status code ${statusCode}`);
         const ideas = JSON.parse(hlintOutputStr);
         ideas.map(hlint_1.serializeProblem).forEach(line => console.log(line));
@@ -1657,7 +1657,7 @@ function run({ baseDir, hlintCmd, pathList, failOn }) {
     return __awaiter(this, void 0, void 0, function* () {
         const hlintArgs = ['-j', '--json', '--', ...pathList];
         const matcherDefPath = path.join(baseDir, hlint_1.MATCHER_DEF_PATH);
-        const { ideas, statusCode } = yield withMatcherAtPath_1.default(matcherDefPath, () => runHLint(hlintCmd, hlintArgs));
+        const { ideas, statusCode } = yield (0, withMatcherAtPath_1.default)(matcherDefPath, () => runHLint(hlintCmd, hlintArgs));
         const { ok, hintSummary } = getOverallCheckResult(failOn, { ideas, statusCode });
         return { ok, statusCode, ideas, hintSummary };
     });
@@ -1774,7 +1774,7 @@ const core = __importStar(__webpack_require__(470));
 const fs = __importStar(__webpack_require__(747));
 const util_1 = __webpack_require__(669);
 const command_1 = __webpack_require__(431);
-const readFile = util_1.promisify(fs.readFile);
+const readFile = (0, util_1.promisify)(fs.readFile);
 function addMatcherAtPath(matcherPath) {
     return __awaiter(this, void 0, void 0, function* () {
         core.debug(`Adding problem matcher at ${matcherPath}`);
@@ -1796,7 +1796,7 @@ function addMatcherAtPath(matcherPath) {
         // to do this. That looks like the best choice for now.
         const fileContents = yield readFile(matcherPath, 'utf8');
         const problemMatcherDocument = JSON.parse(fileContents);
-        command_1.issueCommand('add-matcher', {}, matcherPath);
+        (0, command_1.issueCommand)('add-matcher', {}, matcherPath);
         return problemMatcherDocument;
     });
 }
@@ -1804,7 +1804,7 @@ exports.addMatcherAtPath = addMatcherAtPath;
 function removeMatcher(problemMatcherDocument) {
     return __awaiter(this, void 0, void 0, function* () {
         problemMatcherDocument.problemMatcher.forEach(({ owner }) => {
-            command_1.issueCommand('remove-matcher', { owner }, '');
+            (0, command_1.issueCommand)('remove-matcher', { owner }, '');
         });
     });
 }
@@ -1817,7 +1817,7 @@ function withMatcherAtPath(matcherPath, fn) {
                 return yield addMatcherAtPath(matcherPath);
             }
             catch (e) {
-                core.error(`Error adding problem matcher at path ${matcherPath}: ${e.message}`);
+                core.error(`Error adding problem matcher at path ${matcherPath}: ${e}`);
                 return null;
             }
         }))());

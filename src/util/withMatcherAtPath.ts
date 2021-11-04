@@ -42,7 +42,7 @@ export default async function withMatcherAtPath<T>(matcherPath: string, fn: () =
       // NOTE: Explicitly awaiting to make sure `catch` includes failed promise.
       return await addMatcherAtPath(matcherPath);
     } catch (e) {
-      core.error(`Error adding problem matcher at path ${matcherPath}: ${e.message}`);
+      core.error(`Error adding problem matcher at path ${matcherPath}: ${e}`);
       return null;
     }
   })());
