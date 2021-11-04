@@ -28,7 +28,7 @@
   "homepage": "https://github.com/rwe/actions-hlint#readme",
   "dependencies": {
     "@actions/core": "^1.6.0",
-    "@actions/tool-cache": "^1.6.0"
+    "@actions/tool-cache": "^1.7.1"
   },
   "devDependencies": {
     "@types/node": "^16.11.6",
