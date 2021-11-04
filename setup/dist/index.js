@@ -9645,6 +9645,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const fs = __importStar(__webpack_require__(747));
 const path = __importStar(__webpack_require__(622));
+const os_1 = __webpack_require__(87);
 const opts_1 = __webpack_require__(54);
 const installer_1 = __webpack_require__(923);
 const exec_1 = __webpack_require__(986);
@@ -9668,15 +9669,28 @@ async function run(inputs) {
             await core.group('Pre-installing GHC with stack', async () => exec_1.exec('stack', ['setup', opts.ghc.resolved]));
         if (opts.cabal.enable)
             await core.group('Setting up cabal', async () => {
+                // Create config only if it doesn't exist.
+                await exec_1.exec('cabal', ['user-config', 'init'], {
+                    silent: true,
+                    ignoreReturnCode: true
+                });
+                // Blindly appending is fine.
+                // Cabal merges these and picks the last defined option.
+                const configFile = await cabalConfig();
                 if (process.platform === 'win32') {
-                    await exec_1.exec('cabal', ['user-config', 'update'], { silent: true });
-                    const configFile = await cabalConfig();
-                    fs.appendFileSync(configFile, 'store-dir: C:\\sr\n');
+                    fs.appendFileSync(configFile, `store-dir: C:\\sr${os_1.EOL}`);
                     core.setOutput('cabal-store', 'C:\\sr');
-                    await exec_1.exec('cabal user-config update');
                 }
                 else {
                     core.setOutput('cabal-store', `${process.env.HOME}/.cabal/store`);
+                }
+                // Workaround the GHC nopie linking errors for ancient GHC verions
+                // NB: Is this _just_ for GHC 7.10.3?
+                if (opts.ghc.resolved === '7.10.3') {
+                    fs.appendFileSync(configFile, ['program-default-options', '  ghc-options: -optl-no-pie'].join(os_1.EOL) + os_1.EOL);
+                    // We cannot use cabal user-config to normalize the config because of:
+                    // https://github.com/haskell/cabal/issues/6823
+                    // await exec('cabal user-config update');
                 }
                 if (!opts.stack.enable)
                     await exec_1.exec('cabal update');
