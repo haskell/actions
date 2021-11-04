@@ -126,7 +126,7 @@ async function run() {
     core.setOutput(OUTPUT_KEY_HLINT_PATH, path.join(hlintDir, config.tool.exeName));
     core.setOutput(OUTPUT_KEY_HLINT_VERSION, config.tool.version);
   } catch (error) {
-    core.setFailed(error.message);
+    core.setFailed(error instanceof Error ? error : String(error));
   }
 }
 
