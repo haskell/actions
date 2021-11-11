@@ -40,6 +40,9 @@ jobs:
           - os: ubuntu-latest
             ghc: "8.2.2"
             cabal: "2.4.0.1"
+          - os: ubuntu-18.04
+            ghc: "7.4.1"
+            cabal: "3.4"
     steps:
       - uses: actions/checkout@v2
       - uses: ./setup
