@@ -6020,7 +6020,7 @@ function escapeProperty(s) {
 /***/ 447:
 /***/ (function(module) {
 
-module.exports = {"ghc":["9.0.1","8.10.7","8.10.6","8.10.5","8.10.4","8.10.3","8.10.2","8.10.1","8.8.4","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.4.0.0","3.2.0.0","3.0.0.0","2.4.1.0"],"stack":["2.7.3","2.7.1","2.5.1","2.3.3","2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"],"ghcup":["0.1.16.2"]};
+module.exports = {"ghc":["9.2.1","9.0.1","8.10.7","8.10.6","8.10.5","8.10.4","8.10.3","8.10.2","8.10.1","8.8.4","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.6.2.0","3.6.0.0","3.4.1.0","3.4.0.0","3.2.0.0","3.0.0.0","2.4.1.0"],"stack":["2.7.3","2.7.1","2.5.1","2.3.3","2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"],"ghcup":["0.1.17.3"]};
 
 /***/ }),
 
@@ -9645,6 +9645,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(__webpack_require__(470));
 const fs = __importStar(__webpack_require__(747));
 const path = __importStar(__webpack_require__(622));
+const os_1 = __webpack_require__(87);
 const opts_1 = __webpack_require__(54);
 const installer_1 = __webpack_require__(923);
 const exec_1 = __webpack_require__(986);
@@ -9662,21 +9663,36 @@ async function run(inputs) {
         core.info('Preparing to setup a Haskell environment');
         const os = process.platform;
         const opts = opts_1.getOpts(opts_1.getDefaults(os), os, inputs);
-        for (const [t, { resolved }] of Object.entries(opts).filter(o => o[1].enable))
+        for (const [t, { resolved }] of Object.entries(opts).filter(o => o[1].enable)) {
+            await core.group(`Preparing ${t} environment`, async () => installer_1.resetTool(t, resolved, os));
             await core.group(`Installing ${t} version ${resolved}`, async () => installer_1.installTool(t, resolved, os));
+        }
         if (opts.stack.setup)
             await core.group('Pre-installing GHC with stack', async () => exec_1.exec('stack', ['setup', opts.ghc.resolved]));
         if (opts.cabal.enable)
             await core.group('Setting up cabal', async () => {
+                // Create config only if it doesn't exist.
+                await exec_1.exec('cabal', ['user-config', 'init'], {
+                    silent: true,
+                    ignoreReturnCode: true
+                });
+                // Blindly appending is fine.
+                // Cabal merges these and picks the last defined option.
+                const configFile = await cabalConfig();
                 if (process.platform === 'win32') {
-                    await exec_1.exec('cabal', ['user-config', 'update'], { silent: true });
-                    const configFile = await cabalConfig();
-                    fs.appendFileSync(configFile, 'store-dir: C:\\sr\n');
+                    fs.appendFileSync(configFile, `store-dir: C:\\sr${os_1.EOL}`);
                     core.setOutput('cabal-store', 'C:\\sr');
-                    await exec_1.exec('cabal user-config update');
                 }
                 else {
                     core.setOutput('cabal-store', `${process.env.HOME}/.cabal/store`);
+                }
+                // Workaround the GHC nopie linking errors for ancient GHC verions
+                // NB: Is this _just_ for GHC 7.10.3?
+                if (opts.ghc.resolved === '7.10.3') {
+                    fs.appendFileSync(configFile, ['program-default-options', '  ghc-options: -optl-no-pie'].join(os_1.EOL) + os_1.EOL);
+                    // We cannot use cabal user-config to normalize the config because of:
+                    // https://github.com/haskell/cabal/issues/6823
+                    // await exec('cabal user-config update');
                 }
                 if (!opts.stack.enable)
                     await exec_1.exec('cabal update');
@@ -11703,7 +11719,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.installTool = void 0;
+exports.resetTool = exports.installTool = void 0;
 const core = __importStar(__webpack_require__(470));
 const exec_1 = __webpack_require__(986);
 const io_1 = __webpack_require__(1);
@@ -11835,6 +11851,29 @@ async function installTool(tool, version, os) {
     return failed(tool, version);
 }
 exports.installTool = installTool;
+async function resetTool(tool, _version, os) {
+    if (tool === 'stack') {
+        // We don't need to do anything here... yet
+        // (Once we switch to utilizing ghcup for stack when possible, we can
+        // remove this early return)
+        return;
+    }
+    let bin = '';
+    switch (os) {
+        case 'linux':
+            bin = await ghcupBin(os);
+            await exec(bin, ['unset', tool]);
+            return;
+        case 'darwin':
+            bin = await ghcupBin(os);
+            await exec(bin, ['unset', tool]);
+            return;
+        case 'win32':
+            // We don't need to do anything here... yet
+            return;
+    }
+}
+exports.resetTool = resetTool;
 async function stack(version, os) {
     core.info(`Attempting to install stack ${version}`);
     const build = {

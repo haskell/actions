@@ -169,6 +169,34 @@ export async function installTool(
   return failed(tool, version);
 }
 
+export async function resetTool(
+  tool: Tool,
+  _version: string,
+  os: OS
+): Promise<void> {
+  if (tool === 'stack') {
+    // We don't need to do anything here... yet
+    // (Once we switch to utilizing ghcup for stack when possible, we can
+    // remove this early return)
+    return;
+  }
+
+  let bin = '';
+  switch (os) {
+    case 'linux':
+      bin = await ghcupBin(os);
+      await exec(bin, ['unset', tool]);
+      return;
+    case 'darwin':
+      bin = await ghcupBin(os);
+      await exec(bin, ['unset', tool]);
+      return;
+    case 'win32':
+      // We don't need to do anything here... yet
+      return;
+  }
+}
+
 async function stack(version: string, os: OS): Promise<void> {
   core.info(`Attempting to install stack ${version}`);
   const build = {

@@ -22,6 +22,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const core = __importStar(require("@actions/core"));
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
+const os_1 = require("os");
 const opts_1 = require("./opts");
 const installer_1 = require("./installer");
 const exec_1 = require("@actions/exec");
@@ -39,21 +40,36 @@ async function run(inputs) {
         core.info('Preparing to setup a Haskell environment');
         const os = process.platform;
         const opts = opts_1.getOpts(opts_1.getDefaults(os), os, inputs);
-        for (const [t, { resolved }] of Object.entries(opts).filter(o => o[1].enable))
+        for (const [t, { resolved }] of Object.entries(opts).filter(o => o[1].enable)) {
+            await core.group(`Preparing ${t} environment`, async () => installer_1.resetTool(t, resolved, os));
             await core.group(`Installing ${t} version ${resolved}`, async () => installer_1.installTool(t, resolved, os));
+        }
         if (opts.stack.setup)
             await core.group('Pre-installing GHC with stack', async () => exec_1.exec('stack', ['setup', opts.ghc.resolved]));
         if (opts.cabal.enable)
             await core.group('Setting up cabal', async () => {
+                // Create config only if it doesn't exist.
+                await exec_1.exec('cabal', ['user-config', 'init'], {
+                    silent: true,
+                    ignoreReturnCode: true
+                });
+                // Blindly appending is fine.
+                // Cabal merges these and picks the last defined option.
+                const configFile = await cabalConfig();
                 if (process.platform === 'win32') {
-                    await exec_1.exec('cabal', ['user-config', 'update'], { silent: true });
-                    const configFile = await cabalConfig();
-                    fs.appendFileSync(configFile, 'store-dir: C:\\sr\n');
+                    fs.appendFileSync(configFile, `store-dir: C:\\sr${os_1.EOL}`);
                     core.setOutput('cabal-store', 'C:\\sr');
-                    await exec_1.exec('cabal user-config update');
                 }
                 else {
                     core.setOutput('cabal-store', `${process.env.HOME}/.cabal/store`);
+                }
+                // Workaround the GHC nopie linking errors for ancient GHC verions
+                // NB: Is this _just_ for GHC 7.10.3?
+                if (opts.ghc.resolved === '7.10.3') {
+                    fs.appendFileSync(configFile, ['program-default-options', '  ghc-options: -optl-no-pie'].join(os_1.EOL) + os_1.EOL);
+                    // We cannot use cabal user-config to normalize the config because of:
+                    // https://github.com/haskell/cabal/issues/6823
+                    // await exec('cabal user-config update');
                 }
                 if (!opts.stack.enable)
                     await exec_1.exec('cabal update');

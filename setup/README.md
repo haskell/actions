@@ -130,6 +130,7 @@ That is, setting any "boolean" to a value other than the empty string (`""`) wil
 
 - `head`<sup>[[1]](#ghc-head-note-1)</sup>
 - `latest` (default, recommended)
+- `9.2.1` `9.2`
 - `9.0.1` `9.0`
 - `8.10.7` `8.10`
 - `8.10.6`
@@ -162,7 +163,10 @@ Suggestion: Try to support the three latest major versions of GHC.
 **Cabal:**
 
 - `latest` (default, recommended)
-- `3.4.0.0` `3.4`
+- `3.6.2.0` `3.6`
+- `3.6.0.0`
+- `3.4.1.0` `3.4`
+- `3.4.0.0`
 - `3.2.0.0` `3.2`
 - `3.0.0.0` `3.0`
 - `2.4.1.0` `2.4`
