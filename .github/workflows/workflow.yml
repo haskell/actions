@@ -34,8 +34,8 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        ghc: ["latest", "8.4.4", "7.10.3"]
-        cabal: ["latest", "3.2.0.0", "3.4.0.0"]
+        ghc: ["latest", "8.4.4"]
+        cabal: ["latest", "3.2.0.0"]
         include:
           - os: ubuntu-latest
             ghc: "8.2.2"
@@ -43,6 +43,9 @@ jobs:
           - os: ubuntu-18.04
             ghc: "7.4.1"
             cabal: "3.4"
+          - os: ubuntu-latest
+            ghc: "7.10.3"
+            cabal: "3.6"
     steps:
       - uses: actions/checkout@v2
       - uses: ./setup
