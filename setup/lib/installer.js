@@ -22,7 +22,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.installTool = void 0;
+exports.resetTool = exports.installTool = void 0;
 const core = __importStar(require("@actions/core"));
 const exec_1 = require("@actions/exec");
 const io_1 = require("@actions/io");
@@ -154,6 +154,29 @@ async function installTool(tool, version, os) {
     return failed(tool, version);
 }
 exports.installTool = installTool;
+async function resetTool(tool, _version, os) {
+    if (tool === 'stack') {
+        // We don't need to do anything here... yet
+        // (Once we switch to utilizing ghcup for stack when possible, we can
+        // remove this early return)
+        return;
+    }
+    let bin = '';
+    switch (os) {
+        case 'linux':
+            bin = await ghcupBin(os);
+            await exec(bin, ['unset', tool]);
+            return;
+        case 'darwin':
+            bin = await ghcupBin(os);
+            await exec(bin, ['unset', tool]);
+            return;
+        case 'win32':
+            // We don't need to do anything here... yet
+            return;
+    }
+}
+exports.resetTool = resetTool;
 async function stack(version, os) {
     core.info(`Attempting to install stack ${version}`);
     const build = {

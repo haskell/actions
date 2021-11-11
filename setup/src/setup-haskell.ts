@@ -3,7 +3,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {EOL} from 'os';
 import {getOpts, getDefaults, Tool} from './opts';
-import {installTool} from './installer';
+import {installTool, resetTool} from './installer';
 import type {OS} from './opts';
 import {exec} from '@actions/exec';
 
@@ -25,10 +25,16 @@ export default async function run(
     const os = process.platform as OS;
     const opts = getOpts(getDefaults(os), os, inputs);
 
-    for (const [t, {resolved}] of Object.entries(opts).filter(o => o[1].enable))
+    for (const [t, {resolved}] of Object.entries(opts).filter(
+      o => o[1].enable
+    )) {
+      await core.group(`Preparing ${t} environment`, async () =>
+        resetTool(t as Tool, resolved, os)
+      );
       await core.group(`Installing ${t} version ${resolved}`, async () =>
         installTool(t as Tool, resolved, os)
       );
+    }
 
     if (opts.stack.setup)
       await core.group('Pre-installing GHC with stack', async () =>

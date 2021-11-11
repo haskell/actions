@@ -9663,8 +9663,10 @@ async function run(inputs) {
         core.info('Preparing to setup a Haskell environment');
         const os = process.platform;
         const opts = opts_1.getOpts(opts_1.getDefaults(os), os, inputs);
-        for (const [t, { resolved }] of Object.entries(opts).filter(o => o[1].enable))
+        for (const [t, { resolved }] of Object.entries(opts).filter(o => o[1].enable)) {
+            await core.group(`Preparing ${t} environment`, async () => installer_1.resetTool(t, resolved, os));
             await core.group(`Installing ${t} version ${resolved}`, async () => installer_1.installTool(t, resolved, os));
+        }
         if (opts.stack.setup)
             await core.group('Pre-installing GHC with stack', async () => exec_1.exec('stack', ['setup', opts.ghc.resolved]));
         if (opts.cabal.enable)
@@ -11717,7 +11719,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.installTool = void 0;
+exports.resetTool = exports.installTool = void 0;
 const core = __importStar(__webpack_require__(470));
 const exec_1 = __webpack_require__(986);
 const io_1 = __webpack_require__(1);
@@ -11849,6 +11851,29 @@ async function installTool(tool, version, os) {
     return failed(tool, version);
 }
 exports.installTool = installTool;
+async function resetTool(tool, _version, os) {
+    if (tool === 'stack') {
+        // We don't need to do anything here... yet
+        // (Once we switch to utilizing ghcup for stack when possible, we can
+        // remove this early return)
+        return;
+    }
+    let bin = '';
+    switch (os) {
+        case 'linux':
+            bin = await ghcupBin(os);
+            await exec(bin, ['unset', tool]);
+            return;
+        case 'darwin':
+            bin = await ghcupBin(os);
+            await exec(bin, ['unset', tool]);
+            return;
+        case 'win32':
+            // We don't need to do anything here... yet
+            return;
+    }
+}
+exports.resetTool = resetTool;
 async function stack(version, os) {
     core.info(`Attempting to install stack ${version}`);
     const build = {
