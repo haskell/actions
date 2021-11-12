@@ -1,12 +1,12 @@
-# rwe/actions-hlint-run
+# hlint-run
 
 GitHub Action: Run hlint
 
-See also [rwe/actions-hlint-setup](https://github.com/rwe/actions-hlint-setup), which will install (and cache) hlint.
+See also [haskell/actions/hlint-setup](https://github.com/haskell/actions/hlint-setup), which will install (and cache) HLint.
 
-Executes `hlint` and re-formats the output with a
-[problem matcher](https://github.com/actions/toolkit/blob/1cc56db0ff126f4d65aeb83798852e02a2c180c3/docs/commands.md#problem-matchers),
-so that the hints are displayed as GitHub annotations.
+Executes `hlint` and presents the output using
+[actions/toolkit/commands/problem matcher](https://github.com/actions/toolkit/blob/1cc56db0ff126f4d65aeb83798852e02a2c180c3/docs/commands.md#problem-matchers),
+so hints are displayed as GitHub annotations.
 
 ## Inputs
 
@@ -43,12 +43,12 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: 'Set up HLint'
-      uses: rwe/actions-hlint-setup@v1
+      uses: haskell/actions/hlint-setup@v1
       with:
         version: '3.1.6'
 
     - name: 'Run HLint'
-      uses: rwe/actions-hlint-run@v2
+      uses: haskell/actions/hlint-run@v2
       with:
         path: src/
         fail-on: warning
