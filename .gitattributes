@@ -1,2 +1,3 @@
 setup/lib/* linguist-generated=true
 setup/dist/* linguist-generated=true
+hlint-setup/dist/** generated linguist-vendored -diff
