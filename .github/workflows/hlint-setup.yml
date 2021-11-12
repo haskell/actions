@@ -8,7 +8,7 @@ on:
 
 defaults:
   run:
-    working-directory: "./hlint-setup"
+    working-directory: "hlint-setup"
 
 jobs:
   unit-tests:
@@ -23,8 +23,8 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - run: yarn
+      working-directory: "hlint-setup"
     - run: yarn compile
     - run: yarn package
-    #  2021-11-12: NOTE: Is this would be relative to the default workdir?
-    - uses: ./
+    - uses: ./hlint-setup
     - run: hlint --version

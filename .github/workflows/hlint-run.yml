@@ -8,7 +8,7 @@ on:
 
 defaults:
   run:
-    working-directory: "./hlint-run"
+    working-directory: "hlint-run"
 
 jobs:
   unit-tests:
@@ -26,12 +26,10 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: Set up HLint
-      #  2021-11-12: NOTE: Currently uses old pulished location, until `haslell/actions/hlint-setup` works properly
-      uses: rwe/actions-hlint-setup@v1
+      uses: ./hlint-setup
 
     - run: hlint --version
 
-    #  2021-11-12: NOTE: Is this would be relative to the default workdir?
-    - uses: ./
+    - uses: ./hlint-run
       with:
-        path: test/Example.hs
+        path: ./hlint-run/test/Example.hs
