@@ -1,0 +1,26 @@
+[
+  {
+    "file": "test/Example.hs",
+    "line": 1,
+    "column": 1,
+    "severity": "warning",
+    "code": "Use module export list",
+    "message": "Ignore in module Foo: Use module export list ▫︎ Found: \"module Foo where\" ▫︎ Perhaps: \"module Foo (\\n module Foo\\n ) where\" ▫︎ Note: an explicit list is usually better"
+  },
+  {
+    "file": "test/Example.hs",
+    "line": 7,
+    "column": 13,
+    "severity": "warning",
+    "code": "Redundant do",
+    "message": "Warning in someStr in module Foo: Redundant do ▫︎ Found: \"do show\" ▫︎ Perhaps: \"show\""
+  },
+  {
+    "file": "test/Example.hs",
+    "line": 7,
+    "column": 13,
+    "severity": "warning",
+    "code": "Redundant bracket",
+    "message": "Suggestion in someStr in module Foo: Redundant bracket ▫︎ Found: \"do show $ ((map (x +) xs))\" ▫︎ Perhaps: \"do show $ map (x +) xs\""
+  }
+]
