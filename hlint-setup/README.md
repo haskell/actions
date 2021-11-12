@@ -1,22 +1,24 @@
-# rwe/actions-hlint-setup
+# hlint-setup
 
 GitHub Action: Set up hlint
 
-Downloads and a binary HLint release from [@ndmitchell/hlint](https://github.com/ndmitchell/hlint).
+Downloads a binary of HLint from [@ndmitchell/hlint](https://github.com/ndmitchell/hlint).
 
-The release is cached using [@actions/tool-cache](https://github.com/actions/tool-cache) and is added to `PATH`.
+The which gets cached through [@actions/tool-cache](https://github.com/actions/tool-cache)
 
-See also [rwe/actions-hlint-run](https://github.com/rwe/actions-hlint-run), which will run hlint and format its output for GitHub annotations.
+And adds it into `PATH`.
+
+See also [haskell/actions/hlint-run](https://github.com/haskell/actions/hlint-run), which will run `hlint` and represent its output in GitHub annotations.
 
 ## Inputs
 
-* `version`: The HLint version to download. Defaults to `3.1.6`.
+* `version`: The HLint version to download. Currently defaults to `3.1.6`.
 
 ## Outputs
 
-* `hlint-dir`: Resulting directory containing the hlint executable
-* `hlint-bin`: Location of the hlint executable
-* `version`: Version of the hlint tool (same as input, if provided)
+* `hlint-dir`: Resulting directory containing the `hlint` executable
+* `hlint-bin`: Location of the `hlint` executable
+* `version`: Version of the `hlint` tool (same as input, if provided)
 
 ## Example
 
@@ -36,12 +38,12 @@ jobs:
     - uses: actions/checkout@v2
 
     - name: 'Set up HLint'
-      uses: rwe/actions-hlint-setup@v1
+      uses: haskell/actions/hlint-setup@v1
       with:
         version: '3.1.6'
 
     - name: 'Run HLint'
-      uses: rwe/actions-hlint-run@v1
+      uses: haskell/actions/hlint-run@v1
       with:
         path: src/
         fail-on: warning
