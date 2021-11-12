@@ -6,6 +6,10 @@ on:
       - master
       - 'releases/*'
 
+defaults:
+  run:
+    working-directory: "./hlint-setup"
+
 jobs:
   # unit tests
   unit-tests:
