@@ -1,4 +1,4 @@
-name: Setup
+name: "/setup"
 on:
   push:
     branches:

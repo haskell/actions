@@ -1,4 +1,4 @@
-name: test
+name: "/hlint-setup"
 on:
   pull_request:
   push:
