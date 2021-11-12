@@ -11,7 +11,6 @@ defaults:
     working-directory: "./hlint-setup"
 
 jobs:
-  # unit tests
   unit-tests:
     runs-on: ubuntu-latest
     steps:
@@ -26,5 +25,6 @@ jobs:
     - run: yarn
     - run: yarn compile
     - run: yarn package
+    #  2021-11-12: NOTE: Is this would be relative to the default workdir?
     - uses: ./
     - run: hlint --version
