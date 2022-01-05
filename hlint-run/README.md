@@ -48,7 +48,7 @@ jobs:
         version: '3.1.6'
 
     - name: 'Run HLint'
-      uses: haskell/actions/hlint-run@v2
+      uses: haskell/actions/hlint-run@v1
       with:
         path: src/
         fail-on: warning
