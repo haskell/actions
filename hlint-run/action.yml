@@ -1,0 +1,23 @@
+name: 'Run HLint'
+description: 'Run hlint and format the output for a problem matcher'
+inputs:
+  hlint-bin:
+    description: 'hlint binary path, if not already in PATH'
+    required: false
+  fail-on:
+    description: 'When to fail the build. One of: never, status, warning, suggestion, error'
+    required: false
+    default: 'never'
+  path:
+    description: 'Path or JSON array of paths to check with hlint'
+    required: true
+    default: '.'
+outputs:
+  ideas:
+    description: 'A JSON array of HLint output ideas (errors, warnings, suggestions, and so on)'
+runs:
+  using: 'node12'
+  main: 'dist/index.js'
+branding:
+  icon: 'arrow-down-circle'
+  color: blue

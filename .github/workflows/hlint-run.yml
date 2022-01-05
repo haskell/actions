@@ -1,0 +1,35 @@
+name: "/hlint-run"
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - 'releases/*'
+
+defaults:
+  run:
+    working-directory: "hlint-run"
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - run: yarn
+    - run: yarn compile
+    - run: yarn package
+    - run: yarn test
+
+  test:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+
+    - name: Set up HLint
+      uses: ./hlint-setup
+
+    - run: hlint --version
+
+    - uses: ./hlint-run
+      with:
+        path: ./hlint-run/test/Example.hs
