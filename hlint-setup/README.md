@@ -8,7 +8,7 @@ The which gets cached through [@actions/tool-cache](https://github.com/actions/t
 
 And adds it into `PATH`.
 
-See also [haskell/actions/hlint-run](https://github.com/haskell/actions/hlint-run), which will run `hlint` and represent its output in GitHub annotations.
+See also [haskell/actions/hlint-run](https://github.com/haskell/actions/tree/main/hlint-run), which will run `hlint` and represent its output in GitHub annotations.
 
 ## Inputs
 
