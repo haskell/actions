@@ -21,7 +21,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
         with:
           node-version: "12"
@@ -47,7 +47,7 @@ jobs:
             ghc: "7.10.3"
             cabal: "3.6"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./setup
         with:
           ghc-version: ${{ matrix.ghc }}
@@ -83,7 +83,7 @@ jobs:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./setup
         id: setup
         env:
@@ -104,7 +104,7 @@ jobs:
         stack: ["latest", "1.9.1"]
 
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: ./setup
         with:
           enable-stack: true
