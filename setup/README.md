@@ -130,8 +130,10 @@ That is, setting any "boolean" to a value other than the empty string (`""`) wil
 
 - `head`<sup>[[1]](#ghc-head-note-1)</sup>
 - `latest` (default, recommended)
-- `9.2.1` `9.2`
-- `9.0.1` `9.0`
+- `9.2.2` `9.2`
+- `9.2.1`
+- `9.0.2` `9.0`
+- `9.0.1`
 - `8.10.7` `8.10`
 - `8.10.6`
 - `8.10.5`
