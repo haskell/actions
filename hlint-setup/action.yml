@@ -3,7 +3,7 @@ description: 'Cached download of hlint binary release'
 inputs:
   version:
     description: 'hlint version'
-    required: true
+    required: false
     default: '3.1.6'
 outputs:
   hlint-dir:

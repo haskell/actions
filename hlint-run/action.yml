@@ -10,7 +10,7 @@ inputs:
     default: 'never'
   path:
     description: 'Path or JSON array of paths to check with hlint'
-    required: true
+    required: false
     default: '.'
 outputs:
   ideas:
