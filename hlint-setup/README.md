@@ -39,8 +39,6 @@ jobs:
 
     - name: 'Set up HLint'
       uses: haskell/actions/hlint-setup@v2
-      with:
-        version: '3.1.6'
 
     - name: 'Run HLint'
       uses: haskell/actions/hlint-run@v2
