@@ -19,6 +19,7 @@ jobs:
       with:
         node-version: "16"
         cache: "yarn"
+        cache-dependency-path: hlint-run/yarn.lock
     - run: yarn
     - run: yarn compile
     - run: yarn package
