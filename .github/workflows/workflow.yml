@@ -26,7 +26,7 @@ jobs:
         with:
           node-version: "16"
           cache: "npm"
-          cache-dependency-path: setup/yarn.lock
+          cache-dependency-path: setup/package-lock.json
       - run: npm ci --prefer-offline --no-audit --progress=false
       - run: npm run bundle
       - name: Check dist/index.js was generated
