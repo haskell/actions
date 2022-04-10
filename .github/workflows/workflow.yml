@@ -27,6 +27,11 @@ jobs:
           node-version: "16"
           cache: "npm"
       - run: npm ci --prefer-offline --no-audit --progress=false
+      - run: npm run bundle
+      - name: Check dist/index.js was generated
+        run: |
+          git diff --text dist/index.js
+          [[ -z $(git status -s) ]]
       - run: npm test
 
   install-haskell:
