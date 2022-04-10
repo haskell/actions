@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -29,7 +33,7 @@ const rv = __importStar(require("./release-revisions.json"));
 exports.release_revisions = rv;
 exports.supported_versions = sv;
 exports.ghcup_version = sv.ghcup[0]; // Known to be an array of length 1
-exports.yamlInputs = js_yaml_1.load(fs_1.readFileSync(path_1.join(__dirname, '..', 'action.yml'), 'utf8')
+exports.yamlInputs = (0, js_yaml_1.load)((0, fs_1.readFileSync)((0, path_1.join)(__dirname, '..', 'action.yml'), 'utf8')
 // The action.yml file structure is statically known.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ).inputs;
@@ -47,11 +51,11 @@ function getDefaults(os) {
 }
 exports.getDefaults = getDefaults;
 function resolve(version, supported, tool, os) {
-    var _a, _b, _c, _d, _e;
     const resolved = version === 'latest'
         ? supported[0]
-        : (_a = supported.find(v => v.startsWith(version))) !== null && _a !== void 0 ? _a : version;
-    return ((_e = (_d = (_c = (_b = exports.release_revisions === null || exports.release_revisions === void 0 ? void 0 : exports.release_revisions[os]) === null || _b === void 0 ? void 0 : _b[tool]) === null || _c === void 0 ? void 0 : _c.find(({ from }) => from === resolved)) === null || _d === void 0 ? void 0 : _d.to) !== null && _e !== void 0 ? _e : resolved);
+        : supported.find(v => v.startsWith(version)) ?? version;
+    return (exports.release_revisions?.[os]?.[tool]?.find(({ from }) => from === resolved)?.to ??
+        resolved);
 }
 function getOpts({ ghc, cabal, stack }, os, inputs) {
     core.debug(`Inputs are: ${JSON.stringify(inputs)}`);

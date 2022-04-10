@@ -40,15 +40,15 @@ jobs:
   hlint:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
+    - uses: actions/checkout@v3
 
     - name: 'Set up HLint'
-      uses: haskell/actions/hlint-setup@v1
+      uses: haskell/actions/hlint-setup@v2
       with:
         version: '3.1.6'
 
     - name: 'Run HLint'
-      uses: haskell/actions/hlint-run@v1
+      uses: haskell/actions/hlint-run@v2
       with:
         path: src/
         fail-on: warning

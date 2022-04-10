@@ -12,7 +12,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/rwe/actions-hlint.git"
+    "url": "git+https://github.com/haskell/actions.git"
   },
   "keywords": [
     "Actions",
@@ -23,9 +23,9 @@
   ],
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/rwe/actions-hlint/issues"
+    "url": "https://github.com/haskell/actions/issues"
   },
-  "homepage": "https://github.com/rwe/actions-hlint#readme",
+  "homepage": "https://github.com/haskell/actions#readme",
   "dependencies": {
     "@actions/core": "^1.6.0",
     "@actions/tool-cache": "^1.7.1"
