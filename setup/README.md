@@ -61,7 +61,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: haskell/actions/setup@v1
         with:
-          ghc-version: '8.8.3' # Exact version of ghc to use
+          ghc-version: '8.8.4' # Exact version of ghc to use
           # cabal-version: 'latest'. Omitted, but defaults to 'latest'
           enable-stack: true
           stack-version: 'latest'
@@ -78,12 +78,12 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        ghc: ['8.6.5', '8.8.3']
+        ghc: ['8.6.5', '8.8.4']
         cabal: ['2.4.1.0', '3.0.0.0']
         os: [ubuntu-latest, macOS-latest, windows-latest]
         exclude:
           # GHC 8.8+ only works with cabal v3+
-          - ghc: 8.8.3
+          - ghc: 8.8.4
             cabal: 2.4.1.0
     name: Haskell GHC ${{ matrix.ghc }} sample
     steps:
@@ -178,7 +178,8 @@ Recommendation: Use the latest available version if possible.
 **Stack:**
 
 - `latest` (recommended) -- follows the latest release automatically.
-- `2.7.3` `2.7`
+- `2.7.5` `2.7`
+- `2.7.3`
 - `2.7.1`
 - `2.5.1` `2.5`
 - `2.3.3` `2.3`
