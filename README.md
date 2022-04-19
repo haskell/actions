@@ -1,4 +1,4 @@
-# Haskell Github Actions
+# Haskell GitHub Actions
 
 A Collection of GitHub actions for interacting with Haskell.
 

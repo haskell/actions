@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -34,16 +38,16 @@ const process_1 = __importDefault(require("process"));
 const glob = __importStar(require("@actions/glob"));
 const fs = __importStar(require("fs"));
 // Don't throw on non-zero.
-const exec = async (cmd, args) => exec_1.exec(cmd, args, { ignoreReturnCode: true });
+const exec = async (cmd, args) => (0, exec_1.exec)(cmd, args, { ignoreReturnCode: true });
 function failed(tool, version) {
     throw new Error(`All install methods for ${tool} ${version} failed`);
 }
 async function configureOutputs(tool, path, os) {
-    var _a;
     core.setOutput(`${tool}-path`, path);
-    core.setOutput(`${tool}-exe`, await io_1.which(tool));
+    core.setOutput(`${tool}-exe`, await (0, io_1.which)(tool));
     if (tool == 'stack') {
-        const sr = (_a = process_1.default.env['STACK_ROOT']) !== null && _a !== void 0 ? _a : (os === 'win32' ? 'C:\\sr' : `${process_1.default.env.HOME}/.stack`);
+        const sr = process_1.default.env['STACK_ROOT'] ??
+            (os === 'win32' ? 'C:\\sr' : `${process_1.default.env.HOME}/.stack`);
         core.setOutput('stack-root', sr);
         if (os === 'win32')
             core.exportVariable('STACK_ROOT', sr);
@@ -230,10 +234,10 @@ async function choco(tool, version) {
 async function ghcupBin(os) {
     const cachedBin = tc.find('ghcup', opts_1.ghcup_version);
     if (cachedBin)
-        return path_1.join(cachedBin, 'ghcup');
+        return (0, path_1.join)(cachedBin, 'ghcup');
     const bin = await tc.downloadTool(`https://downloads.haskell.org/ghcup/${opts_1.ghcup_version}/x86_64-${os === 'darwin' ? 'apple-darwin' : 'linux'}-ghcup-${opts_1.ghcup_version}`);
     await fs_1.promises.chmod(bin, 0o755);
-    return path_1.join(await tc.cacheFile(bin, 'ghcup', 'ghcup', opts_1.ghcup_version), 'ghcup');
+    return (0, path_1.join)(await tc.cacheFile(bin, 'ghcup', 'ghcup', opts_1.ghcup_version), 'ghcup');
 }
 async function ghcup(tool, version, os) {
     core.info(`Attempting to install ${tool} ${version} using ghcup`);
@@ -256,20 +260,20 @@ async function ghcupGHCHead() {
         await exec(bin, ['set', 'ghc', 'head']);
 }
 async function getChocoPath(tool, version) {
-    var _a;
     // Environment variable 'ChocolateyToolsLocation' will be added to Hosted images soon
     // fallback to C:\\tools for now until variable is available
-    const chocoToolsLocation = (_a = process_1.default.env.ChocolateyToolsLocation) !== null && _a !== void 0 ? _a : path_1.join(`${process_1.default.env.SystemDrive}`, 'tools');
+    const chocoToolsLocation = process_1.default.env.ChocolateyToolsLocation ??
+        (0, path_1.join)(`${process_1.default.env.SystemDrive}`, 'tools');
     // choco packages GHC 9.x are installed on different path (C:\\tools\ghc-9.0.1)
-    let chocoToolPath = path_1.join(chocoToolsLocation, `${tool}-${version}`);
+    let chocoToolPath = (0, path_1.join)(chocoToolsLocation, `${tool}-${version}`);
     // choco packages GHC < 9.x
     if (!fs.existsSync(chocoToolPath)) {
-        chocoToolPath = path_1.join(`${process_1.default.env.ChocolateyInstall}`, 'lib', `${tool}.${version}`);
+        chocoToolPath = (0, path_1.join)(`${process_1.default.env.ChocolateyInstall}`, 'lib', `${tool}.${version}`);
     }
     const pattern = `${chocoToolPath}/**/${tool}.exe`;
     const globber = await glob.create(pattern);
     for await (const file of globber.globGenerator()) {
-        return path_1.dirname(file);
+        return (0, path_1.dirname)(file);
     }
     return '<not-found>';
 }

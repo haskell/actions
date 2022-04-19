@@ -44,5 +44,5 @@ outputs:
   stack-exe:
     description: 'The path of the stack _executable_'
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'dist/index.js'

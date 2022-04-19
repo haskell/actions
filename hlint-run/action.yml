@@ -16,7 +16,7 @@ outputs:
   ideas:
     description: 'A JSON array of HLint output ideas (errors, warnings, suggestions, and so on)'
 runs:
-  using: 'node12'
+  using: 'node16'
   main: 'dist/index.js'
 branding:
   icon: 'arrow-down-circle'

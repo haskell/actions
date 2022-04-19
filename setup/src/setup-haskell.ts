@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import ensureError from 'ensure-error';
 import * as fs from 'fs';
 import * as path from 'path';
 import {EOL} from 'os';
@@ -76,7 +77,8 @@ export default async function run(
       });
 
     core.info(`##[add-matcher]${path.join(__dirname, '..', 'matcher.json')}`);
-  } catch (error) {
+  } catch (_error) {
+    const error = ensureError(_error);
     if (core.isDebug()) {
       // we don't fail here so that the error path can be tested in CI
       core.setOutput('failed', true);

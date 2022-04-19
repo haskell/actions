@@ -15,6 +15,11 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v3
+    - uses: actions/setup-node@v3
+      with:
+        node-version: "16"
+        cache: "yarn"
+        cache-dependency-path: hlint-run/yarn.lock
     - run: yarn
     - run: yarn compile
     - run: yarn package
