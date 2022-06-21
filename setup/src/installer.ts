@@ -288,7 +288,7 @@ async function ghcupGHCHead(): Promise<void> {
     'install',
     'ghc',
     '-u',
-    'https://gitlab.haskell.org/ghc/ghc/-/jobs/artifacts/master/raw/ghc-x86_64-deb9-linux-integer-simple.tar.xz?job=validate-x86_64-linux-deb9-integer-simple',
+    'https://gitlab.haskell.org/ghc/ghc/-/jobs/artifacts/master/raw/ghc-x86_64-deb11-linux-integer-simple.tar.xz?job=validate-x86_64-linux-deb9-integer-simple',
     'head'
   ]);
   if (returnCode === 0) await exec(bin, ['set', 'ghc', 'head']);
