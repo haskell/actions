@@ -12103,6 +12103,11 @@ async function installTool(tool, version, os) {
             await ghcup(tool, version, os);
             if (await isInstalled(tool, version, os))
                 return;
+            if (tool === 'ghc') {
+                await ghcupGHCrelease(version, os);
+                if (await isInstalled(tool, version, os))
+                    return;
+            }
             await apt(tool, version);
             break;
         case 'win32':
@@ -12110,6 +12115,11 @@ async function installTool(tool, version, os) {
             break;
         case 'darwin':
             await ghcup(tool, version, os);
+            if (tool === 'ghc') {
+                await ghcupGHCrelease(version, os);
+                if (await isInstalled(tool, version, os))
+                    return;
+            }
             break;
     }
     if (await isInstalled(tool, version, os))
@@ -12212,11 +12222,24 @@ async function ghcupGHCHead() {
         'install',
         'ghc',
         '-u',
-        'https://gitlab.haskell.org/ghc/ghc/-/jobs/artifacts/master/raw/ghc-x86_64-deb9-linux-integer-simple.tar.xz?job=validate-x86_64-linux-deb9-integer-simple',
+        'https://gitlab.haskell.org/ghc/ghc/-/jobs/artifacts/master/raw/ghc-x86_64-deb11-linux-integer-simple.tar.xz?job=validate-x86_64-linux-deb9-integer-simple',
         'head'
     ]);
     if (returnCode === 0)
         await exec(bin, ['set', 'ghc', 'head']);
+}
+async function ghcupGHCrelease(version, os) {
+    core.info(`Attempting to install ghc ${version} from downloads.haskell.org using ghcup`);
+    const bin = await ghcupBin(os);
+    const returnCode = await exec(bin, [
+        'install',
+        'ghc',
+        '-u',
+        `https://downloads.haskell.org/ghc/${version}/ghc-${version}-x86_64-${os === 'darwin' ? 'apple-darwin' : 'deb11-linux.tar'}.xz`,
+        version
+    ]);
+    if (returnCode === 0)
+        await exec(bin, ['set', 'ghc', version]);
 }
 async function getChocoPath(tool, version) {
     // Environment variable 'ChocolateyToolsLocation' will be added to Hosted images soon
@@ -12711,7 +12734,7 @@ module.exports = JSON.parse('{"win32":{"ghc":[{"from":"8.10.2","to":"8.10.2.2"},
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"ghc":["9.2.2","9.2.1","9.0.2","9.0.1","8.10.7","8.10.6","8.10.5","8.10.4","8.10.3","8.10.2","8.10.1","8.8.4","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.6.2.0","3.6.0.0","3.4.1.0","3.4.0.0","3.2.0.0","3.0.0.0","2.4.1.0"],"stack":["2.7.5","2.7.3","2.7.1","2.5.1","2.3.3","2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"],"ghcup":["0.1.17.6"]}');
+module.exports = JSON.parse('{"ghc":["9.2.3","9.2.2","9.2.1","9.0.2","9.0.1","8.10.7","8.10.6","8.10.5","8.10.4","8.10.3","8.10.2","8.10.1","8.8.4","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.6.2.0","3.6.0.0","3.4.1.0","3.4.0.0","3.2.0.0","3.0.0.0","2.4.1.0"],"stack":["2.7.5","2.7.3","2.7.1","2.5.1","2.3.3","2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"],"ghcup":["0.1.17.6"]}');
 
 /***/ })
 

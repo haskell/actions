@@ -144,6 +144,11 @@ async function installTool(tool, version, os) {
             await ghcup(tool, version, os);
             if (await isInstalled(tool, version, os))
                 return;
+            if (tool === 'ghc') {
+                await ghcupGHCrelease(version, os);
+                if (await isInstalled(tool, version, os))
+                    return;
+            }
             await apt(tool, version);
             break;
         case 'win32':
@@ -151,6 +156,11 @@ async function installTool(tool, version, os) {
             break;
         case 'darwin':
             await ghcup(tool, version, os);
+            if (tool === 'ghc') {
+                await ghcupGHCrelease(version, os);
+                if (await isInstalled(tool, version, os))
+                    return;
+            }
             break;
     }
     if (await isInstalled(tool, version, os))
@@ -253,11 +263,24 @@ async function ghcupGHCHead() {
         'install',
         'ghc',
         '-u',
-        'https://gitlab.haskell.org/ghc/ghc/-/jobs/artifacts/master/raw/ghc-x86_64-deb9-linux-integer-simple.tar.xz?job=validate-x86_64-linux-deb9-integer-simple',
+        'https://gitlab.haskell.org/ghc/ghc/-/jobs/artifacts/master/raw/ghc-x86_64-deb11-linux-integer-simple.tar.xz?job=validate-x86_64-linux-deb9-integer-simple',
         'head'
     ]);
     if (returnCode === 0)
         await exec(bin, ['set', 'ghc', 'head']);
+}
+async function ghcupGHCrelease(version, os) {
+    core.info(`Attempting to install ghc ${version} from downloads.haskell.org using ghcup`);
+    const bin = await ghcupBin(os);
+    const returnCode = await exec(bin, [
+        'install',
+        'ghc',
+        '-u',
+        `https://downloads.haskell.org/ghc/${version}/ghc-${version}-x86_64-${os === 'darwin' ? 'apple-darwin' : 'deb11-linux.tar'}.xz`,
+        version
+    ]);
+    if (returnCode === 0)
+        await exec(bin, ['set', 'ghc', version]);
 }
 async function getChocoPath(tool, version) {
     // Environment variable 'ChocolateyToolsLocation' will be added to Hosted images soon
