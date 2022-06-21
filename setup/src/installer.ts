@@ -155,6 +155,10 @@ export async function installTool(
       }
       await ghcup(tool, version, os);
       if (await isInstalled(tool, version, os)) return;
+      if (tool === 'ghc') {
+        await ghcupGHCrelease(version, os);
+        if (await isInstalled(tool, version, os)) return;
+      }
       await apt(tool, version);
       break;
     case 'win32':
@@ -162,6 +166,10 @@ export async function installTool(
       break;
     case 'darwin':
       await ghcup(tool, version, os);
+      if (tool === 'ghc') {
+        await ghcupGHCrelease(version, os);
+        if (await isInstalled(tool, version, os)) return;
+      }
       break;
   }
 
@@ -292,6 +300,23 @@ async function ghcupGHCHead(): Promise<void> {
     'head'
   ]);
   if (returnCode === 0) await exec(bin, ['set', 'ghc', 'head']);
+}
+
+async function ghcupGHCrelease(version: string, os: OS): Promise<void> {
+  core.info(
+    `Attempting to install ghc ${version} from downloads.haskell.org using ghcup`
+  );
+  const bin = await ghcupBin(os);
+  const returnCode = await exec(bin, [
+    'install',
+    'ghc',
+    '-u',
+    `https://downloads.haskell.org/ghc/${version}/ghc-${version}-x86_64-${
+      os === 'darwin' ? 'apple-darwin' : 'deb11-linux.tar'
+    }.xz`,
+    version
+  ]);
+  if (returnCode === 0) await exec(bin, ['set', 'ghc', version]);
 }
 
 async function getChocoPath(tool: Tool, version: string): Promise<string> {
