@@ -115,4 +115,4 @@ jobs:
           stack-version: ${{ matrix.stack }}
       - run: |
           stack --version
-          stack
+          stack --help
