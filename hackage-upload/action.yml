@@ -1,0 +1,27 @@
+name: Upload to Hackage
+description: Upload an sdist archive to hackage.haskell.org
+
+inputs:
+  archive:
+    description: The sdist archive to upload
+    required: true
+  token:
+    description: The Hackage auth token
+    required: true
+  candidate:
+    description: Whether to upload the package as a candidate
+    default: true
+
+runs:
+  using: composite
+  steps:
+    - run: |
+        VENV=${GITHUB_ACTION_PATH}/.venv
+        python3 -m venv $VENV
+        $VENV/bin/python -m pip install -r ${GITHUB_ACTION_PATH}/requirements.txt
+        $VENV/bin/python ${GITHUB_ACTION_PATH}/upload_hackage.py
+      shell: bash
+      env:
+        INPUT_ARCHIVE: ${{ inputs.archive }}
+        INPUT_TOKEN: ${{ inputs.token }}
+        INPUT_CANDIDATE: ${{ inputs.candidate }}
