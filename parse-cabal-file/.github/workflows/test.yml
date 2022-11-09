@@ -1,0 +1,23 @@
+name: parse-cabal-file
+on:
+  pull_request:
+  push:
+    branches:
+      - master
+      - 'releases/*'
+
+defaults:
+  run:
+    working-directory: parse-cabal-file
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - run: ghc -Wall -Werror ParseCabalFile.hs
+      - uses: fourmolu/fourmolu-action@v1
+        with:
+          pattern: parse-cabal-file/**/*.hs
+          extra-args: >
+            --indentation 2
+            --indent-wheres true

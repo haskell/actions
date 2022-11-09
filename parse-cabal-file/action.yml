@@ -1,0 +1,23 @@
+name: Parse Cabal File
+description: Parse information in a provided cabal file
+
+inputs:
+  cabal_file:
+    description: Path to cabal file
+    required: true
+
+outputs:
+  version:
+    description: The version in the cabal file
+    value: ${{ steps.cabal_file.outputs.version }}
+
+runs:
+  using: composite
+  steps:
+    - run: |
+        BINDIR=${GITHUB_ACTION_PATH}/bin
+        mkdir -p ${BINDIR}
+        ghc ${GITHUB_ACTION_PATH}/ParseCabalFile.hs -outputdir /tmp -o ${BINDIR}/parse-cabal-file
+        ${BINDIR}/parse-cabal-file "${{ inputs.cabal_file }}" >> "${GITHUB_OUTPUT}"
+      id: cabal_file
+      shell: bash
