@@ -37,15 +37,21 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        ghc: ["latest", "8.4.4"]
-        cabal: ["latest", "3.2.0.0"]
+        # Try the latest version and the oldest "traditionally supported" versions
+        ghc: ["latest", "9.0.2"]
+        # Try the two most widely used versions of cabal
+        cabal: ["latest", "3.6.2.0"]
         include:
           - os: ubuntu-latest
-            ghc: "8.2.2"
+            # Try the latest GHC with an old version of cabal
+            ghc: "latest"
             cabal: "2.4.0.1"
-          - os: ubuntu-18.04
-            ghc: "7.4.1"
-            cabal: "3.4"
+          - os: windows-latest
+            # Try the a GHC that needed to be patched in chocolatey
+            # (in chocolatey it's 8.10.2.2)
+            ghc: "8.10.2"
+            cabal: "latest"
+          # Try the earliest version of GHC supported by ghcup.
           - os: ubuntu-latest
             ghc: "7.10.3"
             cabal: "3.6"
@@ -104,6 +110,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
+        # Test the latest stack version and a very old one
         stack: ["latest", "1.9.1"]
 
     steps:
