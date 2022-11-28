@@ -18,14 +18,11 @@ inputs:
 runs:
   using: composite
   steps:
-    - run: |
-        VENV=${GITHUB_ACTION_PATH}/.venv
-        python3 -m venv $VENV
-        $VENV/bin/python -m pip install -r ${GITHUB_ACTION_PATH}/requirements.txt
-        $VENV/bin/python ${GITHUB_ACTION_PATH}/upload_hackage.py
-      shell: bash
-      env:
-        INPUT_ARCHIVE: ${{ inputs.archive }}
-        INPUT_TOKEN: ${{ inputs.token }}
-        INPUT_CANDIDATE: ${{ inputs.candidate }}
-        INPUT_URL: ${{ inputs.url }}
+    - uses: actions/github-script@v6
+      with:
+        script: |
+          // https://github.com/actions/toolkit/issues/1124#issuecomment-1305836110
+          const inputs = ${{ toJSON(inputs) }}
+
+          const script = require('${{ github.action_path }}/upload-hackage.js')
+          await script({ inputs, core, glob, exec })
