@@ -11,6 +11,9 @@ inputs:
   candidate:
     description: Whether to upload the package as a candidate
     default: true
+  url:
+    description: Hackage URL
+    default: https://hackage.haskell.org
 
 runs:
   using: composite
@@ -25,3 +28,4 @@ runs:
         INPUT_ARCHIVE: ${{ inputs.archive }}
         INPUT_TOKEN: ${{ inputs.token }}
         INPUT_CANDIDATE: ${{ inputs.candidate }}
+        INPUT_URL: ${{ inputs.url }}

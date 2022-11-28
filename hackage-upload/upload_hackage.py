@@ -10,12 +10,13 @@ def main():
     archive = get_archive()
     token = get_token()
     candidate = get_candidate()
+    url = get_url()
 
     path = "/packages/candidates" if candidate else "/packages"
 
     with archive.open("rb") as f:
         r = requests.post(
-            "https://hackage.haskell.org" + path,
+            url + path,
             headers={"Authorization": f"X-ApiKey {token}"},
             files={"package": f},
         )
@@ -52,6 +53,12 @@ def get_candidate() -> bool:
         return False
     else:
         raise Exception(f"Invalid value for candidate: {candidate}")
+
+def get_url() -> str:
+    url = os.environ["INPUT_URL"]
+    if not url:
+        raise Exception("URL was not provided")
+    return url
 
 
 if __name__ == "__main__":

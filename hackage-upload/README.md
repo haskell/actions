@@ -13,6 +13,8 @@ Uploads an sdist archive to Hackage.
 * `candidate` (optional): Whether to upload as a package candidate or not.
     * Defaults to `true` because Hackage uploads are permanent, and it's usually not a good idea to do irreversible actions in an automatic pipeline. But if you absolutely want to skip the candidate step, set this to `false`.
 
+* `url` (optional): The Hackage URL to upload to (e.g. for self-hosted Hackage instances)
+
 ## Outputs
 
 N/A
