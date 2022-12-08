@@ -141,6 +141,13 @@ async function installTool(tool, version, os) {
                 await ghcupGHCHead();
                 break;
             }
+            // Andreas, 2022-12-08: This comparison of versions is not correct.
+            // E.g. we have '8.10' < '8.3' for strings.
+            // We need comparison of version strings, e.g. from the semver or compare-versions package.
+            if (tool === 'ghc' && version < '8.3') {
+                if (!(await aptLibCurses5()))
+                    break;
+            }
             await ghcup(tool, version, os);
             if (await isInstalled(tool, version, os))
                 return;
@@ -184,6 +191,9 @@ exports.resetTool = resetTool;
 async function stack(version, os) {
     core.info(`Attempting to install stack ${version}`);
     const build = {
+        // Andreas, 2022-12-08: This string comparison looks unsound.
+        // E.g. '10.0.0' >= '2.3.1' fails.
+        // So, are we just betting on stack not releasing 10.x next?
         linux: `linux-x86_64${version >= '2.3.1' ? '' : '-static'}`,
         darwin: 'osx-x86_64',
         win32: 'windows-x86_64'
@@ -200,6 +210,11 @@ async function stack(version, os) {
 async function aptBuildEssential() {
     core.info(`Installing build-essential using apt-get (for ghc-head)`);
     const returnCode = await exec(`sudo -- sh -c "apt-get update && apt-get -y install build-essential"`);
+    return returnCode === 0;
+}
+async function aptLibCurses5() {
+    core.info(`Installing libcurses5 and libtinfo5 using apt-get (for ghc < 8.3)`);
+    const returnCode = await exec(`sudo -- sh -c "apt-get update && apt-get -y install libcurses5 libtinfo5"`);
     return returnCode === 0;
 }
 async function apt(tool, version) {
