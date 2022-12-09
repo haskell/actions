@@ -12108,7 +12108,7 @@ async function installTool(tool, version, os) {
                 // Atm, I do not know how to check whether we are on ubuntu-20.04.
                 // So, ignore the error.
                 // if (!(await aptLibCurses5())) break;
-                await aptLibCurses5();
+                await aptLibNCurses5();
             }
             await ghcup(tool, version, os);
             if (await isInstalled(tool, version, os))
@@ -12174,9 +12174,9 @@ async function aptBuildEssential() {
     const returnCode = await exec(`sudo -- sh -c "apt-get update && apt-get -y install build-essential"`);
     return returnCode === 0;
 }
-async function aptLibCurses5() {
+async function aptLibNCurses5() {
     core.info(`Installing libcurses5 and libtinfo5 using apt-get (for ghc < 8.3)`);
-    const returnCode = await exec(`sudo -- sh -c "apt-get update && apt-get -y install libcurses5 libtinfo5"`);
+    const returnCode = await exec(`sudo -- sh -c "apt-get update && apt-get -y install libncurses5 libtinfo5"`);
     return returnCode === 0;
 }
 async function apt(tool, version) {
