@@ -44,11 +44,11 @@ jobs:
         include:
           - os: ubuntu-latest
             ghc: "8.2.2"
-            cabal: "2.4.0.1"
+            cabal: "2.4.1.0"
           - os: ubuntu-18.04
             ghc: "7.4.1"
             cabal: "3.4"
-          - os: ubuntu-latest
+          - os: ubuntu-20.04
             ghc: "7.10.3"
             cabal: "3.6"
     steps:
