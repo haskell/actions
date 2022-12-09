@@ -12104,8 +12104,11 @@ async function installTool(tool, version, os) {
             // E.g. we have '8.10' < '8.3' for strings.
             // We need comparison of version strings, e.g. from the semver or compare-versions package.
             if (tool === 'ghc' && version < '8.3') {
-                if (!(await aptLibCurses5()))
-                    break;
+                // Andreas, 2022-12-09: The following errors out if we are not ubuntu-20.04.
+                // Atm, I do not know how to check whether we are on ubuntu-20.04.
+                // So, ignore the error.
+                // if (!(await aptLibCurses5())) break;
+                await aptLibCurses5();
             }
             await ghcup(tool, version, os);
             if (await isInstalled(tool, version, os))
