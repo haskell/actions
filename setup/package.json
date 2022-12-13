@@ -37,6 +37,7 @@
     "@actions/glob": "^0.3.0",
     "@actions/io": "^1.1.2",
     "@actions/tool-cache": "^2.0.1",
+    "compare-versions": "^5.0.3",
     "ensure-error": "^4.0.0",
     "js-yaml": "^4.1.0"
   },

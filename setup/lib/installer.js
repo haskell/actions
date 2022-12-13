@@ -37,6 +37,7 @@ const opts_1 = require("./opts");
 const process_1 = __importDefault(require("process"));
 const glob = __importStar(require("@actions/glob"));
 const fs = __importStar(require("fs"));
+const compare_versions_1 = require("compare-versions"); // compareVersions can be used in the sense of >
 // Don't throw on non-zero.
 const exec = async (cmd, args) => (0, exec_1.exec)(cmd, args, { ignoreReturnCode: true });
 function failed(tool, version) {
@@ -141,10 +142,7 @@ async function installTool(tool, version, os) {
                 await ghcupGHCHead();
                 break;
             }
-            // Andreas, 2022-12-08: This comparison of versions is not correct.
-            // E.g. we have '8.10' < '8.3' for strings.
-            // We need comparison of version strings, e.g. from the semver or compare-versions package.
-            if (tool === 'ghc' && version < '8.3') {
+            if (tool === 'ghc' && (0, compare_versions_1.compareVersions)('8.3', version)) {
                 // Andreas, 2022-12-09: The following errors out if we are not ubuntu-20.04.
                 // Atm, I do not know how to check whether we are on ubuntu-20.04.
                 // So, ignore the error.
@@ -194,10 +192,7 @@ exports.resetTool = resetTool;
 async function stack(version, os) {
     core.info(`Attempting to install stack ${version}`);
     const build = {
-        // Andreas, 2022-12-08: This string comparison looks unsound.
-        // E.g. '10.0.0' >= '2.3.1' fails.
-        // So, are we just betting on stack not releasing 10.x next?
-        linux: `linux-x86_64${version >= '2.3.1' ? '' : '-static'}`,
+        linux: `linux-x86_64${(0, compare_versions_1.compareVersions)(version, '2.3.1') >= 0 ? '' : '-static'}`,
         darwin: 'osx-x86_64',
         win32: 'windows-x86_64'
     }[os];
