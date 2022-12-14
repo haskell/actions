@@ -65,12 +65,6 @@ function warn(tool: Tool, version: string): void {
   );
 }
 
-function aptVersion(tool: string, version: string): string {
-  // For Cabal, extract the first two segments of the version number. This
-  // regex is intentionally liberal to accomodate unusual cases like "head".
-  return tool === 'cabal' ? /[^.]*\.?[^.]*/.exec(version)![0] : version;
-}
-
 async function isInstalled(
   tool: Tool,
   version: string,
@@ -82,8 +76,6 @@ async function isInstalled(
   const ghcupPath = `${process.env.HOME}/.ghcup${
     tool === 'ghc' ? `/ghc/${version}` : ''
   }/bin`;
-  const v = aptVersion(tool, version);
-  const aptPath = `/opt/${tool}/${v}/bin`;
 
   const chocoPath = await getChocoPath(tool, version);
 
@@ -91,12 +83,12 @@ async function isInstalled(
     stack: [], // Always installed into the tool cache
     cabal: {
       win32: [chocoPath],
-      linux: [aptPath],
+      linux: [],
       darwin: []
     }[os],
     ghc: {
       win32: [chocoPath],
-      linux: [aptPath, ghcupPath],
+      linux: [ghcupPath],
       darwin: [ghcupPath]
     }[os]
   };
@@ -162,8 +154,6 @@ export async function installTool(
         await aptLibNCurses5();
       }
       await ghcup(tool, version, os);
-      if (await isInstalled(tool, version, os)) return;
-      await apt(tool, version);
       break;
     case 'win32':
       await choco(tool, version);
@@ -243,16 +233,6 @@ async function aptLibNCurses5(): Promise<boolean> {
     `sudo -- sh -c "apt-get update && apt-get -y install libncurses5 libtinfo5"`
   );
   return returnCode === 0;
-}
-
-async function apt(tool: Tool, version: string): Promise<void> {
-  const toolName = tool === 'ghc' ? 'ghc' : 'cabal-install';
-  const v = aptVersion(tool, version);
-  core.info(`Attempting to install ${toolName} ${v} using apt-get`);
-  // Ignore the return code so we can fall back to ghcup
-  await exec(
-    `sudo -- sh -c "add-apt-repository -y ppa:hvr/ghc && apt-get update && apt-get -y install ${toolName}-${v}"`
-  );
 }
 
 async function choco(tool: Tool, version: string): Promise<void> {

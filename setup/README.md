@@ -9,7 +9,7 @@ This action sets up a Haskell environment for use in actions by:
 - setting the outputs of `ghc-path`, `cabal-path`, `stack-path`, and `cabal-store` when necessary.
 
 The GitHub runners come with [pre-installed versions of GHC and Cabal](https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners). Those will be used whenever possible.
-For all other versions, this action utilizes [`ppa:hvr/ghc`](https://launchpad.net/~hvr/+archive/ubuntu/ghc), [`ghcup`](https://gitlab.haskell.org/haskell/ghcup-hs), and [`chocolatey`](https://chocolatey.org/packages/ghc).
+For all other versions, this action utilizes [`ghcup`](https://gitlab.haskell.org/haskell/ghcup-hs), and [`chocolatey`](https://chocolatey.org/packages/ghc).
 
 ## Usage
 
