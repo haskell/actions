@@ -8,6 +8,7 @@ import {ghcup_version, OS, Tool} from './opts';
 import process from 'process';
 import * as glob from '@actions/glob';
 import * as fs from 'fs';
+import {compareVersions} from 'compare-versions'; // compareVersions can be used in the sense of >
 
 // Don't throw on non-zero.
 const exec = async (cmd: string, args?: string[]): Promise<number> =>
@@ -153,6 +154,13 @@ export async function installTool(
         await ghcupGHCHead();
         break;
       }
+      if (tool === 'ghc' && compareVersions('8.3', version)) {
+        // Andreas, 2022-12-09: The following errors out if we are not ubuntu-20.04.
+        // Atm, I do not know how to check whether we are on ubuntu-20.04.
+        // So, ignore the error.
+        // if (!(await aptLibCurses5())) break;
+        await aptLibNCurses5();
+      }
       await ghcup(tool, version, os);
       if (await isInstalled(tool, version, os)) return;
       await apt(tool, version);
@@ -200,7 +208,9 @@ export async function resetTool(
 async function stack(version: string, os: OS): Promise<void> {
   core.info(`Attempting to install stack ${version}`);
   const build = {
-    linux: `linux-x86_64${version >= '2.3.1' ? '' : '-static'}`,
+    linux: `linux-x86_64${
+      compareVersions(version, '2.3.1') >= 0 ? '' : '-static'
+    }`,
     darwin: 'osx-x86_64',
     win32: 'windows-x86_64'
   }[os];
@@ -220,6 +230,17 @@ async function aptBuildEssential(): Promise<boolean> {
 
   const returnCode = await exec(
     `sudo -- sh -c "apt-get update && apt-get -y install build-essential"`
+  );
+  return returnCode === 0;
+}
+
+async function aptLibNCurses5(): Promise<boolean> {
+  core.info(
+    `Installing libcurses5 and libtinfo5 using apt-get (for ghc < 8.3)`
+  );
+
+  const returnCode = await exec(
+    `sudo -- sh -c "apt-get update && apt-get -y install libncurses5 libtinfo5"`
   );
   return returnCode === 0;
 }

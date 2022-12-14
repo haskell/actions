@@ -37,6 +37,7 @@ const opts_1 = require("./opts");
 const process_1 = __importDefault(require("process"));
 const glob = __importStar(require("@actions/glob"));
 const fs = __importStar(require("fs"));
+const compare_versions_1 = require("compare-versions"); // compareVersions can be used in the sense of >
 // Don't throw on non-zero.
 const exec = async (cmd, args) => (0, exec_1.exec)(cmd, args, { ignoreReturnCode: true });
 function failed(tool, version) {
@@ -141,6 +142,13 @@ async function installTool(tool, version, os) {
                 await ghcupGHCHead();
                 break;
             }
+            if (tool === 'ghc' && (0, compare_versions_1.compareVersions)('8.3', version)) {
+                // Andreas, 2022-12-09: The following errors out if we are not ubuntu-20.04.
+                // Atm, I do not know how to check whether we are on ubuntu-20.04.
+                // So, ignore the error.
+                // if (!(await aptLibCurses5())) break;
+                await aptLibNCurses5();
+            }
             await ghcup(tool, version, os);
             if (await isInstalled(tool, version, os))
                 return;
@@ -184,7 +192,7 @@ exports.resetTool = resetTool;
 async function stack(version, os) {
     core.info(`Attempting to install stack ${version}`);
     const build = {
-        linux: `linux-x86_64${version >= '2.3.1' ? '' : '-static'}`,
+        linux: `linux-x86_64${(0, compare_versions_1.compareVersions)(version, '2.3.1') >= 0 ? '' : '-static'}`,
         darwin: 'osx-x86_64',
         win32: 'windows-x86_64'
     }[os];
@@ -200,6 +208,11 @@ async function stack(version, os) {
 async function aptBuildEssential() {
     core.info(`Installing build-essential using apt-get (for ghc-head)`);
     const returnCode = await exec(`sudo -- sh -c "apt-get update && apt-get -y install build-essential"`);
+    return returnCode === 0;
+}
+async function aptLibNCurses5() {
+    core.info(`Installing libcurses5 and libtinfo5 using apt-get (for ghc < 8.3)`);
+    const returnCode = await exec(`sudo -- sh -c "apt-get update && apt-get -y install libncurses5 libtinfo5"`);
     return returnCode === 0;
 }
 async function apt(tool, version) {

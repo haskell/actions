@@ -6038,6 +6038,190 @@ function expand(str, isTop) {
 
 /***/ }),
 
+/***/ 4773:
+/***/ (function(__unused_webpack_module, exports) {
+
+(function (global, factory) {
+     true ? factory(exports) :
+    0;
+})(this, (function (exports) { 'use strict';
+
+    /**
+     * Compare [semver](https://semver.org/) version strings to find greater, equal or lesser.
+     * This library supports the full semver specification, including comparing versions with different number of digits like `1.0.0`, `1.0`, `1`, and pre-release versions like `1.0.0-alpha`.
+     * @param v1 - First version to compare
+     * @param v2 - Second version to compare
+     * @returns Numeric value compatible with the [Array.sort(fn) interface](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/sort#Parameters).
+     */
+    const compareVersions = (v1, v2) => {
+        // validate input and split into segments
+        const n1 = validateAndParse(v1);
+        const n2 = validateAndParse(v2);
+        // pop off the patch
+        const p1 = n1.pop();
+        const p2 = n2.pop();
+        // validate numbers
+        const r = compareSegments(n1, n2);
+        if (r !== 0)
+            return r;
+        // validate pre-release
+        if (p1 && p2) {
+            return compareSegments(p1.split('.'), p2.split('.'));
+        }
+        else if (p1 || p2) {
+            return p1 ? -1 : 1;
+        }
+        return 0;
+    };
+    /**
+     * Validate [semver](https://semver.org/) version strings.
+     *
+     * @param version Version number to validate
+     * @returns `true` if the version number is a valid semver version number, `false` otherwise.
+     *
+     * @example
+     * ```
+     * validate('1.0.0-rc.1'); // return true
+     * validate('1.0-rc.1'); // return false
+     * validate('foo'); // return false
+     * ```
+     */
+    const validate = (version) => typeof version === 'string' && /^[v\d]/.test(version) && semver.test(version);
+    /**
+     * Compare [semver](https://semver.org/) version strings using the specified operator.
+     *
+     * @param v1 First version to compare
+     * @param v2 Second version to compare
+     * @param operator Allowed arithmetic operator to use
+     * @returns `true` if the comparison between the firstVersion and the secondVersion satisfies the operator, `false` otherwise.
+     *
+     * @example
+     * ```
+     * compare('10.1.8', '10.0.4', '>'); // return true
+     * compare('10.0.1', '10.0.1', '='); // return true
+     * compare('10.1.1', '10.2.2', '<'); // return true
+     * compare('10.1.1', '10.2.2', '<='); // return true
+     * compare('10.1.1', '10.2.2', '>='); // return false
+     * ```
+     */
+    const compare = (v1, v2, operator) => {
+        // validate input operator
+        assertValidOperator(operator);
+        // since result of compareVersions can only be -1 or 0 or 1
+        // a simple map can be used to replace switch
+        const res = compareVersions(v1, v2);
+        return operatorResMap[operator].includes(res);
+    };
+    /**
+     * Match [npm semver](https://docs.npmjs.com/cli/v6/using-npm/semver) version range.
+     *
+     * @param version Version number to match
+     * @param range Range pattern for version
+     * @returns `true` if the version number is within the range, `false` otherwise.
+     *
+     * @example
+     * ```
+     * satisfies('1.1.0', '^1.0.0'); // return true
+     * satisfies('1.1.0', '~1.0.0'); // return false
+     * ```
+     */
+    const satisfies = (version, range) => {
+        // if no range operator then "="
+        const m = range.match(/^([<>=~^]+)/);
+        const op = m ? m[1] : '=';
+        // if gt/lt/eq then operator compare
+        if (op !== '^' && op !== '~')
+            return compare(version, range, op);
+        // else range of either "~" or "^" is assumed
+        const [v1, v2, v3, , vp] = validateAndParse(version);
+        const [r1, r2, r3, , rp] = validateAndParse(range);
+        const v = [v1, v2, v3];
+        const r = [r1, r2 !== null && r2 !== void 0 ? r2 : 'x', r3 !== null && r3 !== void 0 ? r3 : 'x'];
+        // validate pre-release
+        if (rp) {
+            if (!vp)
+                return false;
+            if (compareSegments(v, r) !== 0)
+                return false;
+            if (compareSegments(vp.split('.'), rp.split('.')) === -1)
+                return false;
+        }
+        // first non-zero number
+        const nonZero = r.findIndex((v) => v !== '0') + 1;
+        // pointer to where segments can be >=
+        const i = op === '~' ? 2 : nonZero > 1 ? nonZero : 1;
+        // before pointer must be equal
+        if (compareSegments(v.slice(0, i), r.slice(0, i)) !== 0)
+            return false;
+        // after pointer must be >=
+        if (compareSegments(v.slice(i), r.slice(i)) === -1)
+            return false;
+        return true;
+    };
+    const semver = /^[v^~<>=]*?(\d+)(?:\.([x*]|\d+)(?:\.([x*]|\d+)(?:\.([x*]|\d+))?(?:-([\da-z\-]+(?:\.[\da-z\-]+)*))?(?:\+[\da-z\-]+(?:\.[\da-z\-]+)*)?)?)?$/i;
+    const validateAndParse = (version) => {
+        if (typeof version !== 'string') {
+            throw new TypeError('Invalid argument expected string');
+        }
+        const match = version.match(semver);
+        if (!match) {
+            throw new Error(`Invalid argument not valid semver ('${version}' received)`);
+        }
+        match.shift();
+        return match;
+    };
+    const isWildcard = (s) => s === '*' || s === 'x' || s === 'X';
+    const tryParse = (v) => {
+        const n = parseInt(v, 10);
+        return isNaN(n) ? v : n;
+    };
+    const forceType = (a, b) => typeof a !== typeof b ? [String(a), String(b)] : [a, b];
+    const compareStrings = (a, b) => {
+        if (isWildcard(a) || isWildcard(b))
+            return 0;
+        const [ap, bp] = forceType(tryParse(a), tryParse(b));
+        if (ap > bp)
+            return 1;
+        if (ap < bp)
+            return -1;
+        return 0;
+    };
+    const compareSegments = (a, b) => {
+        for (let i = 0; i < Math.max(a.length, b.length); i++) {
+            const r = compareStrings(a[i] || '0', b[i] || '0');
+            if (r !== 0)
+                return r;
+        }
+        return 0;
+    };
+    const operatorResMap = {
+        '>': [1],
+        '>=': [0, 1],
+        '=': [0],
+        '<=': [-1, 0],
+        '<': [-1],
+    };
+    const allowedOperators = Object.keys(operatorResMap);
+    const assertValidOperator = (op) => {
+        if (typeof op !== 'string') {
+            throw new TypeError(`Invalid operator type, expected string but got ${typeof op}`);
+        }
+        if (allowedOperators.indexOf(op) === -1) {
+            throw new Error(`Invalid operator, expected one of ${allowedOperators.join('|')}`);
+        }
+    };
+
+    exports.compare = compare;
+    exports.compareVersions = compareVersions;
+    exports.satisfies = satisfies;
+    exports.validate = validate;
+
+}));
+//# sourceMappingURL=index.js.map
+
+
+/***/ }),
+
 /***/ 6891:
 /***/ ((module) => {
 
@@ -13130,6 +13314,7 @@ const opts_1 = __nccwpck_require__(8131);
 const process_1 = __importDefault(__nccwpck_require__(7282));
 const glob = __importStar(__nccwpck_require__(8090));
 const fs = __importStar(__nccwpck_require__(7147));
+const compare_versions_1 = __nccwpck_require__(4773); // compareVersions can be used in the sense of >
 // Don't throw on non-zero.
 const exec = async (cmd, args) => (0, exec_1.exec)(cmd, args, { ignoreReturnCode: true });
 function failed(tool, version) {
@@ -13234,6 +13419,13 @@ async function installTool(tool, version, os) {
                 await ghcupGHCHead();
                 break;
             }
+            if (tool === 'ghc' && (0, compare_versions_1.compareVersions)('8.3', version)) {
+                // Andreas, 2022-12-09: The following errors out if we are not ubuntu-20.04.
+                // Atm, I do not know how to check whether we are on ubuntu-20.04.
+                // So, ignore the error.
+                // if (!(await aptLibCurses5())) break;
+                await aptLibNCurses5();
+            }
             await ghcup(tool, version, os);
             if (await isInstalled(tool, version, os))
                 return;
@@ -13277,7 +13469,7 @@ exports.resetTool = resetTool;
 async function stack(version, os) {
     core.info(`Attempting to install stack ${version}`);
     const build = {
-        linux: `linux-x86_64${version >= '2.3.1' ? '' : '-static'}`,
+        linux: `linux-x86_64${(0, compare_versions_1.compareVersions)(version, '2.3.1') >= 0 ? '' : '-static'}`,
         darwin: 'osx-x86_64',
         win32: 'windows-x86_64'
     }[os];
@@ -13293,6 +13485,11 @@ async function stack(version, os) {
 async function aptBuildEssential() {
     core.info(`Installing build-essential using apt-get (for ghc-head)`);
     const returnCode = await exec(`sudo -- sh -c "apt-get update && apt-get -y install build-essential"`);
+    return returnCode === 0;
+}
+async function aptLibNCurses5() {
+    core.info(`Installing libcurses5 and libtinfo5 using apt-get (for ghc < 8.3)`);
+    const returnCode = await exec(`sudo -- sh -c "apt-get update && apt-get -y install libncurses5 libtinfo5"`);
     return returnCode === 0;
 }
 async function apt(tool, version) {
