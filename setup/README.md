@@ -183,7 +183,8 @@ Recommendation: Use the latest available version if possible.
 **Stack:**
 
 - `latest` (recommended) -- follows the latest release automatically.
-- `2.9.1` `2.9`
+- `2.9.3` `2.9`
+- `2.9.1`
 - `2.7.5` `2.7`
 - `2.7.3`
 - `2.7.1`
