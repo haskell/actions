@@ -1,12 +1,10 @@
 # hlint-setup
 
-GitHub Action: Set up hlint
+GitHub Action: Set up `hlint`.
 
-Downloads a binary of HLint from [@ndmitchell/hlint](https://github.com/ndmitchell/hlint).
-
-The which gets cached through [@actions/tool-cache](https://github.com/actions/tool-cache)
-
-And adds it into `PATH`.
+Downloads a binary of HLint from [@ndmitchell/hlint](https://github.com/ndmitchell/hlint),
+caches it through [@actions/tool-cache](https://github.com/actions/tool-cache),
+and adds it into `PATH`.
 
 See also [haskell/actions/hlint-run](https://github.com/haskell/actions/tree/main/hlint-run), which will run `hlint` and represent its output in GitHub annotations.
 
@@ -16,9 +14,9 @@ See also [haskell/actions/hlint-run](https://github.com/haskell/actions/tree/mai
 
 ## Outputs
 
-* `hlint-dir`: Resulting directory containing the `hlint` executable
-* `hlint-bin`: Location of the `hlint` executable
-* `version`: Version of the `hlint` tool (same as input, if provided)
+* `hlint-dir`: Resulting directory containing the `hlint` executable.
+* `hlint-bin`: Location of the `hlint` executable.
+* `version`: Version of the `hlint` tool (same as input, if provided).
 
 ## Example
 
