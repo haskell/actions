@@ -10,7 +10,10 @@ See also [haskell/actions/hlint-run](https://github.com/haskell/actions/tree/mai
 
 ## Inputs
 
-* `version`: The HLint version to download. Currently defaults to `3.1.6`.
+* `version`: The HLint version to download. Currently defaults to `3.5`.
+
+  Note that on some virtual environments, some versions of `hlint` need extra prerequisites installed.
+  E.g., on `ubuntu-22.04`, versions `hlint < 3.5` need the `libncurses5` library ([#128](https://github.com/haskell/actions/issues/128)).
 
 ## Outputs
 
