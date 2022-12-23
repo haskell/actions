@@ -64,14 +64,13 @@ async function run(inputs) {
                 // Blindly appending is fine.
                 // Cabal merges these and picks the last defined option.
                 const configFile = await cabalConfig();
-                if (process.platform === 'win32') {
-                    fs.appendFileSync(configFile, `store-dir: C:\\sr${os_1.EOL}`);
-                    core.setOutput('cabal-store', 'C:\\sr');
-                }
-                else {
-                    core.setOutput('cabal-store', `${process.env.HOME}/.cabal/store`);
-                }
-                // Workaround the GHC nopie linking errors for ancient GHC verions
+                // if (process.platform === 'win32') {
+                //   fs.appendFileSync(configFile, `store-dir: C:\\sr${EOL}`);
+                //   core.setOutput('cabal-store', 'C:\\sr');
+                // } else {
+                core.setOutput('cabal-store', `${process.env.HOME}/.cabal/store`);
+                // }
+                // Workaround the GHC nopie linking errors for ancient GHC versions
                 // NB: Is this _just_ for GHC 7.10.3?
                 if (opts.ghc.resolved === '7.10.3') {
                     fs.appendFileSync(configFile, ['program-default-options', '  ghc-options: -optl-no-pie'].join(os_1.EOL) + os_1.EOL);
