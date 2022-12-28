@@ -44,7 +44,7 @@ export const yamlInputs: Record<string, {default: string}> = (
 
 export function getDefaults(os: OS): Defaults {
   const mkVersion = (v: string, vs: string[], t: Tool): Version => ({
-    version: resolve(yamlInputs[v].default, vs, t, os),
+    version: resolve(yamlInputs[v].default, vs, t, os, false), // verbose=false: no printout here
     supported: vs
   });
 
@@ -56,12 +56,13 @@ export function getDefaults(os: OS): Defaults {
   };
 }
 
-// Side effect: if resolution isn't the identity, print what resolved to what.
+// E.g. resolve ghc latest to 9.4.2
 function resolve(
   version: string,
   supported: string[],
   tool: Tool,
-  os: OS
+  os: OS,
+  verbose: boolean // If resolution isn't the identity, print what resolved to what.
 ): string {
   const resolved =
     version === 'latest'
@@ -71,7 +72,8 @@ function resolve(
     release_revisions?.[os]?.[tool]?.find(({from}) => from === resolved)?.to ??
     resolved;
   // Andreas 2022-12-29, issue #144: inform about resolution here where we can also output ${tool}.
-  if (version !== result) core.info(`Resolved ${tool} ${version} to ${result}`);
+  if (verbose && version !== result)
+    core.info(`Resolved ${tool} ${version} to ${result}`);
   return result;
 }
 
@@ -108,27 +110,22 @@ export function getOpts(
   const opts: Options = {
     ghc: {
       raw: verInpt.ghc,
-      resolved: resolve(verInpt.ghc, ghc.supported, 'ghc', os),
+      resolved: resolve(verInpt.ghc, ghc.supported, 'ghc', os, true), // verbose=true: inform user
       enable: !stackNoGlobal
     },
     cabal: {
       raw: verInpt.cabal,
-      resolved: resolve(verInpt.cabal, cabal.supported, 'cabal', os),
+      resolved: resolve(verInpt.cabal, cabal.supported, 'cabal', os, true), // verbose=true: inform user
       enable: !stackNoGlobal
     },
     stack: {
       raw: verInpt.stack,
-      resolved: resolve(verInpt.stack, stack.supported, 'stack', os),
+      resolved: resolve(verInpt.stack, stack.supported, 'stack', os, true), // verbose=true: inform user
       enable: stackEnable,
       setup: stackSetupGhc
     },
     general: {matcher: {enable: !matcherDisable}}
   };
-
-  // // eslint-disable-next-line github/array-foreach
-  // Object.values(opts)
-  //   .filter(t => t.enable && t.raw !== t.resolved)
-  //   .forEach(t => core.info(`Resolved ${t.raw} to ${t.resolved}`));
 
   core.debug(`Options are: ${JSON.stringify(opts)}`);
   return opts;
