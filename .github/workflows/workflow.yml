@@ -59,6 +59,9 @@ jobs:
           - os: windows-latest
             ghc: "9.4.3"
             cabal: "3.8.1.0"
+          - os: windows-latest
+            ghc: "9.2.5"
+            cabal: "3.6"
     steps:
       - uses: actions/checkout@v3
       - uses: ./setup
