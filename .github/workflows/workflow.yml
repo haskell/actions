@@ -38,7 +38,7 @@ jobs:
       # Let's see how the other installs are doing and not fail on the first
       fail-fast: false
       matrix:
-        os: [ubuntu-latest] #, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
         ghc: ["latest"] #, "8.4.4"]
         cabal: ["latest"] #, "3.2.0.0"]
         include:
@@ -93,40 +93,40 @@ jobs:
           if [[ "${{ matrix.ghc }}" =~ ^([0-9]+\.[0-9]+\.[0-9]+) ]]; then ghcver="${BASH_REMATCH[1]}"; fi
           [[ "${CABALVER}" =~ ^"${cabalmajor}" ]] && [[ "${GHCVER}" =~ ^"${ghcmajor}" ]] && [[ "${GHCVER}" =~ ^"${ghcver}" ]]
 
-  test-fallback:
-    name: Test GHC Installation Fallbacks - ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./setup
-        id: setup
-        env:
-          RUNNER_DEBUG: "1"
-        with:
-          ghc-version: 8.21.5
-      - name: Error on success
-        if: steps.setup.outputs.failed == 'true'
-        run: |
-          echo "Error: ghc 8.21.5 didn't fail to install"
+  # test-fallback:
+  #   name: Test GHC Installation Fallbacks - ${{ matrix.os }}
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       os: [ubuntu-latest, macOS-latest, windows-latest]
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: ./setup
+  #       id: setup
+  #       env:
+  #         RUNNER_DEBUG: "1"
+  #       with:
+  #         ghc-version: 8.21.5
+  #     - name: Error on success
+  #       if: steps.setup.outputs.failed == 'true'
+  #       run: |
+  #         echo "Error: ghc 8.21.5 didn't fail to install"
 
-  install-stack:
-    name: Stack ${{ matrix.stack }} ${{ matrix.os }}
-    runs-on: ${{ matrix.os }}
-    strategy:
-      matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
-        stack: ["latest", "1.9.1"]
+  # install-stack:
+  #   name: Stack ${{ matrix.stack }} ${{ matrix.os }}
+  #   runs-on: ${{ matrix.os }}
+  #   strategy:
+  #     matrix:
+  #       os: [ubuntu-latest, macOS-latest, windows-latest]
+  #       stack: ["latest", "1.9.1"]
 
-    steps:
-      - uses: actions/checkout@v3
-      - uses: ./setup
-        with:
-          enable-stack: true
-          stack-no-global: true
-          stack-version: ${{ matrix.stack }}
-      - run: |
-          stack --version
-          stack --help
+  #   steps:
+  #     - uses: actions/checkout@v3
+  #     - uses: ./setup
+  #       with:
+  #         enable-stack: true
+  #         stack-no-global: true
+  #         stack-version: ${{ matrix.stack }}
+  #     - run: |
+  #         stack --version
+  #         stack --help
