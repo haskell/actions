@@ -39,7 +39,7 @@ exports.yamlInputs = (0, js_yaml_1.load)((0, fs_1.readFileSync)((0, path_1.join)
 ).inputs;
 function getDefaults(os) {
     const mkVersion = (v, vs, t) => ({
-        version: resolve(exports.yamlInputs[v].default, vs, t, os),
+        version: resolve(exports.yamlInputs[v].default, vs, t, os, false),
         supported: vs
     });
     return {
@@ -50,12 +50,18 @@ function getDefaults(os) {
     };
 }
 exports.getDefaults = getDefaults;
-function resolve(version, supported, tool, os) {
+// E.g. resolve ghc latest to 9.4.2
+function resolve(version, supported, tool, os, verbose // If resolution isn't the identity, print what resolved to what.
+) {
     const resolved = version === 'latest'
         ? supported[0]
         : supported.find(v => v.startsWith(version)) ?? version;
-    return (exports.release_revisions?.[os]?.[tool]?.find(({ from }) => from === resolved)?.to ??
-        resolved);
+    const result = exports.release_revisions?.[os]?.[tool]?.find(({ from }) => from === resolved)?.to ??
+        resolved;
+    // Andreas 2022-12-29, issue #144: inform about resolution here where we can also output ${tool}.
+    if (verbose === true && version !== result)
+        core.info(`Resolved ${tool} ${version} to ${result}`);
+    return result;
 }
 function getOpts({ ghc, cabal, stack }, os, inputs) {
     core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
@@ -79,29 +85,30 @@ function getOpts({ ghc, cabal, stack }, os, inputs) {
     if (errors.length > 0) {
         throw new Error(errors.join('\n'));
     }
+    const ghcEnable = !stackNoGlobal;
+    const cabalEnable = !stackNoGlobal;
     const opts = {
         ghc: {
             raw: verInpt.ghc,
-            resolved: resolve(verInpt.ghc, ghc.supported, 'ghc', os),
-            enable: !stackNoGlobal
+            resolved: resolve(verInpt.ghc, ghc.supported, 'ghc', os, ghcEnable // if true: inform user about resolution
+            ),
+            enable: ghcEnable
         },
         cabal: {
             raw: verInpt.cabal,
-            resolved: resolve(verInpt.cabal, cabal.supported, 'cabal', os),
-            enable: !stackNoGlobal
+            resolved: resolve(verInpt.cabal, cabal.supported, 'cabal', os, cabalEnable // if true: inform user about resolution
+            ),
+            enable: cabalEnable
         },
         stack: {
             raw: verInpt.stack,
-            resolved: resolve(verInpt.stack, stack.supported, 'stack', os),
+            resolved: resolve(verInpt.stack, stack.supported, 'stack', os, stackEnable // if true: inform user about resolution
+            ),
             enable: stackEnable,
             setup: stackSetupGhc
         },
         general: { matcher: { enable: !matcherDisable } }
     };
-    // eslint-disable-next-line github/array-foreach
-    Object.values(opts)
-        .filter(t => t.enable && t.raw !== t.resolved)
-        .forEach(t => core.info(`Resolved ${t.raw} to ${t.resolved}`));
     core.debug(`Options are: ${JSON.stringify(opts)}`);
     return opts;
 }
