@@ -13702,20 +13702,25 @@ function getOpts({ ghc, cabal, stack }, os, inputs) {
     if (errors.length > 0) {
         throw new Error(errors.join('\n'));
     }
+    const ghcEnable = !stackNoGlobal;
+    const cabalEnable = !stackNoGlobal;
     const opts = {
         ghc: {
             raw: verInpt.ghc,
-            resolved: resolve(verInpt.ghc, ghc.supported, 'ghc', os, true),
-            enable: !stackNoGlobal
+            resolved: resolve(verInpt.ghc, ghc.supported, 'ghc', os, ghcEnable // if true: inform user about resolution
+            ),
+            enable: ghcEnable
         },
         cabal: {
             raw: verInpt.cabal,
-            resolved: resolve(verInpt.cabal, cabal.supported, 'cabal', os, true),
-            enable: !stackNoGlobal
+            resolved: resolve(verInpt.cabal, cabal.supported, 'cabal', os, cabalEnable // if true: inform user about resolution
+            ),
+            enable: cabalEnable
         },
         stack: {
             raw: verInpt.stack,
-            resolved: resolve(verInpt.stack, stack.supported, 'stack', os, true),
+            resolved: resolve(verInpt.stack, stack.supported, 'stack', os, stackEnable // if true: inform user about resolution
+            ),
             enable: stackEnable,
             setup: stackSetupGhc
         },
