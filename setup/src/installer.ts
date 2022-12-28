@@ -267,7 +267,7 @@ async function choco(tool: Tool, version: string): Promise<void> {
     version,
     '-m',
     '--no-progress',
-    '-r'
+    '-d' // WAS: -r (opposite)
   ];
   if ((await exec('powershell', args)) !== 0)
     await exec('powershell', [...args, '--pre']);

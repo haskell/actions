@@ -13511,7 +13511,7 @@ async function choco(tool, version) {
         version,
         '-m',
         '--no-progress',
-        '-r'
+        '-d' // WAS: -r (opposite)
     ];
     if ((await exec('powershell', args)) !== 0)
         await exec('powershell', [...args, '--pre']);
