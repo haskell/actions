@@ -38,23 +38,23 @@ jobs:
       # Let's see how the other installs are doing and not fail on the first
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
-        ghc: ["latest", "8.4.4"]
-        cabal: ["latest", "3.2.0.0"]
+        os: [ubuntu-latest] #, macOS-latest, windows-latest]
+        ghc: ["latest"] #, "8.4.4"]
+        cabal: ["latest"] #, "3.2.0.0"]
         include:
-          - os: ubuntu-latest
-            ghc: "8.2.2"
-            cabal: "2.4.1.0"
-          - os: ubuntu-18.04
-            ghc: "7.4.1"
-            cabal: "3.4"
-          - os: ubuntu-20.04
-            ghc: "7.10.3"
-            cabal: "3.6"
-          # Andreas 2022-12-29, issue #98: GHC 7.10 failed to install on windows (choco)
-          - os: windows-latest
-            ghc: "7.10"
-            cabal: "3.0"
+          # - os: ubuntu-latest
+          #   ghc: "8.2.2"
+          #   cabal: "2.4.1.0"
+          # - os: ubuntu-18.04
+          #   ghc: "7.4.1"
+          #   cabal: "3.4"
+          # - os: ubuntu-20.04
+          #   ghc: "7.10.3"
+          #   cabal: "3.6"
+          # # Andreas 2022-12-29, issue #98: GHC 7.10 failed to install on windows (choco)
+          # - os: windows-latest
+          #   ghc: "7.10"
+          #   cabal: "3.0"
           # Test for issue #129: GHC 9.4.3 failed to install on windows (choco)
           - os: windows-latest
             ghc: "9.4.3"
