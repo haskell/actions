@@ -51,6 +51,10 @@ jobs:
           - os: ubuntu-20.04
             ghc: "7.10.3"
             cabal: "3.6"
+          # Andreas 2022-12-29, issue #98: GHC 7.10 failed to install on windows (choco)
+          - os: windows-latest
+            ghc: "7.10"
+            cabal: "3.0"
     steps:
       - uses: actions/checkout@v3
       - uses: ./setup
@@ -73,13 +77,17 @@ jobs:
           ghc --version
       - name: Confirm installed and expected versions match
         shell: bash
-        # this check depends on the ghc versions being "exact" in the matrix
-        if: "matrix.ghc != 'latest'"
+        # check that if given in the matrix, the actual version matches:
+        # - cabal: major version
+        # - ghc: major and minor version
         # pure bash startsWith
         run: |
-          [[ "${{ matrix.cabal }}" =~ ^([0-9]+\.[0-9]+)\. ]] && ver="${BASH_REMATCH[1]}"
-          [[ "$(cabal --numeric-version)" =~ ^"$ver" ]]
-          [[ "$(ghc --numeric-version)" == "${{ matrix.ghc }}" ]]
+          CABALVER="$(cabal --numeric-version)"
+          GHCVER="$(ghc --numeric-version)"
+          if [[ "${{ matrix.cabal }}" =~ ^([0-9]+\.[0-9]+) ]]; then cabalmajor="${BASH_REMATCH[1]}"; fi
+          if [[ "${{ matrix.ghc }}" =~ ^([0-9]+\.[0-9]+) ]]; then ghcmajor="${BASH_REMATCH[1]}"; fi
+          if [[ "${{ matrix.ghc }}" =~ ^([0-9]+\.[0-9]+\.[0-9]+) ]]; then ghcver="${BASH_REMATCH[1]}"; fi
+          [[ "${CABALVER}" =~ ^"${cabalmajor}" ]] && [[ "${GHCVER}" =~ ^"${ghcmajor}" ]] && [[ "${GHCVER}" =~ ^"${ghcver}" ]]
 
   test-fallback:
     name: Test GHC Installation Fallbacks - ${{ matrix.os }}
