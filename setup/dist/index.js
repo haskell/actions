@@ -13676,7 +13676,7 @@ function resolve(version, supported, tool, os, verbose // If resolution isn't th
     const result = exports.release_revisions?.[os]?.[tool]?.find(({ from }) => from === resolved)?.to ??
         resolved;
     // Andreas 2022-12-29, issue #144: inform about resolution here where we can also output ${tool}.
-    if (verbose && version !== result)
+    if (verbose === true && version !== result)
         core.info(`Resolved ${tool} ${version} to ${result}`);
     return result;
 }
