@@ -55,6 +55,10 @@ jobs:
           - os: windows-latest
             ghc: "7.10"
             cabal: "3.0"
+          # Test for issue #129: GHC 9.4.3 failed to install on windows (choco)
+          - os: windows-latest
+            ghc: "9.4.3"
+            cabal: "3.8.1.0"
     steps:
       - uses: actions/checkout@v3
       - uses: ./setup
