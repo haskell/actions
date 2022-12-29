@@ -236,7 +236,7 @@ async function choco(tool, version) {
         revision,
         '-m',
         '--no-progress',
-        '-d' // WAS: -r (opposite)
+        core.isDebug() ? '-d' : '-r'
     ];
     if ((await exec('powershell', args)) !== 0)
         await exec('powershell', [...args, '--pre']);
