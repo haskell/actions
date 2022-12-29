@@ -48,9 +48,10 @@ jobs:
           # - os: ubuntu-18.04
           #   ghc: "7.4.1"
           #   cabal: "3.4"
-          # - os: ubuntu-20.04
-          #   ghc: "7.10.3"
-          #   cabal: "3.6"
+          # setup does something special for 7.10.3 (issue #79)
+          - os: ubuntu-20.04
+            ghc: "7.10.3"
+            cabal: "3.6"
           # Andreas 2022-12-29, issue #98: GHC 7.10 failed to install on windows (choco)
           - os: windows-latest
             ghc: "7.10"
