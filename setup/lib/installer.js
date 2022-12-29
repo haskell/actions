@@ -275,6 +275,7 @@ async function ghcupGHCHead() {
 async function getChocoPath(tool, version) {
     // Environment variable 'ChocolateyToolsLocation' will be added to Hosted images soon
     // fallback to C:\\tools for now until variable is available
+    core.debug(`getChocoPath(): ChocolateyToolsLocation = ${process_1.default.env.ChocolateyToolsLocation}`);
     const chocoToolsLocation = process_1.default.env.ChocolateyToolsLocation ??
         (0, path_1.join)(`${process_1.default.env.SystemDrive}`, 'tools');
     // choco packages GHC 9.x are installed on different path (C:\\tools\ghc-9.0.1)
@@ -283,10 +284,13 @@ async function getChocoPath(tool, version) {
     if (!fs.existsSync(chocoToolPath)) {
         chocoToolPath = (0, path_1.join)(`${process_1.default.env.ChocolateyInstall}`, 'lib', `${tool}.${version}`);
     }
+    core.debug(`getChocoPath(): chocoToolPath = ${chocoToolPath}`);
     const pattern = `${chocoToolPath}/**/${tool}.exe`;
     const globber = await glob.create(pattern);
     for await (const file of globber.globGenerator()) {
+        core.debug(`getChocoPath(): found ${tool} at ${file}`);
         return (0, path_1.dirname)(file);
     }
+    core.debug(`getChocoPath(): cannot find binary for ${tool}`);
     return '<not-found>';
 }

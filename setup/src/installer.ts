@@ -318,6 +318,9 @@ async function ghcupGHCHead(): Promise<void> {
 async function getChocoPath(tool: Tool, version: string): Promise<string> {
   // Environment variable 'ChocolateyToolsLocation' will be added to Hosted images soon
   // fallback to C:\\tools for now until variable is available
+  core.debug(
+    `getChocoPath(): ChocolateyToolsLocation = ${process.env.ChocolateyToolsLocation}`
+  );
   const chocoToolsLocation =
     process.env.ChocolateyToolsLocation ??
     join(`${process.env.SystemDrive}`, 'tools');
@@ -333,13 +336,16 @@ async function getChocoPath(tool: Tool, version: string): Promise<string> {
       `${tool}.${version}`
     );
   }
+  core.debug(`getChocoPath(): chocoToolPath = ${chocoToolPath}`);
 
   const pattern = `${chocoToolPath}/**/${tool}.exe`;
   const globber = await glob.create(pattern);
 
   for await (const file of globber.globGenerator()) {
+    core.debug(`getChocoPath(): found ${tool} at ${file}`);
     return dirname(file);
   }
 
+  core.debug(`getChocoPath(): cannot find binary for ${tool}`);
   return '<not-found>';
 }
