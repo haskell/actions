@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOpts = exports.getDefaults = exports.yamlInputs = exports.ghcup_version = exports.supported_versions = exports.release_revisions = void 0;
+exports.getOpts = exports.releaseRevision = exports.getDefaults = exports.yamlInputs = exports.ghcup_version = exports.supported_versions = exports.release_revisions = void 0;
 const core = __importStar(require("@actions/core"));
 const fs_1 = require("fs");
 const js_yaml_1 = require("js-yaml");
@@ -53,16 +53,22 @@ exports.getDefaults = getDefaults;
 // E.g. resolve ghc latest to 9.4.2
 function resolve(version, supported, tool, os, verbose // If resolution isn't the identity, print what resolved to what.
 ) {
-    const resolved = version === 'latest'
+    const result = version === 'latest'
         ? supported[0]
         : supported.find(v => v.startsWith(version)) ?? version;
-    const result = exports.release_revisions?.[os]?.[tool]?.find(({ from }) => from === resolved)?.to ??
-        resolved;
     // Andreas 2022-12-29, issue #144: inform about resolution here where we can also output ${tool}.
     if (verbose === true && version !== result)
         core.info(`Resolved ${tool} ${version} to ${result}`);
     return result;
 }
+// Further resolve the version to a revision using release-revisions.json.
+// This is only needed for choco-installs (at time of writing, 2022-12-29).
+function releaseRevision(version, tool, os) {
+    const result = exports.release_revisions?.[os]?.[tool]?.find(({ from }) => from === version)?.to ??
+        version;
+    return result;
+}
+exports.releaseRevision = releaseRevision;
 function getOpts({ ghc, cabal, stack }, os, inputs) {
     core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
     const stackNoGlobal = (inputs['stack-no-global'] || '') !== '';

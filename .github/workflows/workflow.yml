@@ -48,13 +48,24 @@ jobs:
           - os: ubuntu-18.04
             ghc: "7.4.1"
             cabal: "3.4"
+          # setup does something special for 7.10.3 (issue #79)
           - os: ubuntu-20.04
             ghc: "7.10.3"
             cabal: "3.6"
+          - os: macOS-latest
+            ghc: "7.10.3"
+            cabal: "3.4"
           # Andreas 2022-12-29, issue #98: GHC 7.10 failed to install on windows (choco)
           - os: windows-latest
             ghc: "7.10"
             cabal: "3.0"
+          # Test for issue #129: GHC 9.4.3 failed to install on windows (choco)
+          - os: windows-latest
+            ghc: "9.4.3"
+            cabal: "3.8.1.0"
+          - os: windows-latest
+            ghc: "9.2.5"
+            cabal: "3.6"
     steps:
       - uses: actions/checkout@v3
       - uses: ./setup

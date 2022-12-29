@@ -64,16 +64,22 @@ function resolve(
   os: OS,
   verbose: boolean // If resolution isn't the identity, print what resolved to what.
 ): string {
-  const resolved =
+  const result =
     version === 'latest'
       ? supported[0]
       : supported.find(v => v.startsWith(version)) ?? version;
-  const result =
-    release_revisions?.[os]?.[tool]?.find(({from}) => from === resolved)?.to ??
-    resolved;
   // Andreas 2022-12-29, issue #144: inform about resolution here where we can also output ${tool}.
   if (verbose === true && version !== result)
     core.info(`Resolved ${tool} ${version} to ${result}`);
+  return result;
+}
+
+// Further resolve the version to a revision using release-revisions.json.
+// This is only needed for choco-installs (at time of writing, 2022-12-29).
+export function releaseRevision(version: string, tool: Tool, os: OS): string {
+  const result: string =
+    release_revisions?.[os]?.[tool]?.find(({from}) => from === version)?.to ??
+    version;
   return result;
 }
 

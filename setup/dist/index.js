@@ -13362,7 +13362,7 @@ async function isInstalled(tool, version, os) {
     const ghcupPath = `${process_1.default.env.HOME}/.ghcup${tool === 'ghc' ? `/ghc/${version}` : ''}/bin`;
     const v = aptVersion(tool, version);
     const aptPath = `/opt/${tool}/${v}/bin`;
-    const chocoPath = await getChocoPath(tool, version);
+    const chocoPath = await getChocoPath(tool, version, (0, opts_1.releaseRevision)(version, tool, os));
     const locations = {
         stack: [],
         cabal: {
@@ -13501,6 +13501,8 @@ async function apt(tool, version) {
 }
 async function choco(tool, version) {
     core.info(`Attempting to install ${tool} ${version} using chocolatey`);
+    // E.g. GHC version 7.10.3 on Chocolatey is revision 7.10.3.1.
+    const revision = (0, opts_1.releaseRevision)(version, tool, 'win32');
     // Choco tries to invoke `add-path` command on earlier versions of ghc, which has been deprecated and fails the step, so disable command execution during this.
     console.log('::stop-commands::SetupHaskellStopCommands');
     const args = [
@@ -13508,16 +13510,16 @@ async function choco(tool, version) {
         'install',
         tool,
         '--version',
-        version,
+        revision,
         '-m',
         '--no-progress',
-        '-r'
+        core.isDebug() ? '-d' : '-r'
     ];
     if ((await exec('powershell', args)) !== 0)
         await exec('powershell', [...args, '--pre']);
     console.log('::SetupHaskellStopCommands::'); // Re-enable command execution
     // Add GHC to path automatically because it does not add until the end of the step and we check the path.
-    const chocoPath = await getChocoPath(tool, version);
+    const chocoPath = await getChocoPath(tool, version, revision);
     if (tool == 'ghc')
         core.addPath(chocoPath);
 }
@@ -13549,22 +13551,26 @@ async function ghcupGHCHead() {
     if (returnCode === 0)
         await exec(bin, ['set', 'ghc', 'head']);
 }
-async function getChocoPath(tool, version) {
+async function getChocoPath(tool, version, revision) {
     // Environment variable 'ChocolateyToolsLocation' will be added to Hosted images soon
     // fallback to C:\\tools for now until variable is available
+    core.debug(`getChocoPath(): ChocolateyToolsLocation = ${process_1.default.env.ChocolateyToolsLocation}`);
     const chocoToolsLocation = process_1.default.env.ChocolateyToolsLocation ??
         (0, path_1.join)(`${process_1.default.env.SystemDrive}`, 'tools');
     // choco packages GHC 9.x are installed on different path (C:\\tools\ghc-9.0.1)
     let chocoToolPath = (0, path_1.join)(chocoToolsLocation, `${tool}-${version}`);
     // choco packages GHC < 9.x
     if (!fs.existsSync(chocoToolPath)) {
-        chocoToolPath = (0, path_1.join)(`${process_1.default.env.ChocolateyInstall}`, 'lib', `${tool}.${version}`);
+        chocoToolPath = (0, path_1.join)(`${process_1.default.env.ChocolateyInstall}`, 'lib', `${tool}.${revision}`);
     }
+    core.debug(`getChocoPath(): chocoToolPath = ${chocoToolPath}`);
     const pattern = `${chocoToolPath}/**/${tool}.exe`;
     const globber = await glob.create(pattern);
     for await (const file of globber.globGenerator()) {
+        core.debug(`getChocoPath(): found ${tool} at ${file}`);
         return (0, path_1.dirname)(file);
     }
+    core.debug(`getChocoPath(): cannot find binary for ${tool}`);
     return '<not-found>';
 }
 
@@ -13640,7 +13646,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getOpts = exports.getDefaults = exports.yamlInputs = exports.ghcup_version = exports.supported_versions = exports.release_revisions = void 0;
+exports.getOpts = exports.releaseRevision = exports.getDefaults = exports.yamlInputs = exports.ghcup_version = exports.supported_versions = exports.release_revisions = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __nccwpck_require__(7147);
 const js_yaml_1 = __nccwpck_require__(1917);
@@ -13670,16 +13676,22 @@ exports.getDefaults = getDefaults;
 // E.g. resolve ghc latest to 9.4.2
 function resolve(version, supported, tool, os, verbose // If resolution isn't the identity, print what resolved to what.
 ) {
-    const resolved = version === 'latest'
+    const result = version === 'latest'
         ? supported[0]
         : supported.find(v => v.startsWith(version)) ?? version;
-    const result = exports.release_revisions?.[os]?.[tool]?.find(({ from }) => from === resolved)?.to ??
-        resolved;
     // Andreas 2022-12-29, issue #144: inform about resolution here where we can also output ${tool}.
     if (verbose === true && version !== result)
         core.info(`Resolved ${tool} ${version} to ${result}`);
     return result;
 }
+// Further resolve the version to a revision using release-revisions.json.
+// This is only needed for choco-installs (at time of writing, 2022-12-29).
+function releaseRevision(version, tool, os) {
+    const result = exports.release_revisions?.[os]?.[tool]?.find(({ from }) => from === version)?.to ??
+        version;
+    return result;
+}
+exports.releaseRevision = releaseRevision;
 function getOpts({ ghc, cabal, stack }, os, inputs) {
     core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
     const stackNoGlobal = (inputs['stack-no-global'] || '') !== '';
@@ -13811,9 +13823,9 @@ async function run(inputs) {
                 else {
                     core.setOutput('cabal-store', `${process.env.HOME}/.cabal/store`);
                 }
-                // Workaround the GHC nopie linking errors for ancient GHC verions
+                // Workaround the GHC nopie linking errors for ancient GHC versions
                 // NB: Is this _just_ for GHC 7.10.3?
-                if (opts.ghc.resolved === '7.10.3') {
+                if (opts.ghc.resolved === '7.10.3' && os !== 'win32') {
                     fs.appendFileSync(configFile, ['program-default-options', '  ghc-options: -optl-no-pie'].join(os_1.EOL) + os_1.EOL);
                     // We cannot use cabal user-config to normalize the config because of:
                     // https://github.com/haskell/cabal/issues/6823
@@ -14041,7 +14053,7 @@ function ensureError(input) {
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"win32":{"ghc":[{"from":"8.10.2","to":"8.10.2.2"},{"from":"8.10.1","to":"8.10.1.1"},{"from":"8.8.4","to":"8.8.4.1"},{"from":"8.8.3","to":"8.8.3.1"},{"from":"8.8.2","to":"8.8.2.1"},{"from":"8.6.1","to":"8.6.1.1"},{"from":"8.0.2","to":"8.0.2.2"},{"from":"7.10.3","to":"7.10.3.2"},{"from":"7.10.2","to":"7.10.2.1"},{"from":"7.10.1","to":"7.10.1.1"},{"from":"7.8.4","to":"7.8.4.1"},{"from":"7.8.3","to":"7.8.3.1"},{"from":"7.8.2","to":"7.8.2.1"},{"from":"7.8.1","to":"7.8.1.1"},{"from":"7.6.3","to":"7.6.3.1"},{"from":"7.6.2","to":"7.6.2.1"},{"from":"7.6.1","to":"7.6.1.1"}]}}');
+module.exports = JSON.parse('{"win32":{"ghc":[{"from":"9.4.3","to":"9.4.3.1"},{"from":"9.2.5","to":"9.2.5.1"},{"from":"8.10.2","to":"8.10.2.2"},{"from":"8.10.1","to":"8.10.1.1"},{"from":"8.8.4","to":"8.8.4.1"},{"from":"8.8.3","to":"8.8.3.1"},{"from":"8.8.2","to":"8.8.2.1"},{"from":"8.6.1","to":"8.6.1.1"},{"from":"8.0.2","to":"8.0.2.2"},{"from":"7.10.3","to":"7.10.3.2"},{"from":"7.10.2","to":"7.10.2.1"},{"from":"7.10.1","to":"7.10.1.1"},{"from":"7.8.4","to":"7.8.4.1"},{"from":"7.8.3","to":"7.8.3.1"},{"from":"7.8.2","to":"7.8.2.1"},{"from":"7.8.1","to":"7.8.1.1"},{"from":"7.6.3","to":"7.6.3.1"},{"from":"7.6.2","to":"7.6.2.1"},{"from":"7.6.1","to":"7.6.1.1"}]}}');
 
 /***/ }),
 
@@ -14049,7 +14061,7 @@ module.exports = JSON.parse('{"win32":{"ghc":[{"from":"8.10.2","to":"8.10.2.2"},
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"ghc":["9.4.2","9.4.1","9.2.4","9.2.3","9.2.2","9.2.1","9.0.2","9.0.1","8.10.7","8.10.6","8.10.5","8.10.4","8.10.3","8.10.2","8.10.1","8.8.4","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.8.1.0","3.6.2.0","3.6.0.0","3.4.1.0","3.4.0.0","3.2.0.0","3.0.0.0","2.4.1.0"],"stack":["2.9.3","2.9.1","2.7.5","2.7.3","2.7.1","2.5.1","2.3.3","2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"],"ghcup":["0.1.18.0"]}');
+module.exports = JSON.parse('{"ghc":["9.4.4","9.4.3","9.4.2","9.4.1","9.2.5","9.2.4","9.2.3","9.2.2","9.2.1","9.0.2","9.0.1","8.10.7","8.10.6","8.10.5","8.10.4","8.10.3","8.10.2","8.10.1","8.8.4","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.8.1.0","3.6.2.0","3.6.0.0","3.4.1.0","3.4.0.0","3.2.0.0","3.0.0.0","2.4.1.0"],"stack":["2.9.3","2.9.1","2.7.5","2.7.3","2.7.1","2.5.1","2.3.3","2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"],"ghcup":["0.1.18.0"]}');
 
 /***/ })
 

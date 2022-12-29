@@ -109,7 +109,7 @@ describe('haskell/actions/setup', () => {
     // Test the case where there is a revision in chocolatey
     expect(
       getOpts(def('win32'), 'win32', {'ghc-version': '8.10.2'}).ghc.resolved
-    ).toBe('8.10.2.2');
+    ).toBe('8.10.2'); // Andreas, 2022-12-29: revisions are handled locally in choco() now
 
     // Test the case where there is not a revision in chocolatey
     expect(

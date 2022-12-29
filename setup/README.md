@@ -129,9 +129,12 @@ That is, setting any "boolean" to a value other than the empty string (`""`) wil
 **GHC:**
 
 - `latest` (default, recommended)
-- `9.4.2` `9.4`
+- `9.4.4` `9.4`
+- `9.4.3`
+- `9.4.2`
 - `9.4.1`
-- `9.2.4` `9.2`
+- `9.2.5` `9.2`
+- `9.2.4`
 - `9.2.3`
 - `9.2.2`
 - `9.2.1`
