@@ -13350,29 +13350,22 @@ function warn(tool, version) {
         'If the list is outdated, please file an issue here: https://github.com/actions/virtual-environments\n' +
         'by using the appropriate tool request template: https://github.com/actions/virtual-environments/issues/new/choose');
 }
-function aptVersion(tool, version) {
-    // For Cabal, extract the first two segments of the version number. This
-    // regex is intentionally liberal to accomodate unusual cases like "head".
-    return tool === 'cabal' ? /[^.]*\.?[^.]*/.exec(version)[0] : version;
-}
 async function isInstalled(tool, version, os) {
     const toolPath = tc.find(tool, version);
     if (toolPath)
         return success(tool, version, toolPath, os);
     const ghcupPath = `${process_1.default.env.HOME}/.ghcup${tool === 'ghc' ? `/ghc/${version}` : ''}/bin`;
-    const v = aptVersion(tool, version);
-    const aptPath = `/opt/${tool}/${v}/bin`;
     const chocoPath = await getChocoPath(tool, version);
     const locations = {
         stack: [],
         cabal: {
             win32: [chocoPath],
-            linux: [aptPath],
+            linux: [],
             darwin: []
         }[os],
         ghc: {
             win32: [chocoPath],
-            linux: [aptPath, ghcupPath],
+            linux: [ghcupPath],
             darwin: [ghcupPath]
         }[os]
     };
@@ -13427,9 +13420,6 @@ async function installTool(tool, version, os) {
                 await aptLibNCurses5();
             }
             await ghcup(tool, version, os);
-            if (await isInstalled(tool, version, os))
-                return;
-            await apt(tool, version);
             break;
         case 'win32':
             await choco(tool, version);
@@ -13491,13 +13481,6 @@ async function aptLibNCurses5() {
     core.info(`Installing libcurses5 and libtinfo5 using apt-get (for ghc < 8.3)`);
     const returnCode = await exec(`sudo -- sh -c "apt-get update && apt-get -y install libncurses5 libtinfo5"`);
     return returnCode === 0;
-}
-async function apt(tool, version) {
-    const toolName = tool === 'ghc' ? 'ghc' : 'cabal-install';
-    const v = aptVersion(tool, version);
-    core.info(`Attempting to install ${toolName} ${v} using apt-get`);
-    // Ignore the return code so we can fall back to ghcup
-    await exec(`sudo -- sh -c "add-apt-repository -y ppa:hvr/ghc && apt-get update && apt-get -y install ${toolName}-${v}"`);
 }
 async function choco(tool, version) {
     core.info(`Attempting to install ${tool} ${version} using chocolatey`);
