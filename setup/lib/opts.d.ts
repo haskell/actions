@@ -39,5 +39,6 @@ export declare const yamlInputs: Record<string, {
     default: string;
 }>;
 export declare function getDefaults(os: OS): Defaults;
+export declare function releaseRevision(version: string, tool: Tool, os: OS): string;
 export declare function getOpts({ ghc, cabal, stack }: Defaults, os: OS, inputs: Record<string, string>): Options;
 export {};
