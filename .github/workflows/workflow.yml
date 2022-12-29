@@ -52,6 +52,9 @@ jobs:
           - os: ubuntu-20.04
             ghc: "7.10.3"
             cabal: "3.6"
+          - os: macOS-latest
+            ghc: "7.10.3"
+            cabal: "3.4"
           # Andreas 2022-12-29, issue #98: GHC 7.10 failed to install on windows (choco)
           - os: windows-latest
             ghc: "7.10"
