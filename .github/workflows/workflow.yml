@@ -51,10 +51,10 @@ jobs:
           # - os: ubuntu-20.04
           #   ghc: "7.10.3"
           #   cabal: "3.6"
-          # # Andreas 2022-12-29, issue #98: GHC 7.10 failed to install on windows (choco)
-          # - os: windows-latest
-          #   ghc: "7.10"
-          #   cabal: "3.0"
+          # Andreas 2022-12-29, issue #98: GHC 7.10 failed to install on windows (choco)
+          - os: windows-latest
+            ghc: "7.10"
+            cabal: "3.0"
           # Test for issue #129: GHC 9.4.3 failed to install on windows (choco)
           - os: windows-latest
             ghc: "9.4.3"
