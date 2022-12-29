@@ -71,9 +71,9 @@ async function run(inputs) {
                 else {
                     core.setOutput('cabal-store', `${process.env.HOME}/.cabal/store`);
                 }
-                // Workaround the GHC nopie linking errors for ancient GHC verions
+                // Workaround the GHC nopie linking errors for ancient GHC versions
                 // NB: Is this _just_ for GHC 7.10.3?
-                if (opts.ghc.resolved === '7.10.3') {
+                if (opts.ghc.resolved === '7.10.3' && os !== 'win32') {
                     fs.appendFileSync(configFile, ['program-default-options', '  ghc-options: -optl-no-pie'].join(os_1.EOL) + os_1.EOL);
                     // We cannot use cabal user-config to normalize the config because of:
                     // https://github.com/haskell/cabal/issues/6823
