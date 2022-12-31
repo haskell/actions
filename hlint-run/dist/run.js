@@ -1,7 +1,11 @@
 "use strict";
 var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
-    Object.defineProperty(o, k2, { enumerable: true, get: function() { return m[k]; } });
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
 }) : (function(o, m, k, k2) {
     if (k2 === undefined) k2 = k;
     o[k2] = m[k];
@@ -18,15 +22,6 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
@@ -37,16 +32,14 @@ const hlint_1 = require("./hlint");
 const bufferedExec_1 = __importDefault(require("./util/bufferedExec"));
 const withMatcherAtPath_1 = __importDefault(require("./util/withMatcherAtPath"));
 ;
-function runHLint(cmd, args) {
-    return __awaiter(this, void 0, void 0, function* () {
-        // In order to make regexable output without e.g. tripping over quotes, we need to transform the lines.
-        core.info(`Running ${cmd} ${args.join(' ')}`);
-        const { stdout: hlintOutputStr, statusCode } = yield (0, bufferedExec_1.default)(cmd, args);
-        core.info(`hlint completed with status code ${statusCode}`);
-        const ideas = JSON.parse(hlintOutputStr);
-        ideas.map(hlint_1.serializeProblem).forEach(line => console.log(line));
-        return { ideas, statusCode };
-    });
+async function runHLint(cmd, args) {
+    // In order to make regexable output without e.g. tripping over quotes, we need to transform the lines.
+    core.info(`Running ${cmd} ${args.join(' ')}`);
+    const { stdout: hlintOutputStr, statusCode } = await (0, bufferedExec_1.default)(cmd, args);
+    core.info(`hlint completed with status code ${statusCode}`);
+    const ideas = JSON.parse(hlintOutputStr);
+    ideas.map(hlint_1.serializeProblem).forEach(line => console.log(line));
+    return { ideas, statusCode };
 }
 function getOverallCheckResult(failOn, { ideas, statusCode }) {
     const hintsBySev = hlint_1.SEVERITY_LEVELS.map(sev => ([sev, ideas.filter(hint => hint.severity === sev).length]));
@@ -71,13 +64,11 @@ function getOverallCheckResult(failOn, { ideas, statusCode }) {
     }
     return { ok, hintSummary };
 }
-function run({ baseDir, hlintCmd, pathList, failOn }) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const hlintArgs = ['-j', '--json', '--', ...pathList];
-        const matcherDefPath = path.join(baseDir, hlint_1.MATCHER_DEF_PATH);
-        const { ideas, statusCode } = yield (0, withMatcherAtPath_1.default)(matcherDefPath, () => runHLint(hlintCmd, hlintArgs));
-        const { ok, hintSummary } = getOverallCheckResult(failOn, { ideas, statusCode });
-        return { ok, statusCode, ideas, hintSummary };
-    });
+async function run({ baseDir, hlintCmd, pathList, failOn }) {
+    const hlintArgs = ['-j', '--json', '--', ...pathList];
+    const matcherDefPath = path.join(baseDir, hlint_1.MATCHER_DEF_PATH);
+    const { ideas, statusCode } = await (0, withMatcherAtPath_1.default)(matcherDefPath, () => runHLint(hlintCmd, hlintArgs));
+    const { ok, hintSummary } = getOverallCheckResult(failOn, { ideas, statusCode });
+    return { ok, statusCode, ideas, hintSummary };
 }
 exports.default = run;

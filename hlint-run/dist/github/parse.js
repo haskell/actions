@@ -55,8 +55,11 @@ function parseFormattedProblem(def, line) {
     const prob = core_1.MATCH_LINE_KEYS
         .reduce((obj, k) => {
         const v = parseKey(k);
-        return v == null ? obj : Object.assign(Object.assign({}, obj), { [k]: v });
+        return v == null ? obj : { ...obj, [k]: v };
     }, {});
-    return Object.assign(Object.assign({}, prob), { severity: prob.severity || defaultSeverity });
+    return {
+        ...prob,
+        severity: prob.severity || defaultSeverity,
+    };
 }
 exports.parseFormattedProblem = parseFormattedProblem;
