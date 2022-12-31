@@ -30,9 +30,12 @@ function getMatchLineRegexString(toolName) {
 }
 const MATCH_LINE_REGEX_GROUPS = (exports.MATCH_LINE_KEYS
     .map((key, index) => ([key, index + 1]))
-    .reduce((obj, [key, matchGroup]) => (Object.assign(Object.assign({}, obj), { [key]: matchGroup })), {}));
+    .reduce((obj, [key, matchGroup]) => ({ ...obj, [key]: matchGroup }), {}));
 function getMatcherPatternObj(toolName) {
-    return Object.assign({ regexp: getMatchLineRegexString(toolName) }, MATCH_LINE_REGEX_GROUPS);
+    return {
+        regexp: getMatchLineRegexString(toolName),
+        ...MATCH_LINE_REGEX_GROUPS,
+    };
 }
 function getMatcherDef(toolName) {
     return {
