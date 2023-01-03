@@ -9,3 +9,27 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    # Look for `package.json` and `lock` files in the action's `root` directory
+    directory: "/setup"
+    # Check the npm registry for updates every day (weekdays)
+    schedule:
+      interval: "weekly"
+
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    # Look for `package.json` and `lock` files in the action's `root` directory
+    directory: "/hlint-setup"
+    # Check the npm registry for updates every day (weekdays)
+    schedule:
+      interval: "weekly"
+
+  # Enable version updates for npm
+  - package-ecosystem: "npm"
+    # Look for `package.json` and `lock` files in the action's `root` directory
+    directory: "/hlint-run"
+    # Check the npm registry for updates every day (weekdays)
+    schedule:
+      interval: "weekly"
