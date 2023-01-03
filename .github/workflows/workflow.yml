@@ -72,6 +72,7 @@ jobs:
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
+          cabal-update: false
       - name: Test runghc
         run: |
           runghc --version
