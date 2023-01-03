@@ -75,6 +75,7 @@ function getOpts({ ghc, cabal, stack }, os, inputs) {
     const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
     const stackEnable = (inputs['enable-stack'] || '') !== '';
     const matcherDisable = (inputs['disable-matcher'] || '') !== '';
+    const cabalUpdate = inputs['cabal-update'] !== 'false';
     core.debug(`${stackNoGlobal}/${stackSetupGhc}/${stackEnable}`);
     const verInpt = {
         ghc: inputs['ghc-version'] || ghc.version,
@@ -104,7 +105,8 @@ function getOpts({ ghc, cabal, stack }, os, inputs) {
             raw: verInpt.cabal,
             resolved: resolve(verInpt.cabal, cabal.supported, 'cabal', os, cabalEnable // if true: inform user about resolution
             ),
-            enable: cabalEnable
+            enable: cabalEnable,
+            update: cabalUpdate
         },
         stack: {
             raw: verInpt.stack,

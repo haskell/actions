@@ -16,16 +16,20 @@ inputs:
     default: 'latest'
   enable-stack:
     required: false
-    description: 'If specified, will setup Stack'
+    description: 'If specified, will setup Stack.'
   stack-no-global:
     required: false
-    description: 'If specified, enable-stack must be set. Prevents installing GHC and Cabal globally'
+    description: 'If specified, enable-stack must be set. Prevents installing GHC and Cabal globally.'
   stack-setup-ghc:
     required: false
-    description: 'If specified, enable-stack must be set. Will run stack setup to install the specified GHC'
+    description: 'If specified, enable-stack must be set. Will run stack setup to install the specified GHC.'
+  cabal-update:
+    required: false
+    default: true
+    description: 'Set to false to prevent `cabal update` from being run.'
   disable-matcher:
     required: false
-    description: 'If specified, disables match messages from GHC as GitHub CI annotations'
+    description: 'If specified, disables match messages from GHC as GitHub CI annotations.'
 outputs:
   ghc-path:
     description: 'The path of the ghc executable _directory_'

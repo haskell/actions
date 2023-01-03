@@ -14,7 +14,9 @@ export interface ProgramOpt {
 }
 export interface Options {
     ghc: ProgramOpt;
-    cabal: ProgramOpt;
+    cabal: ProgramOpt & {
+        update: boolean;
+    };
     stack: ProgramOpt & {
         setup: boolean;
     };
