@@ -115,8 +115,13 @@ export function getOpts(
   const stackEnable = (inputs['enable-stack'] || '') !== '';
   const matcherDisable = (inputs['disable-matcher'] || '') !== '';
   // Andreas, 2023-01-05, issue #29:
-  // 'cabal-update' has a default value, so we should get a proper boolean always. (Fingers crossed.)
-  const cabalUpdate = parseYAMLBoolean('cabal-update', inputs['cabal-update']);
+  // 'cabal-update' has a default value, so we should get a proper boolean always.
+  // Andreas, 2023-01-06: This is not true if we use the action as a library.
+  // Thus, need to patch with default value here.
+  const cabalUpdate = parseYAMLBoolean(
+    'cabal-update',
+    inputs['cabal-update'] || 'true'
+  );
   core.debug(`${stackNoGlobal}/${stackSetupGhc}/${stackEnable}`);
   const verInpt = {
     ghc: inputs['ghc-version'] || ghc.version,
