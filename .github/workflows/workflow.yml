@@ -41,7 +41,7 @@ jobs:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         ghc: ["latest", "8.4.4"]
         cabal: ["latest", "3.2.0.0"]
-        cabal-update: [false]
+        cabal_update: ["false"]
         # The following tests do not set 'cabal-update', which defaults to 'true' then.
         include:
           - os: ubuntu-latest
@@ -75,7 +75,7 @@ jobs:
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
-          cabal-update: ${{ matrix.cabal-update }}
+          cabal-update: ${{ matrix.cabal_update }}
 
       - name: Test runghc
         run: |
@@ -91,7 +91,7 @@ jobs:
         run: cabal run
 
       - name: Build and run test with Hackage dependency
-        if:   ${{ matrix.cabal-update != false }}
+        if:   ${{ matrix.cabal_update != 'false' }}
         working-directory: setup/__tests__/project-with-hackage-dependency
         run:  cabal build && cabal run
 
