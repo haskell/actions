@@ -70,6 +70,8 @@ async function run(inputs) {
                 }
                 else {
                     core.setOutput('cabal-store', `${process.env.HOME}/.cabal/store`);
+                    // Issue #130: for non-choco installs, add ~/.cabal/bin to PATH
+                    core.addPath(`${process.env.HOME}/.cabal/bin`);
                 }
                 // Workaround the GHC nopie linking errors for ancient GHC versions
                 // NB: Is this _just_ for GHC 7.10.3?
