@@ -78,6 +78,11 @@ jobs:
           cabal-version: ${{ matrix.cabal }}
           cabal-update: ${{ matrix.cabal_update }}
 
+      - name: Show installed versions
+        run: |
+          cabal --version
+          ghc --version
+
       - name: Test runghc
         run: |
           runghc --version
@@ -91,15 +96,18 @@ jobs:
         working-directory: setup/__tests__/project
         run: cabal run
 
+      - name: Install test project
+        working-directory: setup/__tests__/project
+        run: cabal install
+
+      - name: Run installed test project
+        run: hello-haskell-setup
+        # This tests whether the default installdir has been added to the PATH (issue #130).
+
       - name: Build and run test with Hackage dependency
         if:   ${{ matrix.cabal_update != 'false' }}
         working-directory: setup/__tests__/project-with-hackage-dependency
         run:  cabal build && cabal run
-
-      - name: Show installed versions
-        run: |
-          cabal --version
-          ghc --version
 
       - name: Confirm installed and expected versions match
         shell: bash
