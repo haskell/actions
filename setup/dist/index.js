@@ -13646,7 +13646,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getOpts = exports.releaseRevision = exports.getDefaults = exports.yamlInputs = exports.ghcup_version = exports.supported_versions = exports.release_revisions = void 0;
+exports.getOpts = exports.parseYAMLBoolean = exports.releaseRevision = exports.getDefaults = exports.yamlInputs = exports.ghcup_version = exports.supported_versions = exports.release_revisions = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __nccwpck_require__(7147);
 const js_yaml_1 = __nccwpck_require__(1917);
@@ -13692,12 +13692,38 @@ function releaseRevision(version, tool, os) {
     return result;
 }
 exports.releaseRevision = releaseRevision;
+/**
+ * Convert a string input to a boolean according to the YAML 1.2 "core schema" specification.
+ * Supported boolean renderings: `true | True | TRUE | false | False | FALSE` .
+ * ref: https://yaml.org/spec/1.2/spec.html#id2804923
+ * Adapted from: https://github.com/actions/toolkit/commit/fbdf27470cdcb52f16755d32082f1fee0bfb7d6d#diff-f63fb32fca85d8e177d6400ce078818a4815b80ac7a3319b60d3507354890992R94-R115
+ *
+ * @param     name     name of the input
+ * @param     val      supposed string representation of a boolean
+ * @returns   boolean
+ */
+function parseYAMLBoolean(name, val) {
+    const trueValue = ['true', 'True', 'TRUE'];
+    const falseValue = ['false', 'False', 'FALSE'];
+    if (trueValue.includes(val))
+        return true;
+    if (falseValue.includes(val))
+        return false;
+    throw new TypeError(`Action input "${name}" does not meet YAML 1.2 "Core Schema" specification: \n` +
+        `Supported boolean values: \`true | True | TRUE | false | False | FALSE\``);
+}
+exports.parseYAMLBoolean = parseYAMLBoolean;
 function getOpts({ ghc, cabal, stack }, os, inputs) {
     core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
     const stackNoGlobal = (inputs['stack-no-global'] || '') !== '';
     const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
     const stackEnable = (inputs['enable-stack'] || '') !== '';
     const matcherDisable = (inputs['disable-matcher'] || '') !== '';
+    // Andreas, 2023-01-05, issue #29:
+    // 'cabal-update' has a default value, so we should get a proper boolean always.
+    // Andreas, 2023-01-06: This is not true if we use the action as a library.
+    // Thus, need to patch with default value here.
+    const cabalUpdate = parseYAMLBoolean('cabal-update', inputs['cabal-update'] || 'true');
     core.debug(`${stackNoGlobal}/${stackSetupGhc}/${stackEnable}`);
     const verInpt = {
         ghc: inputs['ghc-version'] || ghc.version,
@@ -13727,7 +13753,8 @@ function getOpts({ ghc, cabal, stack }, os, inputs) {
             raw: verInpt.cabal,
             resolved: resolve(verInpt.cabal, cabal.supported, 'cabal', os, cabalEnable // if true: inform user about resolution
             ),
-            enable: cabalEnable
+            enable: cabalEnable,
+            update: cabalUpdate
         },
         stack: {
             raw: verInpt.stack,
@@ -13831,7 +13858,7 @@ async function run(inputs) {
                     // https://github.com/haskell/cabal/issues/6823
                     // await exec('cabal user-config update');
                 }
-                if (!opts.stack.enable)
+                if (opts.cabal.update && !opts.stack.enable)
                     await (0, exec_1.exec)('cabal update');
             });
         core.info(`##[add-matcher]${path.join(__dirname, '..', 'matcher.json')}`);

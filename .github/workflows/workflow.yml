@@ -41,10 +41,13 @@ jobs:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         ghc: ["latest", "8.4.4"]
         cabal: ["latest", "3.2.0.0"]
+        cabal_update: ["false"]
+        # The following tests do not set 'cabal-update', which defaults to 'true' then.
         include:
           - os: ubuntu-latest
             ghc: "8.2.2"
             cabal: "2.4.1.0"
+            cabal_update: "false"
           - os: ubuntu-18.04
             ghc: "7.4.1"
             cabal: "3.4"
@@ -68,24 +71,36 @@ jobs:
             cabal: "3.6"
     steps:
       - uses: actions/checkout@v3
+
       - uses: ./setup
         with:
           ghc-version: ${{ matrix.ghc }}
           cabal-version: ${{ matrix.cabal }}
+          cabal-update: ${{ matrix.cabal_update }}
+
       - name: Test runghc
         run: |
           runghc --version
           runghc __tests__/hello.hs
+
       - name: Build test project
         working-directory: setup/__tests__/project
         run: cabal build
+
       - name: Run test project
         working-directory: setup/__tests__/project
         run: cabal run
+
+      - name: Build and run test with Hackage dependency
+        if:   ${{ matrix.cabal_update != 'false' }}
+        working-directory: setup/__tests__/project-with-hackage-dependency
+        run:  cabal build && cabal run
+
       - name: Show installed versions
         run: |
           cabal --version
           ghc --version
+
       - name: Confirm installed and expected versions match
         shell: bash
         # check that if given in the matrix, the actual version matches:

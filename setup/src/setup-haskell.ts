@@ -73,7 +73,7 @@ export default async function run(
           // https://github.com/haskell/cabal/issues/6823
           // await exec('cabal user-config update');
         }
-        if (!opts.stack.enable) await exec('cabal update');
+        if (opts.cabal.update && !opts.stack.enable) await exec('cabal update');
       });
 
     core.info(`##[add-matcher]${path.join(__dirname, '..', 'matcher.json')}`);
