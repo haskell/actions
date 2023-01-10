@@ -26,7 +26,10 @@ inputs:
   cabal-update:
     required: false
     default: true
-    description: 'Set to false to prevent `cabal update` from being run.'
+    description: 'Set to `false` to prevent `cabal update` from being run.'
+    # Note: 'cabal-update' only accepts 'true' and 'false' as values.
+    # This is different from the other flags ('enable-stack', 'disable-matcher' etc.)
+    # which are true as soon as they are not null.
   disable-matcher:
     required: false
     description: 'If specified, disables match messages from GHC as GitHub CI annotations.'
