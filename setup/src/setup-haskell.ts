@@ -4,7 +4,7 @@ import * as fs from 'fs';
 import * as path from 'path';
 import {EOL} from 'os';
 import {getOpts, getDefaults, Tool} from './opts';
-import {installTool, resetTool} from './installer';
+import {addGhcupReleaseChannel, installTool, resetTool} from './installer';
 import type {OS} from './opts';
 import {exec} from '@actions/exec';
 
@@ -25,6 +25,12 @@ export default async function run(
     core.info('Preparing to setup a Haskell environment');
     const os = process.platform as OS;
     const opts = getOpts(getDefaults(os), os, inputs);
+
+    if (opts.ghcup.releaseChannel !== '') {
+      await core.group(`Preparing ghcup environment`, async () =>
+        addGhcupReleaseChannel(opts.ghcup.releaseChannel, os)
+      );
+    }
 
     for (const [t, {resolved}] of Object.entries(opts).filter(
       o => o[1].enable

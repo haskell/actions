@@ -98,16 +98,17 @@ jobs:
 
 ## Inputs
 
-| Name              | Description                                                                                                                                 | Type      | Default     |
-| ----------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ----------- |
-| `ghc-version`     | GHC version to use, e.g. `9.2` or `9.2.4`.                                                                                                  | `string`  | `latest`    |
-| `cabal-version`   | Cabal version to use, e.g. `3.4`.                                                                                                           | `string`  | `latest`    |
-| `stack-version`   | Stack version to use, e.g. `latest`. Stack will only be installed if `enable-stack` is set.                                                 | `string`  | `latest`    |
-| `enable-stack`    | If set, will setup Stack.                                                                                                                   | "boolean" | false/unset |
-| `stack-no-global` | If set, `enable-stack` must be set. Prevents installing GHC and Cabal globally.                                                             | "boolean" | false/unset |
-| `stack-setup-ghc` | If set, `enable-stack` must be set. Runs stack setup to install the specified GHC. (Note: setting this does _not_ imply `stack-no-global`.) | "boolean" | false/unset |
-| `disable-matcher` | If set, disables match messages from GHC as GitHub CI annotations.                                                                          | "boolean" | false/unset |
-| `cabal-update`    | If set to `false`, skip `cabal update` step.                                                                                                | `boolean` | `true`      |
+| Name                    | Description                                                                                                                                 | Type      | Default       |
+| ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ------------- |
+| `ghc-version`           | GHC version to use, e.g. `9.2` or `9.2.4`.                                                                                                  | `string`  | `latest`      |
+| `cabal-version`         | Cabal version to use, e.g. `3.4`.                                                                                                           | `string`  | `latest`      |
+| `stack-version`         | Stack version to use, e.g. `latest`. Stack will only be installed if `enable-stack` is set.                                                 | `string`  | `latest`      |
+| `enable-stack`          | If set, will setup Stack.                                                                                                                   | `boolean` | `false`/unset |
+| `stack-no-global`       | If set, `enable-stack` must be set. Prevents installing GHC and Cabal globally.                                                             | `boolean` | `false`/unset |
+| `stack-setup-ghc`       | If set, `enable-stack` must be set. Runs stack setup to install the specified GHC. (Note: setting this does _not_ imply `stack-no-global`.) | `boolean` | `false`/unset |
+| `disable-matcher`       | If set, disables match messages from GHC as GitHub CI annotations.                                                                          | `boolean` | `false`/unset |
+| `cabal-update`          | If set to `false`, skip `cabal update` step.                                                                                                | `boolean` | `true`        |
+| `ghcup-release-channel` | If set, add a release channel to ghcup.                                                                                                     | `string`  | unset         |
 
 Note: "boolean" types are set/unset, not true/false.
 That is, setting any "boolean" to a value other than the empty string (`""`) will be considered true/set.

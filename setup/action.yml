@@ -30,6 +30,9 @@ inputs:
     # Note: 'cabal-update' only accepts 'true' and 'false' as values.
     # This is different from the other flags ('enable-stack', 'disable-matcher' etc.)
     # which are true as soon as they are not null.
+  ghcup-release-channel:
+    required: false
+    description: "A release channel to add to ghcup via `ghcup add-release-channel`."
   disable-matcher:
     required: false
     description: 'If specified, disables match messages from GHC as GitHub CI annotations.'

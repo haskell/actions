@@ -24,6 +24,7 @@ export interface ProgramOpt {
 
 export interface Options {
   ghc: ProgramOpt;
+  ghcup: {releaseChannel: string};
   cabal: ProgramOpt & {update: boolean};
   stack: ProgramOpt & {setup: boolean};
   general: {matcher: {enable: boolean}};
@@ -114,6 +115,7 @@ export function getOpts(
   const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
   const stackEnable = (inputs['enable-stack'] || '') !== '';
   const matcherDisable = (inputs['disable-matcher'] || '') !== '';
+  const ghcupReleaseChannel = inputs['ghcup-release-channel'] || '';
   // Andreas, 2023-01-05, issue #29:
   // 'cabal-update' has a default value, so we should get a proper boolean always.
   // Andreas, 2023-01-06: This is not true if we use the action as a library.
@@ -155,6 +157,9 @@ export function getOpts(
         ghcEnable // if true: inform user about resolution
       ),
       enable: ghcEnable
+    },
+    ghcup: {
+      releaseChannel: ghcupReleaseChannel
     },
     cabal: {
       raw: verInpt.cabal,
