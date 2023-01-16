@@ -16,7 +16,7 @@ updates:
     directory: "/setup"
     # Check the npm registry for updates every day (weekdays)
     schedule:
-      interval: "weekly"
+      interval: "monthly"
 
   # Enable version updates for npm
   - package-ecosystem: "npm"
@@ -24,7 +24,7 @@ updates:
     directory: "/hlint-setup"
     # Check the npm registry for updates every day (weekdays)
     schedule:
-      interval: "weekly"
+      interval: "monthly"
 
   # Enable version updates for npm
   - package-ecosystem: "npm"
@@ -32,4 +32,4 @@ updates:
     directory: "/hlint-run"
     # Check the npm registry for updates every day (weekdays)
     schedule:
-      interval: "weekly"
+      interval: "monthly"
