@@ -32,7 +32,7 @@ inputs:
     # which are true as soon as they are not null.
   ghcup-release-channel:
     required: false
-    description: "A release channel to add to ghcup via `ghcup add-release-channel`."
+    description: "A release channel URL to add to ghcup via `ghcup config add-release-channel`."
   disable-matcher:
     required: false
     description: 'If specified, disables match messages from GHC as GitHub CI annotations.'
