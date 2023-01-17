@@ -24,6 +24,7 @@ export interface ProgramOpt {
 
 export interface Options {
   ghc: ProgramOpt;
+  ghcup: {releaseChannel?: URL};
   cabal: ProgramOpt & {update: boolean};
   stack: ProgramOpt & {setup: boolean};
   general: {matcher: {enable: boolean}};
@@ -104,6 +105,15 @@ export function parseYAMLBoolean(name: string, val: string): boolean {
   );
 }
 
+export function parseURL(name: string, val: string): URL | undefined {
+  if (val === '') return undefined;
+  try {
+    return new URL(val);
+  } catch (e) {
+    throw new TypeError(`Action input "${name}" is not a valid URL`);
+  }
+}
+
 export function getOpts(
   {ghc, cabal, stack}: Defaults,
   os: OS,
@@ -114,6 +124,10 @@ export function getOpts(
   const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
   const stackEnable = (inputs['enable-stack'] || '') !== '';
   const matcherDisable = (inputs['disable-matcher'] || '') !== '';
+  const ghcupReleaseChannel = parseURL(
+    'ghcup-release-channel',
+    inputs['ghcup-release-channel'] || ''
+  );
   // Andreas, 2023-01-05, issue #29:
   // 'cabal-update' has a default value, so we should get a proper boolean always.
   // Andreas, 2023-01-06: This is not true if we use the action as a library.
@@ -155,6 +169,9 @@ export function getOpts(
         ghcEnable // if true: inform user about resolution
       ),
       enable: ghcEnable
+    },
+    ghcup: {
+      releaseChannel: ghcupReleaseChannel
     },
     cabal: {
       raw: verInpt.cabal,

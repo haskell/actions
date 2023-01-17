@@ -13303,7 +13303,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.resetTool = exports.installTool = void 0;
+exports.addGhcupReleaseChannel = exports.resetTool = exports.installTool = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const exec_1 = __nccwpck_require__(1514);
 const io_1 = __nccwpck_require__(7436);
@@ -13531,6 +13531,12 @@ async function ghcupBin(os) {
     await fs_1.promises.chmod(bin, 0o755);
     return (0, path_1.join)(await tc.cacheFile(bin, 'ghcup', 'ghcup', opts_1.ghcup_version), 'ghcup');
 }
+async function addGhcupReleaseChannel(channel, os) {
+    core.info(`Adding ghcup release channel: ${channel}`);
+    const bin = await ghcupBin(os);
+    await exec(bin, ['config', 'add-release-channel', channel.toString()]);
+}
+exports.addGhcupReleaseChannel = addGhcupReleaseChannel;
 async function ghcup(tool, version, os) {
     core.info(`Attempting to install ${tool} ${version} using ghcup`);
     const bin = await ghcupBin(os);
@@ -13646,7 +13652,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
-exports.getOpts = exports.parseYAMLBoolean = exports.releaseRevision = exports.getDefaults = exports.yamlInputs = exports.ghcup_version = exports.supported_versions = exports.release_revisions = void 0;
+exports.getOpts = exports.parseURL = exports.parseYAMLBoolean = exports.releaseRevision = exports.getDefaults = exports.yamlInputs = exports.ghcup_version = exports.supported_versions = exports.release_revisions = void 0;
 const core = __importStar(__nccwpck_require__(2186));
 const fs_1 = __nccwpck_require__(7147);
 const js_yaml_1 = __nccwpck_require__(1917);
@@ -13713,12 +13719,24 @@ function parseYAMLBoolean(name, val) {
         `Supported boolean values: \`true | True | TRUE | false | False | FALSE\``);
 }
 exports.parseYAMLBoolean = parseYAMLBoolean;
+function parseURL(name, val) {
+    if (val === '')
+        return undefined;
+    try {
+        return new URL(val);
+    }
+    catch (e) {
+        throw new TypeError(`Action input "${name}" is not a valid URL`);
+    }
+}
+exports.parseURL = parseURL;
 function getOpts({ ghc, cabal, stack }, os, inputs) {
     core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
     const stackNoGlobal = (inputs['stack-no-global'] || '') !== '';
     const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
     const stackEnable = (inputs['enable-stack'] || '') !== '';
     const matcherDisable = (inputs['disable-matcher'] || '') !== '';
+    const ghcupReleaseChannel = parseURL('ghcup-release-channel', inputs['ghcup-release-channel'] || '');
     // Andreas, 2023-01-05, issue #29:
     // 'cabal-update' has a default value, so we should get a proper boolean always.
     // Andreas, 2023-01-06: This is not true if we use the action as a library.
@@ -13748,6 +13766,9 @@ function getOpts({ ghc, cabal, stack }, os, inputs) {
             resolved: resolve(verInpt.ghc, ghc.supported, 'ghc', os, ghcEnable // if true: inform user about resolution
             ),
             enable: ghcEnable
+        },
+        ghcup: {
+            releaseChannel: ghcupReleaseChannel
         },
         cabal: {
             raw: verInpt.cabal,
@@ -13827,6 +13848,9 @@ async function run(inputs) {
         core.info('Preparing to setup a Haskell environment');
         const os = process.platform;
         const opts = (0, opts_1.getOpts)((0, opts_1.getDefaults)(os), os, inputs);
+        if (opts.ghcup.releaseChannel) {
+            await core.group(`Preparing ghcup environment`, async () => (0, installer_1.addGhcupReleaseChannel)(opts.ghcup.releaseChannel, os));
+        }
         for (const [t, { resolved }] of Object.entries(opts).filter(o => o[1].enable)) {
             await core.group(`Preparing ${t} environment`, async () => (0, installer_1.resetTool)(t, resolved, os));
             await core.group(`Installing ${t} version ${resolved}`, async () => (0, installer_1.installTool)(t, resolved, os));

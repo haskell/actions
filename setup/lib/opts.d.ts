@@ -1,3 +1,4 @@
+/// <reference types="node" />
 export declare const release_revisions: Revisions;
 export declare const supported_versions: Record<Tool, string[]>;
 export declare const ghcup_version: string;
@@ -14,6 +15,9 @@ export interface ProgramOpt {
 }
 export interface Options {
     ghc: ProgramOpt;
+    ghcup: {
+        releaseChannel?: URL;
+    };
     cabal: ProgramOpt & {
         update: boolean;
     };
@@ -53,5 +57,6 @@ export declare function releaseRevision(version: string, tool: Tool, os: OS): st
  * @returns   boolean
  */
 export declare function parseYAMLBoolean(name: string, val: string): boolean;
+export declare function parseURL(name: string, val: string): URL | undefined;
 export declare function getOpts({ ghc, cabal, stack }: Defaults, os: OS, inputs: Record<string, string>): Options;
 export {};

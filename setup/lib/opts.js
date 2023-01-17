@@ -23,7 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOpts = exports.parseYAMLBoolean = exports.releaseRevision = exports.getDefaults = exports.yamlInputs = exports.ghcup_version = exports.supported_versions = exports.release_revisions = void 0;
+exports.getOpts = exports.parseURL = exports.parseYAMLBoolean = exports.releaseRevision = exports.getDefaults = exports.yamlInputs = exports.ghcup_version = exports.supported_versions = exports.release_revisions = void 0;
 const core = __importStar(require("@actions/core"));
 const fs_1 = require("fs");
 const js_yaml_1 = require("js-yaml");
@@ -90,12 +90,24 @@ function parseYAMLBoolean(name, val) {
         `Supported boolean values: \`true | True | TRUE | false | False | FALSE\``);
 }
 exports.parseYAMLBoolean = parseYAMLBoolean;
+function parseURL(name, val) {
+    if (val === '')
+        return undefined;
+    try {
+        return new URL(val);
+    }
+    catch (e) {
+        throw new TypeError(`Action input "${name}" is not a valid URL`);
+    }
+}
+exports.parseURL = parseURL;
 function getOpts({ ghc, cabal, stack }, os, inputs) {
     core.debug(`Inputs are: ${JSON.stringify(inputs)}`);
     const stackNoGlobal = (inputs['stack-no-global'] || '') !== '';
     const stackSetupGhc = (inputs['stack-setup-ghc'] || '') !== '';
     const stackEnable = (inputs['enable-stack'] || '') !== '';
     const matcherDisable = (inputs['disable-matcher'] || '') !== '';
+    const ghcupReleaseChannel = parseURL('ghcup-release-channel', inputs['ghcup-release-channel'] || '');
     // Andreas, 2023-01-05, issue #29:
     // 'cabal-update' has a default value, so we should get a proper boolean always.
     // Andreas, 2023-01-06: This is not true if we use the action as a library.
@@ -125,6 +137,9 @@ function getOpts({ ghc, cabal, stack }, os, inputs) {
             resolved: resolve(verInpt.ghc, ghc.supported, 'ghc', os, ghcEnable // if true: inform user about resolution
             ),
             enable: ghcEnable
+        },
+        ghcup: {
+            releaseChannel: ghcupReleaseChannel
         },
         cabal: {
             raw: verInpt.cabal,

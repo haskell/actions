@@ -26,7 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.resetTool = exports.installTool = void 0;
+exports.addGhcupReleaseChannel = exports.resetTool = exports.installTool = void 0;
 const core = __importStar(require("@actions/core"));
 const exec_1 = require("@actions/exec");
 const io_1 = require("@actions/io");
@@ -254,6 +254,12 @@ async function ghcupBin(os) {
     await fs_1.promises.chmod(bin, 0o755);
     return (0, path_1.join)(await tc.cacheFile(bin, 'ghcup', 'ghcup', opts_1.ghcup_version), 'ghcup');
 }
+async function addGhcupReleaseChannel(channel, os) {
+    core.info(`Adding ghcup release channel: ${channel}`);
+    const bin = await ghcupBin(os);
+    await exec(bin, ['config', 'add-release-channel', channel.toString()]);
+}
+exports.addGhcupReleaseChannel = addGhcupReleaseChannel;
 async function ghcup(tool, version, os) {
     core.info(`Attempting to install ${tool} ${version} using ghcup`);
     const bin = await ghcupBin(os);
