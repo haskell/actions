@@ -304,12 +304,12 @@ async function ghcupBin(os: OS): Promise<string> {
 }
 
 export async function addGhcupReleaseChannel(
-  channel: string,
+  channel: URL,
   os: OS
 ): Promise<void> {
   core.info(`Adding ghcup release channel: ${channel}`);
   const bin = await ghcupBin(os);
-  await exec(bin, ['config', 'add-release-channel', channel]);
+  await exec(bin, ['config', 'add-release-channel', channel.toString()]);
 }
 
 async function ghcup(tool: Tool, version: string, os: OS): Promise<void> {

@@ -26,9 +26,9 @@ export default async function run(
     const os = process.platform as OS;
     const opts = getOpts(getDefaults(os), os, inputs);
 
-    if (opts.ghcup.releaseChannel !== '') {
+    if (opts.ghcup.releaseChannel) {
       await core.group(`Preparing ghcup environment`, async () =>
-        addGhcupReleaseChannel(opts.ghcup.releaseChannel, os)
+        addGhcupReleaseChannel(opts.ghcup.releaseChannel!, os)
       );
     }
 

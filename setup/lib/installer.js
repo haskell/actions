@@ -257,7 +257,7 @@ async function ghcupBin(os) {
 async function addGhcupReleaseChannel(channel, os) {
     core.info(`Adding ghcup release channel: ${channel}`);
     const bin = await ghcupBin(os);
-    await exec(bin, ['config', 'add-release-channel', channel]);
+    await exec(bin, ['config', 'add-release-channel', channel.toString()]);
 }
 exports.addGhcupReleaseChannel = addGhcupReleaseChannel;
 async function ghcup(tool, version, os) {
