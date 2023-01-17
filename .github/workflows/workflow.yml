@@ -51,6 +51,11 @@ jobs:
           - os: ubuntu-18.04
             ghc: "7.4.1"
             cabal: "3.4"
+          # Test ghcup pre-release channel
+          - os: ubuntu-latest
+            ghc: "9.6.0.20230111"
+            ghcup_release_channel: "https://raw.githubusercontent.com/haskell/ghcup-metadata/master/ghcup-prereleases-0.0.7.yaml"
+            cabal: "3.8"
           # setup does something special for 7.10.3 (issue #79)
           - os: ubuntu-20.04
             ghc: "7.10.3"
@@ -75,6 +80,7 @@ jobs:
       - uses: ./setup
         with:
           ghc-version: ${{ matrix.ghc }}
+          ghcup-release-channel: ${{ matrix.ghcup_release_channel }}
           cabal-version: ${{ matrix.cabal }}
           cabal-update: ${{ matrix.cabal_update }}
 
