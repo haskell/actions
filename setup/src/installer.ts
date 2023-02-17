@@ -3,11 +3,10 @@ import {exec as e} from '@actions/exec';
 import {which} from '@actions/io';
 import * as tc from '@actions/tool-cache';
 import {promises as afs} from 'fs';
-import {join, dirname} from 'path';
-import {ghcup_version, OS, Tool, releaseRevision} from './opts';
+import {join} from 'path';
+import {ghcup_version, OS, Tool} from './opts';
 import process from 'process';
 import * as glob from '@actions/glob';
-import * as fs from 'fs';
 import {compareVersions} from 'compare-versions'; // compareVersions can be used in the sense of >
 
 // Don't throw on non-zero.
@@ -85,21 +84,15 @@ async function isInstalled(
   const v = aptVersion(tool, version);
   const aptPath = `/opt/${tool}/${v}/bin`;
 
-  const chocoPath = await getChocoPath(
-    tool,
-    version,
-    releaseRevision(version, tool, os)
-  );
-
   const locations = {
     stack: [], // Always installed into the tool cache
     cabal: {
-      win32: [chocoPath],
+      win32: [ghcupPath],
       linux: [aptPath],
       darwin: []
     }[os],
     ghc: {
-      win32: [chocoPath],
+      win32: [ghcupPath],
       linux: [aptPath, ghcupPath],
       darwin: [ghcupPath]
     }[os]
@@ -338,6 +331,7 @@ async function ghcupGHCHead(): Promise<void> {
   if (returnCode === 0) await exec(bin, ['set', 'ghc', 'head']);
 }
 
+/*
 async function getChocoPath(
   tool: Tool,
   version: string,
@@ -365,7 +359,9 @@ async function getChocoPath(
   }
   core.debug(`getChocoPath(): chocoToolPath = ${chocoToolPath}`);
 
-  const pattern = `${chocoToolPath}/**/${tool}.exe`;
+*/
+//  const pattern = `${chocoToolPath}/**/${tool}.exe`;
+/*
   const globber = await glob.create(pattern);
 
   for await (const file of globber.globGenerator()) {
@@ -376,3 +372,5 @@ async function getChocoPath(
   core.debug(`getChocoPath(): cannot find binary for ${tool}`);
   return '<not-found>';
 }
+
+*/
