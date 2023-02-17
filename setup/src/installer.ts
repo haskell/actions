@@ -288,6 +288,10 @@ async function choco(tool: Tool, version: string): Promise<void> {
 }
 
 async function ghcupBin(os: OS): Promise<string> {
+  core.info(`ghcupBin : ${os}`);
+  if (os === 'win32') {
+    return 'ghcup'
+  }
   const cachedBin = tc.find('ghcup', ghcup_version);
   if (cachedBin) return join(cachedBin, 'ghcup');
 

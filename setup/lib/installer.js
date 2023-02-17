@@ -247,6 +247,10 @@ async function choco(tool, version) {
         core.addPath(chocoPath);
 }
 async function ghcupBin(os) {
+    core.info(`ghcupBin : ${os}`);
+    if (os === 'win32') {
+        return 'ghcup';
+    }
     const cachedBin = tc.find('ghcup', opts_1.ghcup_version);
     if (cachedBin)
         return (0, path_1.join)(cachedBin, 'ghcup');
