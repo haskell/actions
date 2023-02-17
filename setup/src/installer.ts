@@ -170,7 +170,7 @@ export async function installTool(
       await apt(tool, version);
       break;
     case 'win32':
-      await choco(tool, version);
+      await ghcup(tool, version, os);
       break;
     case 'darwin':
       await ghcup(tool, version, os);
@@ -259,6 +259,7 @@ async function apt(tool: Tool, version: string): Promise<void> {
   );
 }
 
+/*
 async function choco(tool: Tool, version: string): Promise<void> {
   core.info(`Attempting to install ${tool} ${version} using chocolatey`);
 
@@ -286,11 +287,12 @@ async function choco(tool: Tool, version: string): Promise<void> {
 
   if (tool == 'ghc') core.addPath(chocoPath);
 }
+*/
 
 async function ghcupBin(os: OS): Promise<string> {
   core.info(`ghcupBin : ${os}`);
   if (os === 'win32') {
-    return 'ghcup'
+    return 'ghcup';
   }
   const cachedBin = tc.find('ghcup', ghcup_version);
   if (cachedBin) return join(cachedBin, 'ghcup');
