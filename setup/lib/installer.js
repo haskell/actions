@@ -155,7 +155,7 @@ async function installTool(tool, version, os) {
             await apt(tool, version);
             break;
         case 'win32':
-            await choco(tool, version);
+            await ghcup(tool, version, os);
             break;
         case 'darwin':
             await ghcup(tool, version, os);
@@ -222,30 +222,35 @@ async function apt(tool, version) {
     // Ignore the return code so we can fall back to ghcup
     await exec(`sudo -- sh -c "add-apt-repository -y ppa:hvr/ghc && apt-get update && apt-get -y install ${toolName}-${v}"`);
 }
-async function choco(tool, version) {
-    core.info(`Attempting to install ${tool} ${version} using chocolatey`);
-    // E.g. GHC version 7.10.3 on Chocolatey is revision 7.10.3.1.
-    const revision = (0, opts_1.releaseRevision)(version, tool, 'win32');
-    // Choco tries to invoke `add-path` command on earlier versions of ghc, which has been deprecated and fails the step, so disable command execution during this.
-    console.log('::stop-commands::SetupHaskellStopCommands');
-    const args = [
-        'choco',
-        'install',
-        tool,
-        '--version',
-        revision,
-        '-m',
-        '--no-progress',
-        core.isDebug() ? '-d' : '-r'
-    ];
-    if ((await exec('powershell', args)) !== 0)
-        await exec('powershell', [...args, '--pre']);
-    console.log('::SetupHaskellStopCommands::'); // Re-enable command execution
-    // Add GHC to path automatically because it does not add until the end of the step and we check the path.
-    const chocoPath = await getChocoPath(tool, version, revision);
-    if (tool == 'ghc')
-        core.addPath(chocoPath);
+/*
+async function choco(tool: Tool, version: string): Promise<void> {
+  core.info(`Attempting to install ${tool} ${version} using chocolatey`);
+
+  // E.g. GHC version 7.10.3 on Chocolatey is revision 7.10.3.1.
+  const revision: string = releaseRevision(version, tool, 'win32');
+
+  // Choco tries to invoke `add-path` command on earlier versions of ghc, which has been deprecated and fails the step, so disable command execution during this.
+  console.log('::stop-commands::SetupHaskellStopCommands');
+  const args = [
+    'choco',
+    'install',
+    tool,
+    '--version',
+    revision,
+    '-m',
+    '--no-progress',
+    core.isDebug() ? '-d' : '-r'
+  ];
+  if ((await exec('powershell', args)) !== 0)
+    await exec('powershell', [...args, '--pre']);
+  console.log('::SetupHaskellStopCommands::'); // Re-enable command execution
+  // Add GHC to path automatically because it does not add until the end of the step and we check the path.
+
+  const chocoPath = await getChocoPath(tool, version, revision);
+
+  if (tool == 'ghc') core.addPath(chocoPath);
 }
+*/
 async function ghcupBin(os) {
     core.info(`ghcupBin : ${os}`);
     if (os === 'win32') {
