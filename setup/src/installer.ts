@@ -97,6 +97,7 @@ async function isInstalled(
       darwin: [ghcupPath]
     }[os]
   };
+  core.info(`isInstalled ${tool} ${version} ${locations}`);
 
   for (const p of locations[tool]) {
     const installedPath = await afs
@@ -114,7 +115,7 @@ async function isInstalled(
     }
   }
 
-  if (tool === 'cabal' && os !== 'win32') {
+  if (tool === 'cabal') {
     const installedPath = await afs
       .access(`${ghcupPath}/cabal-${version}`)
       .then(() => ghcupPath)
@@ -252,36 +253,6 @@ async function apt(tool: Tool, version: string): Promise<void> {
   );
 }
 
-/*
-async function choco(tool: Tool, version: string): Promise<void> {
-  core.info(`Attempting to install ${tool} ${version} using chocolatey`);
-
-  // E.g. GHC version 7.10.3 on Chocolatey is revision 7.10.3.1.
-  const revision: string = releaseRevision(version, tool, 'win32');
-
-  // Choco tries to invoke `add-path` command on earlier versions of ghc, which has been deprecated and fails the step, so disable command execution during this.
-  console.log('::stop-commands::SetupHaskellStopCommands');
-  const args = [
-    'choco',
-    'install',
-    tool,
-    '--version',
-    revision,
-    '-m',
-    '--no-progress',
-    core.isDebug() ? '-d' : '-r'
-  ];
-  if ((await exec('powershell', args)) !== 0)
-    await exec('powershell', [...args, '--pre']);
-  console.log('::SetupHaskellStopCommands::'); // Re-enable command execution
-  // Add GHC to path automatically because it does not add until the end of the step and we check the path.
-
-  const chocoPath = await getChocoPath(tool, version, revision);
-
-  if (tool == 'ghc') core.addPath(chocoPath);
-}
-*/
-
 async function ghcupBin(os: OS): Promise<string> {
   core.info(`ghcupBin : ${os}`);
   if (os === 'win32') {
@@ -330,47 +301,3 @@ async function ghcupGHCHead(): Promise<void> {
   ]);
   if (returnCode === 0) await exec(bin, ['set', 'ghc', 'head']);
 }
-
-/*
-async function getChocoPath(
-  tool: Tool,
-  version: string,
-  revision: string
-): Promise<string> {
-  // Environment variable 'ChocolateyToolsLocation' will be added to Hosted images soon
-  // fallback to C:\\tools for now until variable is available
-  core.debug(
-    `getChocoPath(): ChocolateyToolsLocation = ${process.env.ChocolateyToolsLocation}`
-  );
-  const chocoToolsLocation =
-    process.env.ChocolateyToolsLocation ??
-    join(`${process.env.SystemDrive}`, 'tools');
-
-  // choco packages GHC 9.x are installed on different path (C:\\tools\ghc-9.0.1)
-  let chocoToolPath = join(chocoToolsLocation, `${tool}-${version}`);
-
-  // choco packages GHC < 9.x
-  if (!fs.existsSync(chocoToolPath)) {
-    chocoToolPath = join(
-      `${process.env.ChocolateyInstall}`,
-      'lib',
-      `${tool}.${revision}`
-    );
-  }
-  core.debug(`getChocoPath(): chocoToolPath = ${chocoToolPath}`);
-
-*/
-//  const pattern = `${chocoToolPath}/**/${tool}.exe`;
-/*
-  const globber = await glob.create(pattern);
-
-  for await (const file of globber.globGenerator()) {
-    core.debug(`getChocoPath(): found ${tool} at ${file}`);
-    return dirname(file);
-  }
-
-  core.debug(`getChocoPath(): cannot find binary for ${tool}`);
-  return '<not-found>';
-}
-
-*/
