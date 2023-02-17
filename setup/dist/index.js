@@ -13362,7 +13362,10 @@ async function isInstalled(tool, version, os) {
     const toolPath = tc.find(tool, version);
     if (toolPath)
         return success(tool, version, toolPath, os);
-    const ghcupPath = `${process_1.default.env.HOME}/.ghcup${tool === 'ghc' ? `/ghc/${version}` : ''}/bin`;
+    let ghcupPath = `${process_1.default.env.HOME}/.ghcup${tool === 'ghc' ? `/ghc/${version}` : ''}/bin`;
+    if (os === 'win32') {
+        ghcupPath = 'C:/ghcup/bin';
+    }
     const v = aptVersion(tool, version);
     const aptPath = `/opt/${tool}/${v}/bin`;
     const locations = {
