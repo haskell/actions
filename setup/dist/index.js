@@ -13378,7 +13378,9 @@ async function isInstalled(tool, version, os) {
             darwin: [ghcupPath]
         }[os]
     };
-    core.info(`isInstalled ${tool} ${version} ${locations}`);
+    core.info(`isInstalled ${tool} ${version} ${locations.ghc}`);
+    const f = await exec(await ghcupBin(os), ['whereis', tool, version]);
+    core.info(`isInstalled whereis ${f}`);
     for (const p of locations[tool]) {
         const installedPath = await fs_1.promises
             .access(p)
