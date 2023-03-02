@@ -123,7 +123,13 @@ async function isInstalled(tool, version, os) {
                     return success(tool, version, installedPath, os);
             }
             else {
-                return success(tool, version, installedPath, os);
+                const cabalPath = await fs_1.promises
+                    .access(`${installedPath}/cabal-${version}`)
+                    .then(() => p)
+                    .catch(() => undefined);
+                if (cabalPath) {
+                    return success(tool, version, installedPath, os);
+                }
             }
         }
     }

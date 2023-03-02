@@ -124,7 +124,13 @@ async function isInstalled(
         if (ghcupSetResult == 0)
           return success(tool, version, installedPath, os);
       } else {
-        return success(tool, version, installedPath, os);
+        const cabalPath = await afs
+          .access(`${installedPath}/cabal-${version}`)
+          .then(() => p)
+          .catch(() => undefined);
+        if (cabalPath) {
+          return success(tool, version, installedPath, os);
+        }
       }
     }
   }
