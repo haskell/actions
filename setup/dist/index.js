@@ -13372,8 +13372,8 @@ async function isInstalled(tool, version, os) {
         stack: [],
         cabal: {
             win32: [ghcupPath],
-            linux: [aptPath],
-            darwin: []
+            linux: [ghcupPath, aptPath],
+            darwin: [ghcupPath]
         }[os],
         ghc: {
             win32: [ghcupPath],
@@ -13385,13 +13385,21 @@ async function isInstalled(tool, version, os) {
     const f = await exec(await ghcupBin(os), ['whereis', tool, version]);
     core.info(`isInstalled whereis ${f}`);
     for (const p of locations[tool]) {
+        core.info(`Attempting to access tool ${tool} at location ${p}`);
         const installedPath = await fs_1.promises
             .access(p)
             .then(() => p)
             .catch(() => undefined);
+        if (installedPath == undefined) {
+            core.info(`Failed to access tool ${tool} at location ${p}`);
+        }
+        else {
+            core.info(`Succeeded accessing tool ${tool} at location ${p}`);
+        }
         if (installedPath) {
             // Make sure that the correct ghc is used, even if ghcup has set a
             // default prior to this action being ran.
+            core.info(`isInstalled installedPath: ${installedPath}`);
             if (installedPath === ghcupPath) {
                 // If the result of this `ghcup set` is non-zero, the version we want
                 // is probably not actually installed
@@ -13408,6 +13416,7 @@ async function isInstalled(tool, version, os) {
                     .access(`${installedPath}/cabal-${version}`)
                     .then(() => p)
                     .catch(() => undefined);
+                core.info(`isInstalled cabalPath ${cabalPath}`);
                 if (cabalPath) {
                     return success(tool, version, installedPath, os);
                 }
@@ -13635,6 +13644,34 @@ const rv = __importStar(__nccwpck_require__(8738));
 exports.release_revisions = rv;
 exports.supported_versions = sv;
 exports.ghcup_version = sv.ghcup[0]; // Known to be an array of length 1
+/**
+ * Reads the example `actions.yml` file and selects the `inputs` key. The result
+ * will be a key-value map of the following shape:
+ * ```
+ * {
+ *   'ghc-version': {
+ *     required: false,
+ *     description: '...',
+ *     default: 'latest'
+ *   },
+ *   'cabal-version': {
+ *     required: false,
+ *     description: '...',
+ *     default: 'latest'
+ *   },
+ *   'stack-version': {
+ *     required: false,
+ *     description: '...',
+ *     default: 'latest'
+ *   },
+ *   'enable-stack': {
+ *     required: false,
+ *     default: 'latest'
+ *   },
+ *   ...
+ * }
+ * ```
+ */
 exports.yamlInputs = (0, js_yaml_1.load)((0, fs_1.readFileSync)((0, path_1.join)(__dirname, '..', 'action.yml'), 'utf8')
 // The action.yml file structure is statically known.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -13821,6 +13858,9 @@ async function run(inputs) {
         core.info('Preparing to setup a Haskell environment');
         const os = process.platform;
         const opts = (0, opts_1.getOpts)((0, opts_1.getDefaults)(os), os, inputs);
+        core.debug(`run: inputs = ${JSON.stringify(inputs)}`);
+        core.debug(`run: os     = ${JSON.stringify(os)}`);
+        core.debug(`run: opts   = ${JSON.stringify(opts)}`);
         if (opts.ghcup.releaseChannel) {
             await core.group(`Preparing ghcup environment`, async () => (0, installer_1.addGhcupReleaseChannel)(opts.ghcup.releaseChannel, os));
         }
