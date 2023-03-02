@@ -96,7 +96,7 @@ async function isInstalled(tool, version, os) {
         }[os],
         ghc: {
             win32: [ghcupPath],
-            linux: [aptPath, ghcupPath],
+            linux: [ghcupPath, aptPath],
             darwin: [ghcupPath]
         }[os]
     };
@@ -121,8 +121,6 @@ async function isInstalled(tool, version, os) {
                 ]);
                 if (ghcupSetResult == 0)
                     return success(tool, version, installedPath, os);
-                else
-                    return false;
             }
             else {
                 return success(tool, version, installedPath, os);
