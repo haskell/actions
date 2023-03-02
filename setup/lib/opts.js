@@ -33,6 +33,34 @@ const rv = __importStar(require("./release-revisions.json"));
 exports.release_revisions = rv;
 exports.supported_versions = sv;
 exports.ghcup_version = sv.ghcup[0]; // Known to be an array of length 1
+/**
+ * Reads the example `actions.yml` file and selects the `inputs` key. The result
+ * will be a key-value map of the following shape:
+ * ```
+ * {
+ *   'ghc-version': {
+ *     required: false,
+ *     description: '...',
+ *     default: 'latest'
+ *   },
+ *   'cabal-version': {
+ *     required: false,
+ *     description: '...',
+ *     default: 'latest'
+ *   },
+ *   'stack-version': {
+ *     required: false,
+ *     description: '...',
+ *     default: 'latest'
+ *   },
+ *   'enable-stack': {
+ *     required: false,
+ *     default: 'latest'
+ *   },
+ *   ...
+ * }
+ * ```
+ */
 exports.yamlInputs = (0, js_yaml_1.load)((0, fs_1.readFileSync)((0, path_1.join)(__dirname, '..', 'action.yml'), 'utf8')
 // The action.yml file structure is statically known.
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

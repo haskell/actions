@@ -48,6 +48,9 @@ async function run(inputs) {
         core.info('Preparing to setup a Haskell environment');
         const os = process.platform;
         const opts = (0, opts_1.getOpts)((0, opts_1.getDefaults)(os), os, inputs);
+        core.debug(`run: inputs = ${JSON.stringify(inputs)}`);
+        core.debug(`run: os     = ${JSON.stringify(os)}`);
+        core.debug(`run: opts   = ${JSON.stringify(opts)}`);
         if (opts.ghcup.releaseChannel) {
             await core.group(`Preparing ghcup environment`, async () => (0, installer_1.addGhcupReleaseChannel)(opts.ghcup.releaseChannel, os));
         }

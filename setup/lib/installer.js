@@ -91,8 +91,8 @@ async function isInstalled(tool, version, os) {
         stack: [],
         cabal: {
             win32: [ghcupPath],
-            linux: [aptPath],
-            darwin: []
+            linux: [ghcupPath, aptPath],
+            darwin: [ghcupPath]
         }[os],
         ghc: {
             win32: [ghcupPath],
@@ -104,13 +104,21 @@ async function isInstalled(tool, version, os) {
     const f = await exec(await ghcupBin(os), ['whereis', tool, version]);
     core.info(`isInstalled whereis ${f}`);
     for (const p of locations[tool]) {
+        core.info(`Attempting to access tool ${tool} at location ${p}`);
         const installedPath = await fs_1.promises
             .access(p)
             .then(() => p)
             .catch(() => undefined);
+        if (installedPath == undefined) {
+            core.info(`Failed to access tool ${tool} at location ${p}`);
+        }
+        else {
+            core.info(`Succeeded accessing tool ${tool} at location ${p}`);
+        }
         if (installedPath) {
             // Make sure that the correct ghc is used, even if ghcup has set a
             // default prior to this action being ran.
+            core.info(`isInstalled installedPath: ${installedPath}`);
             if (installedPath === ghcupPath) {
                 // If the result of this `ghcup set` is non-zero, the version we want
                 // is probably not actually installed
@@ -127,6 +135,7 @@ async function isInstalled(tool, version, os) {
                     .access(`${installedPath}/cabal-${version}`)
                     .then(() => p)
                     .catch(() => undefined);
+                core.info(`isInstalled cabalPath ${cabalPath}`);
                 if (cabalPath) {
                     return success(tool, version, installedPath, os);
                 }

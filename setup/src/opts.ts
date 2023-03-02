@@ -35,6 +35,34 @@ export type Defaults = Record<Tool, Version> & {
   general: {matcher: {enable: boolean}};
 };
 
+/**
+ * Reads the example `actions.yml` file and selects the `inputs` key. The result
+ * will be a key-value map of the following shape:
+ * ```
+ * {
+ *   'ghc-version': {
+ *     required: false,
+ *     description: '...',
+ *     default: 'latest'
+ *   },
+ *   'cabal-version': {
+ *     required: false,
+ *     description: '...',
+ *     default: 'latest'
+ *   },
+ *   'stack-version': {
+ *     required: false,
+ *     description: '...',
+ *     default: 'latest'
+ *   },
+ *   'enable-stack': {
+ *     required: false,
+ *     default: 'latest'
+ *   },
+ *   ...
+ * }
+ * ```
+ */
 export const yamlInputs: Record<string, {default: string}> = (
   load(
     readFileSync(join(__dirname, '..', 'action.yml'), 'utf8')

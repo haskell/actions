@@ -41,6 +41,34 @@ export type Defaults = Record<Tool, Version> & {
         };
     };
 };
+/**
+ * Reads the example `actions.yml` file and selects the `inputs` key. The result
+ * will be a key-value map of the following shape:
+ * ```
+ * {
+ *   'ghc-version': {
+ *     required: false,
+ *     description: '...',
+ *     default: 'latest'
+ *   },
+ *   'cabal-version': {
+ *     required: false,
+ *     description: '...',
+ *     default: 'latest'
+ *   },
+ *   'stack-version': {
+ *     required: false,
+ *     description: '...',
+ *     default: 'latest'
+ *   },
+ *   'enable-stack': {
+ *     required: false,
+ *     default: 'latest'
+ *   },
+ *   ...
+ * }
+ * ```
+ */
 export declare const yamlInputs: Record<string, {
     default: string;
 }>;
