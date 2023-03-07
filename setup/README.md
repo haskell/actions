@@ -138,7 +138,9 @@ In contrast, a proper `boolean` input like `cabal-update` only accepts values `t
 - `9.4.3`
 - `9.4.2`
 - `9.4.1`
-- `9.2.5` `9.2`
+- `9.2.7` `9.2`
+- `9.2.6`
+- `9.2.5`
 - `9.2.4`
 - `9.2.3`
 - `9.2.2`
