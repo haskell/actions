@@ -134,6 +134,7 @@ In contrast, a proper `boolean` input like `cabal-update` only accepts values `t
 **GHC:**
 
 - `latest` (default, recommended)
+- `9.6.1` `9.6`
 - `9.4.4` `9.4`
 - `9.4.3`
 - `9.4.2`
@@ -176,6 +177,7 @@ Suggestion: Try to support the three latest major versions of GHC.
 **Cabal:**
 
 - `latest` (default, recommended)
+- `3.10.1.0` `3.10`
 - `3.8.1.0` `3.8`
 - `3.6.2.0` `3.6`
 - `3.6.0.0`
