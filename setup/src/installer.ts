@@ -273,6 +273,7 @@ async function choco(tool: Tool, version: string): Promise<void> {
     tool,
     '--version',
     revision,
+    '--allow-multiple-versions',
     // Andreas, 2023-03-13, issue #202:
     // When installing GHC, skip automatic cabal installation.
     tool == 'ghc' ? '--ignore-dependencies' : '',
