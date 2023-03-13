@@ -13511,9 +13511,12 @@ async function choco(tool, version) {
         tool,
         '--version',
         revision,
-        '-m',
+        // Andreas, 2023-03-13, issue #202:
+        // When installing GHC, skip automatic cabal installation.
+        tool == 'ghc' ? '--ignore-dependencies' : '',
+        // Verbosity options:
         '--no-progress',
-        core.isDebug() ? '-d' : '-r'
+        core.isDebug() ? '--debug' : '--limit-output'
     ];
     if ((await exec('powershell', args)) !== 0)
         await exec('powershell', [...args, '--pre']);
@@ -13851,6 +13854,19 @@ async function run(inputs) {
         if (opts.ghcup.releaseChannel) {
             await core.group(`Preparing ghcup environment`, async () => (0, installer_1.addGhcupReleaseChannel)(opts.ghcup.releaseChannel, os));
         }
+        // Andreas, 2023-03-13, issue #202: Prepare choco.
+        // Since currently choco is the only install method for Windows,
+        // the following test is ok.
+        if (os == 'win32')
+            // choco install chocolatey-core.extension
+            await (0, exec_1.exec)('powershell', [
+                'choco',
+                'install',
+                'chocolatey-core.extension',
+                // Verbosity options:
+                '--no-progress',
+                core.isDebug() ? '--debug' : '--limit-output'
+            ]);
         for (const [t, { resolved }] of Object.entries(opts).filter(o => o[1].enable)) {
             await core.group(`Preparing ${t} environment`, async () => (0, installer_1.resetTool)(t, resolved, os));
             await core.group(`Installing ${t} version ${resolved}`, async () => (0, installer_1.installTool)(t, resolved, os));
