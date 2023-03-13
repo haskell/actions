@@ -2,7 +2,7 @@ name: "/setup"
 on:
   push:
     branches:
-      - main
+      - $default-branch
     paths-ignore:
       - "**.md"
   pull_request:
@@ -32,56 +32,84 @@ jobs:
       - run: npm test
 
   install-haskell:
-    name: GHC ${{ matrix.ghc }}, Cabal ${{ matrix.cabal }} - ${{ matrix.os }}
+    name: GHC ${{ matrix.plan.ghc }}, Cabal ${{ matrix.plan.cabal }} - ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+
       # Let's see how the other installs are doing and not fail on the first
       fail-fast: false
+
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        ghc: ["latest", "9.2"]
-        cabal: ["latest", "3.2.0.0"]
+        plan:
+          # Latest releases
+          - ghc:   latest
+            cabal: latest
+          # Recommended releases (update according to ghcup)
+          - ghc:   "9.2"
+            cabal: "3.6"
+          # Some previously recommended releases of ghc with matching cabal
+          - ghc:   "8.10"
+            cabal: "3.2"
+          - ghc:   "8.6"
+            cabal: "2.4"
         cabal_update: ["false"]
         # The following tests do not set 'cabal-update', which defaults to 'true' then.
+
         include:
+
+          # Test some old versions
           - os: ubuntu-latest
-            ghc: "8.2.2"
-            cabal: "2.4.1.0"
+            plan:
+              ghc:   "8.2.2"
+              cabal: "2.4.1.0"
             cabal_update: "false"
           - os: ubuntu-18.04
-            ghc: "7.4.1"
-            cabal: "3.4"
+            plan:
+              ghc:   "7.4.1"
+              cabal: "3.4"
+
           # Test ghcup pre-release channel
           - os: ubuntu-latest
-            ghc: "9.6.0.20230111"
             ghcup_release_channel: "https://raw.githubusercontent.com/haskell/ghcup-metadata/master/ghcup-prereleases-0.0.7.yaml"
-            cabal: "3.8"
+            plan:
+              ghc:   "9.6.0.20230111"
+              cabal: "3.8"
+
           # setup does something special for 7.10.3 (issue #79)
           - os: ubuntu-20.04
-            ghc: "7.10.3"
-            cabal: "3.6"
+            plan:
+              ghc:   "7.10.3"
+              cabal: "3.6"
           - os: macOS-latest
-            ghc: "7.10.3"
-            cabal: "3.4"
+            plan:
+              ghc:   "7.10.3"
+              cabal: "3.4"
+
           # Andreas 2022-12-29, issue #98: GHC 7.10 failed to install on windows (choco)
           - os: windows-latest
-            ghc: "7.10"
-            cabal: "3.0"
+            plan:
+              ghc:   "7.10"
+              cabal: "3.0"
+
           # Test for issue #129: GHC 9.4.3 failed to install on windows (choco)
           - os: windows-latest
-            ghc: "9.4.3"
-            cabal: "3.8.1.0"
+            plan:
+              ghc:   "9.4.3"
+              cabal: "3.8.1.0"
           - os: windows-latest
-            ghc: "9.2.5"
-            cabal: "3.6"
+            plan:
+              ghc:   "9.2.5"
+              cabal: "3.6"
+
     steps:
       - uses: actions/checkout@v3
 
       - uses: ./setup
         with:
-          ghc-version: ${{ matrix.ghc }}
+          ghc-version: ${{ matrix.plan.ghc }}
           ghcup-release-channel: ${{ matrix.ghcup_release_channel }}
-          cabal-version: ${{ matrix.cabal }}
+          cabal-version: ${{ matrix.plan.cabal }}
           cabal-update: ${{ matrix.cabal_update }}
 
       - name: Show installed versions
@@ -124,9 +152,9 @@ jobs:
         run: |
           CABALVER="$(cabal --numeric-version)"
           GHCVER="$(ghc --numeric-version)"
-          if [[ "${{ matrix.cabal }}" =~ ^([0-9]+\.[0-9]+) ]]; then cabalmajor="${BASH_REMATCH[1]}"; fi
-          if [[ "${{ matrix.ghc }}" =~ ^([0-9]+\.[0-9]+) ]]; then ghcmajor="${BASH_REMATCH[1]}"; fi
-          if [[ "${{ matrix.ghc }}" =~ ^([0-9]+\.[0-9]+\.[0-9]+) ]]; then ghcver="${BASH_REMATCH[1]}"; fi
+          if [[ "${{ matrix.plan.cabal }}" =~ ^([0-9]+\.[0-9]+) ]]; then cabalmajor="${BASH_REMATCH[1]}"; fi
+          if [[ "${{ matrix.plan.ghc }}" =~ ^([0-9]+\.[0-9]+) ]]; then ghcmajor="${BASH_REMATCH[1]}"; fi
+          if [[ "${{ matrix.plan.ghc }}" =~ ^([0-9]+\.[0-9]+\.[0-9]+) ]]; then ghcver="${BASH_REMATCH[1]}"; fi
           [[ "${CABALVER}" =~ ^"${cabalmajor}" ]] && [[ "${GHCVER}" =~ ^"${ghcmajor}" ]] && [[ "${GHCVER}" =~ ^"${ghcver}" ]]
 
   test-fallback:
@@ -144,7 +172,8 @@ jobs:
         with:
           ghc-version: 8.21.5
       - name: Error on success
-        if: steps.setup.outputs.failed == 'true'
+        if: steps.setup.outputs.failed != 'true'
+          # NB: 'failed' is an undeclared output of the setup action, used in debug mode
         run: |
           echo "Error: ghc 8.21.5 didn't fail to install"
 
@@ -154,7 +183,7 @@ jobs:
     strategy:
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
-        stack: ["latest", "1.9.1"]
+        stack: ["latest", "2.3.3"]
 
     steps:
       - uses: actions/checkout@v3
