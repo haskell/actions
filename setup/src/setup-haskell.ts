@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import * as io from '@actions/io';
 import ensureError from 'ensure-error';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -50,6 +51,11 @@ export default async function run(
 
     if (opts.cabal.enable)
       await core.group('Setting up cabal', async () => {
+        // Andreas, 2023-03-16, issue #210.
+        // Create .cabal/bin to activate non-XDG mode of cabal.
+        if (process.platform !== 'win32')
+          io.mkdirP(`${process.env.HOME}/.cabal/bin`);
+
         // Create config only if it doesn't exist.
         await exec('cabal', ['user-config', 'init'], {
           silent: true,

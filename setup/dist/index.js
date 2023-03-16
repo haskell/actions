@@ -13834,6 +13834,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
+const io = __importStar(__nccwpck_require__(7436));
 const ensure_error_1 = __importDefault(__nccwpck_require__(1056));
 const fs = __importStar(__nccwpck_require__(7147));
 const path = __importStar(__nccwpck_require__(1017));
@@ -13866,6 +13867,10 @@ async function run(inputs) {
             await core.group('Pre-installing GHC with stack', async () => (0, exec_1.exec)('stack', ['setup', opts.ghc.resolved]));
         if (opts.cabal.enable)
             await core.group('Setting up cabal', async () => {
+                // Andreas, 2023-03-16, issue #210.
+                // Create .cabal/bin to activate non-XDG mode of cabal.
+                if (process.platform !== 'win32')
+                    io.mkdirP(`${process.env.HOME}/.cabal/bin`);
                 // Create config only if it doesn't exist.
                 await (0, exec_1.exec)('cabal', ['user-config', 'init'], {
                     silent: true,
