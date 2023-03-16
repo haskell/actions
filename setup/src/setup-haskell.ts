@@ -1,4 +1,5 @@
 import * as core from '@actions/core';
+import * as io from '@actions/io';
 import ensureError from 'ensure-error';
 import * as fs from 'fs';
 import * as path from 'path';
@@ -50,20 +51,30 @@ export default async function run(
 
     if (opts.cabal.enable)
       await core.group('Setting up cabal', async () => {
+        // Andreas, 2023-03-16, issue #210.
+        // Create .cabal/bin to activate non-XDG mode of cabal.
+        if (process.platform !== 'win32')
+          io.mkdirP(`${process.env.HOME}/.cabal/bin`);
+
         // Create config only if it doesn't exist.
         await exec('cabal', ['user-config', 'init'], {
           silent: true,
           ignoreReturnCode: true
         });
+
+        // Set the 'store-dir' in the cabal configuration.
         // Blindly appending is fine.
         // Cabal merges these and picks the last defined option.
         const configFile = await cabalConfig();
-        if (process.platform === 'win32') {
-          fs.appendFileSync(configFile, `store-dir: C:\\sr${EOL}`);
-          core.setOutput('cabal-store', 'C:\\sr');
-        } else {
-          core.setOutput('cabal-store', `${process.env.HOME}/.cabal/store`);
-          // Issue #130: for non-choco installs, add ~/.cabal/bin to PATH
+        const storeDir =
+          process.platform === 'win32'
+            ? 'C:\\sr'
+            : `${process.env.HOME}/.cabal/store`;
+        fs.appendFileSync(configFile, `store-dir: ${storeDir}${EOL}`);
+        core.setOutput('cabal-store', storeDir);
+
+        // Issue #130: for non-choco installs, add ~/.cabal/bin to PATH
+        if (process.platform !== 'win32') {
           const installdir = `${process.env.HOME}/.cabal/bin`;
           core.info(`Adding ${installdir} to PATH`);
           core.addPath(installdir);
