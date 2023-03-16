@@ -55,15 +55,20 @@ export default async function run(
           silent: true,
           ignoreReturnCode: true
         });
+
+        // Set the 'store-dir' in the cabal configuration.
         // Blindly appending is fine.
         // Cabal merges these and picks the last defined option.
         const configFile = await cabalConfig();
-        if (process.platform === 'win32') {
-          fs.appendFileSync(configFile, `store-dir: C:\\sr${EOL}`);
-          core.setOutput('cabal-store', 'C:\\sr');
-        } else {
-          core.setOutput('cabal-store', `${process.env.HOME}/.cabal/store`);
-          // Issue #130: for non-choco installs, add ~/.cabal/bin to PATH
+        const storeDir =
+          process.platform === 'win32'
+            ? 'C:\\sr'
+            : `${process.env.HOME}/.cabal/store`;
+        fs.appendFileSync(configFile, `store-dir: ${storeDir}${EOL}`);
+        core.setOutput('cabal-store', storeDir);
+
+        // Issue #130: for non-choco installs, add ~/.cabal/bin to PATH
+        if (process.platform !== 'win32') {
           const installdir = `${process.env.HOME}/.cabal/bin`;
           core.info(`Adding ${installdir} to PATH`);
           core.addPath(installdir);
