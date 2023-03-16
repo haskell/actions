@@ -59,6 +59,13 @@ jobs:
 
         include:
 
+          # Test #210 (XDG): is the cabal store-dir set to something meaningful?
+          - os:  ubuntu-latest
+            plan:
+              ghc:   "9.6"
+              cabal: "3.10"
+            cabal_update: "true"
+
           # Test some old versions
           - os: ubuntu-latest
             plan:
