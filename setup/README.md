@@ -190,8 +190,8 @@ jobs:
 
 | Name                    | Description                                                                                                                                 | Type      | Default     |
 | ----------------------- | ------------------------------------------------------------------------------------------------------------------------------------------- | --------- | ----------- |
-| `ghc-version`           | GHC version to use, e.g. `9.2` or `9.2.4`.                                                                                                  | `string`  | `latest`    |
-| `cabal-version`         | Cabal version to use, e.g. `3.4`.                                                                                                           | `string`  | `latest`    |
+| `ghc-version`           | GHC version to use, e.g. `9.2` or `9.2.5`.                                                                                                  | `string`  | `latest`    |
+| `cabal-version`         | Cabal version to use, e.g. `3.6`.                                                                                                           | `string`  | `latest`    |
 | `stack-version`         | Stack version to use, e.g. `latest`. Stack will only be installed if `enable-stack` is set.                                                 | `string`  | `latest`    |
 | `enable-stack`          | If set, will setup Stack.                                                                                                                   | "boolean" | false/unset |
 | `stack-no-global`       | If set, `enable-stack` must be set. Prevents installing GHC and Cabal globally.                                                             | "boolean" | false/unset |
@@ -223,7 +223,7 @@ In contrast, a proper `boolean` input like `cabal-update` only accepts values `t
 
 **GHC:**
 
-- `latest` (default, recommended)
+- `latest` (default)
 - `9.6.1` `9.6`
 - `9.4.4` `9.4`
 - `9.4.3`
@@ -262,7 +262,7 @@ In contrast, a proper `boolean` input like `cabal-update` only accepts values `t
 - `8.0.2` `8.0`
 - `7.10.3` `7.10`
 
-Suggestion: Try to support the three latest major versions of GHC.
+Suggestion: Try to support at least the three latest major versions of GHC.
 
 **Cabal:**
 
@@ -279,9 +279,9 @@ Suggestion: Try to support the three latest major versions of GHC.
 
 Recommendation: Use the latest available version if possible.
 
-**Stack:**
+**Stack:** (with `enable-stack: true`)
 
-- `latest` (recommended) -- follows the latest release automatically.
+- `latest` (default, recommended)
 - `2.9.3` `2.9`
 - `2.9.1`
 - `2.7.5` `2.7`
