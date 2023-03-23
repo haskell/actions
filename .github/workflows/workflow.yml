@@ -65,6 +65,12 @@ jobs:
               ghc:   "9.6"
               cabal: "3.10"
             cabal_update: "true"
+          # With choco, cabal 3.10.1.0 should map to 3.10.1.1
+          - os:  windows-latest
+            plan:
+              ghc:   "9.6"
+              cabal: "3.10"
+            cabal_update: "true"
 
           # Test some old versions
           - os: ubuntu-latest

@@ -29,7 +29,10 @@ describe('haskell/actions/setup', () => {
     forAllOS(os =>
       forAllTools(t =>
         expect(def(os)[t].version).toBe(
-          latestRevisions(os, latestVersions[t])[t] ?? latestVersions[t]
+          // Andreas, 2023-03-23: getDefaults actually does not return revision (like cabal 3.10.1.1),
+          // but version (like cabal 3.10.1.0)
+          // WAS: latestRevisions(os, latestVersions[t])[t] ?? latestVersions[t]
+          latestVersions[t]
         )
       )
     );
@@ -86,7 +89,8 @@ describe('haskell/actions/setup', () => {
       });
       forAllTools(t =>
         expect(options[t].resolved).toBe(
-          latestRevisions(os, latestVersions[t])[t] ?? latestVersions[t]
+          // latestRevisions(os, latestVersions[t])[t] ?? latestVersions[t]
+          latestVersions[t]
         )
       );
     });
