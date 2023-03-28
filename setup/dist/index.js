@@ -13881,6 +13881,10 @@ async function run(inputs) {
                 // Cabal merges these and picks the last defined option.
                 const configFile = await cabalConfig();
                 if (process.platform === 'win32') {
+                    // Some Windows version cannot symlink, so we need to switch to 'install-method: copy'.
+                    // Choco does this for us, but not GHCup: https://github.com/haskell/ghcup-hs/issues/808
+                    fs.appendFileSync(configFile, `install-method: copy${os_1.EOL}`);
+                    fs.appendFileSync(configFile, `overwrite-policy: always${os_1.EOL}`);
                     fs.appendFileSync(configFile, `store-dir: C:\\sr${os_1.EOL}`);
                     core.setOutput('cabal-store', 'C:\\sr');
                 }
