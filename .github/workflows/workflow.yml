@@ -82,10 +82,13 @@ jobs:
               ghc:   "8.2.2"
               cabal: "2.4.1.0"
             cabal_update: "false"
-          - os: ubuntu-18.04
+          - os: ubuntu-20.04
             plan:
-              ghc:   "7.4.1"
+              ghc:   "7.4.2"
               cabal: "3.4"
+              # ubuntu-20.04/hvr has of GHC 7 just 7.0.1, 7.0.4, 7.2.2, 7.4.2, 7.10.3
+              # and of cabal just 2.4, 3.0, 3.2, 3.4
+              # according to https://launchpad.net/~hvr/+archive/ubuntu/ghc?field.series_filter=focal
 
           # Test ghcup pre-release channel
           - os: ubuntu-latest
