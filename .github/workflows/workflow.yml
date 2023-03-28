@@ -52,6 +52,10 @@ jobs:
           # Some previously recommended releases of ghc with matching cabal
           - ghc:   "8.10"
             cabal: "3.2"
+          - ghc:   "8.8"
+            cabal: "3.0"
+              # cabal-3.0 install might have the Windows symlinking problem
+              # https://github.com/haskell/cabal/issues/5748
           - ghc:   "8.6"
             cabal: "2.4"
         cabal_update: ["false"]
