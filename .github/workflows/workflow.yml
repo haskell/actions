@@ -52,12 +52,29 @@ jobs:
           # Some previously recommended releases of ghc with matching cabal
           - ghc:   "8.10"
             cabal: "3.2"
+          - ghc:   "8.8"
+            cabal: "3.0"
+              # cabal-3.0 install might have the Windows symlinking problem
+              # https://github.com/haskell/cabal/issues/5748
           - ghc:   "8.6"
             cabal: "2.4"
         cabal_update: ["false"]
         # The following tests do not set 'cabal-update', which defaults to 'true' then.
 
         include:
+
+          # Test #210 (XDG): is the cabal store-dir set to something meaningful?
+          - os:  ubuntu-latest
+            plan:
+              ghc:   "9.6"
+              cabal: "3.10"
+            cabal_update: "true"
+          # With choco, cabal 3.10.1.0 should map to 3.10.1.1
+          - os:  windows-latest
+            plan:
+              ghc:   "9.6"
+              cabal: "3.10"
+            cabal_update: "true"
 
           # Test some old versions
           - os: ubuntu-latest

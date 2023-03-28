@@ -13837,6 +13837,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", ({ value: true }));
 const core = __importStar(__nccwpck_require__(2186));
+const io = __importStar(__nccwpck_require__(7436));
 const ensure_error_1 = __importDefault(__nccwpck_require__(1056));
 const fs = __importStar(__nccwpck_require__(7147));
 const path = __importStar(__nccwpck_require__(1017));
@@ -13872,24 +13873,31 @@ async function run(inputs) {
             await core.group('Pre-installing GHC with stack', async () => (0, exec_1.exec)('stack', ['setup', opts.ghc.resolved]));
         if (opts.cabal.enable)
             await core.group('Setting up cabal', async () => {
+                // Andreas, 2023-03-16, issue #210.
+                // Create .cabal/bin to activate non-XDG mode of cabal.
+                if (process.platform !== 'win32')
+                    io.mkdirP(`${process.env.HOME}/.cabal/bin`);
                 // Create config only if it doesn't exist.
                 await (0, exec_1.exec)('cabal', ['user-config', 'init'], {
                     silent: true,
                     ignoreReturnCode: true
                 });
+                // Set the 'store-dir' in the cabal configuration.
                 // Blindly appending is fine.
                 // Cabal merges these and picks the last defined option.
                 const configFile = await cabalConfig();
+                const storeDir = process.platform === 'win32'
+                    ? 'C:\\sr'
+                    : `${process.env.HOME}/.cabal/store`;
+                fs.appendFileSync(configFile, `store-dir: ${storeDir}${os_1.EOL}`);
+                core.setOutput('cabal-store', storeDir);
                 if (process.platform === 'win32') {
                     // Some Windows version cannot symlink, so we need to switch to 'install-method: copy'.
                     // Choco does this for us, but not GHCup: https://github.com/haskell/ghcup-hs/issues/808
                     fs.appendFileSync(configFile, `install-method: copy${os_1.EOL}`);
                     fs.appendFileSync(configFile, `overwrite-policy: always${os_1.EOL}`);
-                    fs.appendFileSync(configFile, `store-dir: C:\\sr${os_1.EOL}`);
-                    core.setOutput('cabal-store', 'C:\\sr');
                 }
                 else {
-                    core.setOutput('cabal-store', `${process.env.HOME}/.cabal/store`);
                     // Issue #130: for non-choco installs, add ~/.cabal/bin to PATH
                     const installdir = `${process.env.HOME}/.cabal/bin`;
                     core.info(`Adding ${installdir} to PATH`);
@@ -14125,7 +14133,7 @@ function ensureError(input) {
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"win32":{"ghc":[{"from":"9.4.3","to":"9.4.3.1"},{"from":"9.2.5","to":"9.2.5.1"},{"from":"8.10.2","to":"8.10.2.2"},{"from":"8.10.1","to":"8.10.1.1"},{"from":"8.8.4","to":"8.8.4.1"},{"from":"8.8.3","to":"8.8.3.1"},{"from":"8.8.2","to":"8.8.2.1"},{"from":"8.6.1","to":"8.6.1.1"},{"from":"8.0.2","to":"8.0.2.2"},{"from":"7.10.3","to":"7.10.3.2"},{"from":"7.10.2","to":"7.10.2.1"},{"from":"7.10.1","to":"7.10.1.1"},{"from":"7.8.4","to":"7.8.4.1"},{"from":"7.8.3","to":"7.8.3.1"},{"from":"7.8.2","to":"7.8.2.1"},{"from":"7.8.1","to":"7.8.1.1"},{"from":"7.6.3","to":"7.6.3.1"},{"from":"7.6.2","to":"7.6.2.1"},{"from":"7.6.1","to":"7.6.1.1"}]}}');
+module.exports = JSON.parse('{"win32":{"ghc":[{"from":"9.4.3","to":"9.4.3.1"},{"from":"9.2.5","to":"9.2.5.1"},{"from":"8.10.2","to":"8.10.2.2"},{"from":"8.10.1","to":"8.10.1.1"},{"from":"8.8.4","to":"8.8.4.1"},{"from":"8.8.3","to":"8.8.3.1"},{"from":"8.8.2","to":"8.8.2.1"},{"from":"8.6.1","to":"8.6.1.1"},{"from":"8.0.2","to":"8.0.2.2"},{"from":"7.10.3","to":"7.10.3.2"},{"from":"7.10.2","to":"7.10.2.1"},{"from":"7.10.1","to":"7.10.1.1"},{"from":"7.8.4","to":"7.8.4.1"},{"from":"7.8.3","to":"7.8.3.1"},{"from":"7.8.2","to":"7.8.2.1"},{"from":"7.8.1","to":"7.8.1.1"},{"from":"7.6.3","to":"7.6.3.1"},{"from":"7.6.2","to":"7.6.2.1"},{"from":"7.6.1","to":"7.6.1.1"}],"cabal":[{"from":"3.10.1.0","to":"3.10.1.1"}]}}');
 
 /***/ }),
 
