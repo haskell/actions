@@ -1,0 +1,45 @@
+name: Scan code with HLint
+description: Scan Haskell code for possible improvements using HLint.
+
+inputs:
+  hlint-bin:
+    description: Path to the hlint binary.
+    required: false
+    default: hlint
+  args:
+    description: Extra arguments to pass to HLint.
+    required: false
+    default: null
+  path:
+    description: Path or array of paths that HLint will be told to scan.
+    required: false
+    default: .
+  sarif_file:
+    description: The name of the SARIF file to write and upload to GItHub code scanning.
+    required: false
+    default: hlint.sarif
+  category:
+    description: String used by GitHub code scanning for matching the analyses.
+    required: false
+    default: null
+
+outputs:
+  sarif-id:
+    description: The ID of the uploaded SARIF file.
+    value: ${{ steps.upload-sarif.outputs.sarif-id }}
+
+runs:
+  using: 'composite'
+
+  steps:
+
+    - name: Run HLint
+      run: ${{ inputs.hlint-bin }} --no-exit-code --sarif ${{ join(inputs.path, ' ') }} >> ${{ inputs.sarif_file }}
+      shell: bash
+
+    - id: upload-sarif
+      name: Upload SARIF file
+      uses: github/codeql-action/upload-sarif@v2
+      with:
+        sarif_file: ${{ inputs.sarif_file }}
+        category: ${{ inputs.category }}
