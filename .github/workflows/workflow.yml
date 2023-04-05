@@ -228,11 +228,10 @@ jobs:
         run: |
           stack path --system-ghc
           expected_stack_root=$(stack path --system-ghc --stack-root)
-          returned_stack_root=${{ steps.setup.outputs.stack-root }}
 
-          if [ "${returned_stack_root}" != "${expected_stack_root}" ]; then
+          if [ "${expected_stack_root}" != "${{ steps.setup.outputs.stack-root }}" ]; then
             echo "Stack-root does not match expected value"
-            echo "Returned stack-root: ${returned_stack_root}"
             echo "Expected stack-root: ${expected_stack_root}"
+            echo "Returned stack-root: ${{ steps.setup.outputs.stack-root }}"
             exit 1
           fi
