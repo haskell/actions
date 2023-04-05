@@ -26,9 +26,9 @@ async function configureOutputs(
   core.setOutput(`${tool}-path`, path);
   core.setOutput(`${tool}-exe`, await which(tool));
   if (tool == 'stack') {
-    const sr =
-      process.env['STACK_ROOT'] ??
-      (os === 'win32' ? 'C:\\sr' : `${process.env.HOME}/.stack`);
+    const stackRootCommand = 'stack path --stack-root';
+    const sr = process.env['STACK_ROOT'] ?? (await exec(stackRootCommand));
+
     core.setOutput('stack-root', sr);
     if (os === 'win32') core.exportVariable('STACK_ROOT', sr);
   }
