@@ -167,8 +167,7 @@ jobs:
       - name: Save cached dependencies
         uses: actions/cache/save@v3
         # Caches are immutable, trying to save with the same key would error.
-        if: ${{ !steps.cache.outputs.cache-hit
-          || steps.cache.outputs.cache-primary-key != steps.cache.outputs.cache-matched-key }}
+        if: ${{ steps.cache.outputs.cache-primary-key != steps.cache.outputs.cache-matched-key }}
         with:
           path: ${{ steps.setup.outputs.cabal-store }}
           key: ${{ steps.cache.outputs.cache-primary-key }}
