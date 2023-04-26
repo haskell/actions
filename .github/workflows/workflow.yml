@@ -107,6 +107,12 @@ jobs:
               ghc:   "7.10.3"
               cabal: "3.4"
 
+          # Andreas 2023-04-26, issue #233: GHC 7.10 fails on ubuntu-22.04 (ghcup)
+          - os: ubuntu-22.04
+            plan:
+              ghc:   "7.10.3"
+              cabal: latest
+
           # Andreas 2022-12-29, issue #98: GHC 7.10 failed to install on windows (choco)
           - os: windows-latest
             plan:
