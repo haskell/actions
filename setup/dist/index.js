@@ -13377,9 +13377,10 @@ async function isInstalled(tool, version, os) {
             darwin: [ghcupPath]
         }[os]
     };
-    core.info(`isInstalled ${tool} ${version} ${locations[tool]}`);
+    core.debug(`isInstalled ${tool} ${version} ${locations[tool]}`);
     const f = await exec(await ghcupBin(os), ['whereis', tool, version]);
-    core.info(`isInstalled whereis ${f}`);
+    core.info(`\n`);
+    core.debug(`isInstalled whereis ${f}`);
     for (const p of locations[tool]) {
         core.info(`Attempting to access tool ${tool} at location ${p}`);
         const installedPath = await fs_1.promises
@@ -13395,7 +13396,7 @@ async function isInstalled(tool, version, os) {
         if (installedPath) {
             // Make sure that the correct ghc is used, even if ghcup has set a
             // default prior to this action being ran.
-            core.info(`isInstalled installedPath: ${installedPath}`);
+            core.debug(`isInstalled installedPath: ${installedPath}`);
             if (installedPath === ghcupPath) {
                 // If the result of this `ghcup set` is non-zero, the version we want
                 // is probably not actually installed
@@ -13549,7 +13550,7 @@ async function choco(tool, version) {
         core.addPath(chocoPath);
 }
 async function ghcupBin(os) {
-    core.info(`ghcupBin : ${os}`);
+    core.debug(`ghcupBin : ${os}`);
     if (os === 'win32') {
         return 'ghcup';
     }
