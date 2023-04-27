@@ -84,6 +84,7 @@ async function run(inputs) {
                 if (process.platform === 'win32') {
                     // Some Windows version cannot symlink, so we need to switch to 'install-method: copy'.
                     // Choco does this for us, but not GHCup: https://github.com/haskell/ghcup-hs/issues/808
+                    // However, here we do not know whether we installed with choco or not, so do it always:
                     fs.appendFileSync(configFile, `install-method: copy${os_1.EOL}`);
                     fs.appendFileSync(configFile, `overwrite-policy: always${os_1.EOL}`);
                 }
