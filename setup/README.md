@@ -259,7 +259,7 @@ In contrast, a proper `boolean` input like `cabal-update` only accepts values `t
 - `8.4.1`
 - `8.2.2` `8.2`
 - `8.0.2` `8.0`
-- `7.10.3` `7.10`
+- `7.10.3` `7.10` (not on `ubuntu-22.04` or up)
 
 Suggestion: Try to support at least the three latest major versions of GHC.
 
