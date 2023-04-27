@@ -60,21 +60,15 @@ async function success(tool, version, path, os) {
     return true;
 }
 function warn(tool, version) {
-    const policy = {
-        cabal: `the two latest major releases of ${tool} are commonly supported.`,
-        ghc: `the three latest major releases of ${tool} are commonly supported.`,
-        stack: `the latest release of ${tool} is commonly supported.`
-    }[tool];
     core.debug(`${tool} ${version} was not found in the cache. It will be downloaded.\n` +
         `If this is unexpected, please check if version ${version} is pre-installed.\n` +
-        `The list of pre-installed versions is available here: https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners\n` +
-        `The above list follows a common haskell convention that ${policy}\n` +
-        'If the list is outdated, please file an issue here: https://github.com/actions/virtual-environments\n' +
-        'by using the appropriate tool request template: https://github.com/actions/virtual-environments/issues/new/choose');
+        `The list of pre-installed versions is available from here: https://github.com/actions/runner-images#available-images\n` +
+        'If the list is outdated, please file an issue here: https://github.com/actions/runner-images/issues\n' +
+        'by using the appropriate tool request template: https://github.com/actions/runner-images/issues/new/choose');
 }
 function aptVersion(tool, version) {
-    // For Cabal, extract the first two segments of the version number. This
-    // regex is intentionally liberal to accomodate unusual cases like "head".
+    // For Cabal, extract the first two segments of the version number.
+    // This regex is intentionally liberal to accommodate unusual cases like "head".
     return tool === 'cabal' ? /[^.]*\.?[^.]*/.exec(version)[0] : version;
 }
 async function isInstalled(tool, version, os) {

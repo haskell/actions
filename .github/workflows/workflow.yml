@@ -202,17 +202,36 @@ jobs:
     name: Stack ${{ matrix.stack }} ${{ matrix.os }}
     runs-on: ${{ matrix.os }}
     strategy:
+      fail-fast: false
       matrix:
         os: [ubuntu-latest, macOS-latest, windows-latest]
         stack: ["latest", "2.3.3"]
 
     steps:
       - uses: actions/checkout@v3
+
       - uses: ./setup
+        id: setup
         with:
           enable-stack: true
           stack-no-global: true
           stack-version: ${{ matrix.stack }}
+
       - run: |
           stack --version
           stack --help
+
+      - name: Checking if returned stack-root output is correct
+        shell: bash
+          # NB: we invoke `stack path` twice, because the first time it
+          # might install things (like MSYS2 on Windows) which clobber the output.
+        run: |
+          stack path --system-ghc
+          expected_stack_root=$(stack path --system-ghc --stack-root)
+
+          if [ "${expected_stack_root}" != "${{ steps.setup.outputs.stack-root }}" ]; then
+            echo "Stack-root does not match expected value"
+            echo "Expected stack-root: ${expected_stack_root}"
+            echo "Returned stack-root: ${{ steps.setup.outputs.stack-root }}"
+            exit 1
+          fi
