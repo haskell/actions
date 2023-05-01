@@ -224,7 +224,8 @@ In contrast, a proper `boolean` input like `cabal-update` only accepts values `t
 
 - `latest` (default)
 - `9.6.1` `9.6`
-- `9.4.4` `9.4`
+- `9.4.5` `9.4`
+- `9.4.4`
 - `9.4.3`
 - `9.4.2`
 - `9.4.1`
