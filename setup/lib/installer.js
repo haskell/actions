@@ -76,44 +76,62 @@ async function isInstalled(tool, version, os) {
     const toolPath = tc.find(tool, version);
     if (toolPath)
         return success(tool, version, toolPath, os);
-    const ghcupPath = `${process_1.default.env.HOME}/.ghcup${tool === 'ghc' ? `/ghc/${version}` : ''}/bin`;
+    // Path where ghcup installs binaries
+    const ghcupPath = os === 'win32' ? 'C:/ghcup/bin' : `${process_1.default.env.HOME}/.ghcup/bin`;
+    // Path where apt installs binaries of a tool
     const v = aptVersion(tool, version);
     const aptPath = `/opt/${tool}/${v}/bin`;
+    // Path where choco installs binaries of a tool
     const chocoPath = await getChocoPath(tool, version, (0, opts_1.releaseRevision)(version, tool, os));
     const locations = {
         stack: [],
         cabal: {
-            win32: [chocoPath],
-            linux: [aptPath],
-            darwin: []
+            win32: [chocoPath, ghcupPath],
+            linux: [aptPath, ghcupPath],
+            darwin: [ghcupPath]
         }[os],
         ghc: {
-            win32: [chocoPath],
+            win32: [chocoPath, ghcupPath],
             linux: [aptPath, ghcupPath],
             darwin: [ghcupPath]
         }[os]
     };
+    core.debug(`isInstalled ${tool} ${version} ${locations[tool]}`);
+    const f = await exec(await ghcupBin(os), ['whereis', tool, version]);
+    core.info(`\n`);
+    core.debug(`isInstalled whereis ${f}`);
     for (const p of locations[tool]) {
+        core.info(`Attempting to access tool ${tool} at location ${p}`);
         const installedPath = await fs_1.promises
             .access(p)
             .then(() => p)
             .catch(() => undefined);
+        if (installedPath == undefined) {
+            core.info(`Failed to access tool ${tool} at location ${p}`);
+        }
+        else {
+            core.info(`Succeeded accessing tool ${tool} at location ${p}`);
+        }
         if (installedPath) {
             // Make sure that the correct ghc is used, even if ghcup has set a
             // default prior to this action being ran.
-            if (tool === 'ghc' && installedPath === ghcupPath)
-                await exec(await ghcupBin(os), ['set', tool, version]);
-            return success(tool, version, installedPath, os);
-        }
-    }
-    if (tool === 'cabal' && os !== 'win32') {
-        const installedPath = await fs_1.promises
-            .access(`${ghcupPath}/cabal-${version}`)
-            .then(() => ghcupPath)
-            .catch(() => undefined);
-        if (installedPath) {
-            await exec(await ghcupBin(os), ['set', tool, version]);
-            return success(tool, version, installedPath, os);
+            core.debug(`isInstalled installedPath: ${installedPath}`);
+            if (installedPath === ghcupPath) {
+                // If the result of this `ghcup set` is non-zero, the version we want
+                // is probably not actually installed
+                const ghcupSetResult = await exec(await ghcupBin(os), [
+                    'set',
+                    tool,
+                    version
+                ]);
+                if (ghcupSetResult == 0)
+                    return success(tool, version, installedPath, os);
+            }
+            else {
+                // Install methods apt and choco have precise install paths,
+                // so if the install path is present, the tool should be present, too.
+                return success(tool, version, installedPath, os);
+            }
         }
     }
     return false;
@@ -150,6 +168,9 @@ async function installTool(tool, version, os) {
             break;
         case 'win32':
             await choco(tool, version);
+            if (await isInstalled(tool, version, os))
+                return;
+            await ghcup(tool, version, os);
             break;
         case 'darwin':
             await ghcup(tool, version, os);
@@ -248,6 +269,10 @@ async function choco(tool, version) {
         core.addPath(chocoPath);
 }
 async function ghcupBin(os) {
+    core.debug(`ghcupBin : ${os}`);
+    if (os === 'win32') {
+        return 'ghcup';
+    }
     const cachedBin = tc.find('ghcup', opts_1.ghcup_version);
     if (cachedBin)
         return (0, path_1.join)(cachedBin, 'ghcup');

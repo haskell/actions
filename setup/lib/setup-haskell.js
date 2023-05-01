@@ -49,6 +49,9 @@ async function run(inputs) {
         core.info('Preparing to setup a Haskell environment');
         const os = process.platform;
         const opts = (0, opts_1.getOpts)((0, opts_1.getDefaults)(os), os, inputs);
+        core.debug(`run: inputs = ${JSON.stringify(inputs)}`);
+        core.debug(`run: os     = ${JSON.stringify(os)}`);
+        core.debug(`run: opts   = ${JSON.stringify(opts)}`);
         if (opts.ghcup.releaseChannel) {
             await core.group(`Preparing ghcup environment`, async () => (0, installer_1.addGhcupReleaseChannel)(opts.ghcup.releaseChannel, os));
         }
@@ -78,8 +81,15 @@ async function run(inputs) {
                     : `${process.env.HOME}/.cabal/store`;
                 fs.appendFileSync(configFile, `store-dir: ${storeDir}${os_1.EOL}`);
                 core.setOutput('cabal-store', storeDir);
-                // Issue #130: for non-choco installs, add ~/.cabal/bin to PATH
-                if (process.platform !== 'win32') {
+                if (process.platform === 'win32') {
+                    // Some Windows version cannot symlink, so we need to switch to 'install-method: copy'.
+                    // Choco does this for us, but not GHCup: https://github.com/haskell/ghcup-hs/issues/808
+                    // However, here we do not know whether we installed with choco or not, so do it always:
+                    fs.appendFileSync(configFile, `install-method: copy${os_1.EOL}`);
+                    fs.appendFileSync(configFile, `overwrite-policy: always${os_1.EOL}`);
+                }
+                else {
+                    // Issue #130: for non-choco installs, add ~/.cabal/bin to PATH
                     const installdir = `${process.env.HOME}/.cabal/bin`;
                     core.info(`Adding ${installdir} to PATH`);
                     core.addPath(installdir);

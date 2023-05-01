@@ -123,6 +123,12 @@ jobs:
               ghc:   "9.2.5"
               cabal: "3.6"
 
+          # Test ghcup on windows (PR #206) which choco does not have 9.4.5
+          - os: windows-latest
+            plan:
+              ghc:   "9.4.5"
+              cabal: "3.8"
+
     steps:
       - uses: actions/checkout@v3
 
