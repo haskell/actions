@@ -130,8 +130,13 @@ async function isInstalled(
           tool,
           version
         ]);
-        if (ghcupSetResult == 0)
+        if (ghcupSetResult == 0) {
           return success(tool, version, installedPath, os);
+        } else {
+          // Andreas, 2023-05-03, issue #245.
+          // Since we do not have the correct version, disable any default version.
+          await exec(await ghcupBin(os), ['unset', tool]);
+        }
       } else {
         // Install methods apt and choco have precise install paths,
         // so if the install path is present, the tool should be present, too.
