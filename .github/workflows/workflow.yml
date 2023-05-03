@@ -12,6 +12,7 @@ on:
 
 defaults:
   run:
+    shell: bash
     working-directory: setup
 
 jobs:
@@ -129,6 +130,12 @@ jobs:
               ghc:   "9.4.5"
               cabal: "3.8"
 
+          # Test GHC 9.4.4 on windows (Issue #245)
+          - os: windows-latest
+            plan:
+              ghc:   "9.4.4"
+              cabal: "3.10.1.0"
+
     steps:
       - uses: actions/checkout@v3
 
@@ -139,10 +146,11 @@ jobs:
           cabal-version: ${{ matrix.plan.cabal }}
           cabal-update: ${{ matrix.cabal_update }}
 
-      - name: Show installed versions
+      - name: Show installed versions and PATH
         run: |
           cabal --version
           ghc --version
+          echo "$PATH"
 
       - name: Test runghc
         run: |
