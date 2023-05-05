@@ -4,12 +4,16 @@
 
 This action sets up a Haskell environment for use in actions by:
 
-- optionally installing a version of [ghc](https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/) and [cabal](https://www.haskell.org/cabal/) and adding to PATH.
-- optionally installing a version of [Stack](https://haskellstack.org) and adding to PATH.
-- setting the outputs of `ghc-path`, `cabal-path`, `stack-path`, and `cabal-store` when necessary.
+- if requested, installing a version of [ghc](https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/) and [cabal](https://www.haskell.org/cabal/) and adding them to `PATH`,
+- if requested, installing a version of [Stack](https://haskellstack.org) and adding it to the `PATH`,
+- outputting of `ghc-exe/path`, `cabal-exe/path`, `stack-exe/path`, `stack-root` and `cabal-store` (for the requested components).
 
-The GitHub runners come with [pre-installed versions of GHC and Cabal](https://help.github.com/en/actions/reference/software-installed-on-github-hosted-runners). Those will be used whenever possible.
-For all other versions, this action utilizes [`ppa:hvr/ghc`](https://launchpad.net/~hvr/+archive/ubuntu/ghc), [`ghcup`](https://gitlab.haskell.org/haskell/ghcup-hs), and [`chocolatey`](https://chocolatey.org/packages/ghc).
+The GitHub runners come with [pre-installed versions of GHC and Cabal](https://github.com/actions/runner-images).
+Those will be used whenever possible.
+For all other versions, this action utilizes
+[`ppa:hvr/ghc`](https://launchpad.net/~hvr/+archive/ubuntu/ghc),
+[`ghcup`](https://github.com/haskell/ghcup-hs), and
+[`chocolatey`](https://chocolatey.org/packages/ghc).
 
 ## Usage
 
@@ -307,14 +311,16 @@ Recommendation: Use the latest available version if possible.
 
 Recommendation: Use the latest available version if possible.
 
-The full list of available versions of GHC, Cabal, and Stack are as follows:
+Beyond the officially supported listed versions above, you can request any precise version of
+[GHC](https://www.haskell.org/ghc/download.html),
+[Cabal](https://www.haskell.org/cabal/download.html), and
+[Stack](https://github.com/commercialhaskell/stack/tags).
+The action will forward the request to the install methods (apt, ghcup, choco), and installation might succeed.
 
-- [Linux/macOS - Cabal and GHC](https://www.haskell.org/ghc/download.html)
-- [Windows - Cabal](https://chocolatey.org/packages/cabal#versionhistory).
-- [Windows - GHC](https://chocolatey.org/packages/ghc#versionhistory)
-- [Linux/macOS/Windows - Stack](https://github.com/commercialhaskell/stack/tags)
-
-Note: There are _technically_ some discrepancies here. For example, "8.10.1-alpha1" will work for a ghc version for windows but not for Linux and macOS. For your sanity, I suggest sticking with the version lists above which are supported across all three operating systems.
+Note however that Chocolatey's version numbers might differ from the official ones,
+please consult their pages for
+[GHC](https://chocolatey.org/packages/ghc#versionhistory) and
+[Cabal](https://chocolatey.org/packages/cabal#versionhistory).
 
 ## License
 
