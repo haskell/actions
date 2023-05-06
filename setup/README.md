@@ -141,14 +141,6 @@ jobs:
           cabal-version: 'latest'
           cabal-update: true
 
-      - name: Installed minor versions of GHC and Cabal
-        shell: bash
-        run: |
-          GHC_VERSION=$(ghc --numeric-version)
-          CABAL_VERSION=$(cabal --numeric-version)
-          echo "GHC_VERSION=${GHC_VERSION}"     >> "${GITHUB_ENV}"
-          echo "CABAL_VERSION=${CABAL_VERSION}" >> "${GITHUB_ENV}"
-
       - name: Configure the build
         run: |
           cabal configure --enable-tests --enable-benchmarks --disable-documentation
@@ -158,11 +150,12 @@ jobs:
       - name: Restore cached dependencies
         uses: actions/cache/restore@v3
         id: cache
+        env:
+          key: ${{ runner.os }}-ghc-${{ steps.setup.outputs.ghc-version }}-cabal-${{ steps.setup.outputs.cabal-version }}
         with:
           path: ${{ steps.setup.outputs.cabal-store }}
-          key: ${{ runner.os }}-ghc-${{ env.GHC_VERSION }}-cabal-${{ env.CABAL_VERSION }}-plan-${{ hashFiles('**/plan.json') }}
-          restore-keys: |
-            ${{ runner.os }}-ghc-${{ env.GHC_VERSION }}-cabal-${{ env.CABAL_VERSION }}-
+          key: ${{ env.key }}-plan-${{ hashFiles('**/plan.json') }}
+          restore-keys: ${{ env.key }}-
 
       - name: Install dependencies
         run: cabal build all --only-dependencies
