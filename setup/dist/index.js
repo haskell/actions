@@ -13324,7 +13324,7 @@ const exec = async (cmd, args) => (0, exec_1.exec)(cmd, args, { ignoreReturnCode
 function failed(tool, version) {
     throw new Error(`All install methods for ${tool} ${version} failed`);
 }
-async function configureOutputs(tool, path, os) {
+async function configureOutputs(tool, version, path, os) {
     core.setOutput(`${tool}-path`, path);
     core.setOutput(`${tool}-exe`, await (0, io_1.which)(tool));
     if (tool == 'stack') {
@@ -13334,10 +13334,11 @@ async function configureOutputs(tool, path, os) {
         if (os === 'win32')
             core.exportVariable('STACK_ROOT', sr);
     }
+    core.setOutput(`${tool}-version`, version);
 }
 async function success(tool, version, path, os) {
     core.addPath(path);
-    await configureOutputs(tool, path, os);
+    await configureOutputs(tool, version, path, os);
     core.info(`Found ${tool} ${version} in cache at path ${path}. Setup successful.`);
     return true;
 }

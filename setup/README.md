@@ -6,7 +6,7 @@ This action sets up a Haskell environment for use in actions by:
 
 - if requested, installing a version of [ghc](https://downloads.haskell.org/~ghc/latest/docs/html/users_guide/) and [cabal](https://www.haskell.org/cabal/) and adding them to `PATH`,
 - if requested, installing a version of [Stack](https://haskellstack.org) and adding it to the `PATH`,
-- outputting of `ghc-exe/path`, `cabal-exe/path`, `stack-exe/path`, `stack-root` and `cabal-store` (for the requested components).
+- outputting of `ghc-version/exe/path`, `cabal-version/exe/path`, `stack-version/exe/path`, `stack-root` and `cabal-store` (for the requested components).
 
 The GitHub runners come with [pre-installed versions of GHC and Cabal](https://github.com/actions/runner-images).
 Those will be used whenever possible.
@@ -211,16 +211,24 @@ In contrast, a proper `boolean` input like `cabal-update` only accepts values `t
 
 ## Outputs
 
-| Name          | Description                                                                                                                | Type   |
-| ------------- | -------------------------------------------------------------------------------------------------------------------------- | ------ |
-| `ghc-path`    | The path of the ghc executable _directory_                                                                                 | string |
-| `cabal-path`  | The path of the cabal executable _directory_                                                                               | string |
-| `stack-path`  | The path of the stack executable _directory_                                                                               | string |
-| `cabal-store` | The path to the cabal store                                                                                                | string |
-| `stack-root`  | The path to the stack root (equal to the `STACK_ROOT` environment variable if it is set; otherwise an OS-specific default) | string |
-| `ghc-exe`     | The path of the ghc _executable_                                                                                           | string |
-| `cabal-exe`   | The path of the cabal _executable_                                                                                         | string |
-| `stack-exe`   | The path of the stack _executable_                                                                                         | string |
+The action outputs parameters for the components it installed.
+E.g. if `ghc-version: 8.10` is requested, the action will output `ghc-version: 8.10.7` if installation succeeded,
+and `ghc-exe` and `ghc-path` will be set accordingly.
+(Details on version resolution see next section.)
+
+| Name            | Description                                                                                                                | Type   |
+| --------------- | -------------------------------------------------------------------------------------------------------------------------- | ------ |
+| `ghc-version`   | The resolved version of `ghc`                                                                                              | string |
+| `cabal-version` | The resolved version of `cabal`                                                                                            | string |
+| `stack-version` | The resolved version of `stack`                                                                                            | string |
+| `ghc-exe`       | The path of the `ghc` _executable_                                                                                         | string |
+| `cabal-exe`     | The path of the `cabal` _executable_                                                                                       | string |
+| `stack-exe`     | The path of the `stack` _executable_                                                                                       | string |
+| `ghc-path`      | The path of the `ghc` executable _directory_                                                                               | string |
+| `cabal-path`    | The path of the `cabal` executable _directory_                                                                             | string |
+| `stack-path`    | The path of the `stack` executable _directory_                                                                             | string |
+| `cabal-store`   | The path to the cabal store                                                                                                | string |
+| `stack-root`    | The path to the stack root (equal to the `STACK_ROOT` environment variable if it is set; otherwise an OS-specific default) | string |
 
 ## Version Support
 
