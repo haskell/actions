@@ -37,6 +37,18 @@ inputs:
     required: false
     description: 'If specified, disables match messages from GHC as GitHub CI annotations.'
 outputs:
+  ghc-version:
+    description: 'The resolved version of ghc'
+  cabal-version:
+    description: 'The resolved version of cabal'
+  stack-version:
+    description: 'The resolved version of stack'
+  ghc-exe:
+    description: 'The path of the ghc _executable_'
+  cabal-exe:
+    description: 'The path of the cabal _executable_'
+  stack-exe:
+    description: 'The path of the stack _executable_'
   ghc-path:
     description: 'The path of the ghc executable _directory_'
   cabal-path:
@@ -47,12 +59,6 @@ outputs:
     description: 'The path to the cabal store'
   stack-root:
     description: 'The path to the stack root (equal to the STACK_ROOT environment variable if it is set; otherwise an OS-specific default)'
-  ghc-exe:
-    description: 'The path of the ghc _executable_'
-  cabal-exe:
-    description: 'The path of the cabal _executable_'
-  stack-exe:
-    description: 'The path of the stack _executable_'
 runs:
   using: 'node16'
   main: 'dist/index.js'

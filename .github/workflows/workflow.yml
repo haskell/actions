@@ -140,6 +140,7 @@ jobs:
       - uses: actions/checkout@v3
 
       - uses: ./setup
+        id: setup
         with:
           ghc-version: ${{ matrix.plan.ghc }}
           ghcup-release-channel: ${{ matrix.ghcup_release_channel }}
@@ -151,6 +152,16 @@ jobs:
           cabal --version
           ghc --version
           echo "$PATH"
+
+      - name: Confirm resolved and installed versions match
+        shell: bash
+        run: |
+          CABALVER="$(cabal --numeric-version)"
+          GHCVER="$(ghc --numeric-version)"
+          echo "CABALVER=${CABALVER}" >> "${GITHUB_ENV}"
+          echo "GHCVER=${GHCVER}"     >> "${GITHUB_ENV}"
+          [[ "${CABALVER}" == "${{ steps.setup.outputs.cabal-version }}" ]] && \
+            [[ "${GHCVER}" == "${{ steps.setup.outputs.ghc-version }}" ]]
 
       - name: Test runghc
         run: |
@@ -185,8 +196,6 @@ jobs:
         # - ghc: major and minor version
         # pure bash startsWith
         run: |
-          CABALVER="$(cabal --numeric-version)"
-          GHCVER="$(ghc --numeric-version)"
           if [[ "${{ matrix.plan.cabal }}" =~ ^([0-9]+\.[0-9]+) ]]; then cabalmajor="${BASH_REMATCH[1]}"; fi
           if [[ "${{ matrix.plan.ghc }}" =~ ^([0-9]+\.[0-9]+) ]]; then ghcmajor="${BASH_REMATCH[1]}"; fi
           if [[ "${{ matrix.plan.ghc }}" =~ ^([0-9]+\.[0-9]+\.[0-9]+) ]]; then ghcver="${BASH_REMATCH[1]}"; fi

@@ -20,6 +20,7 @@ function failed(tool: Tool, version: string): void {
 
 async function configureOutputs(
   tool: Tool,
+  version: string,
   path: string,
   os: OS
 ): Promise<void> {
@@ -32,6 +33,7 @@ async function configureOutputs(
     core.setOutput('stack-root', sr);
     if (os === 'win32') core.exportVariable('STACK_ROOT', sr);
   }
+  core.setOutput(`${tool}-version`, version);
 }
 
 async function success(
@@ -41,7 +43,7 @@ async function success(
   os: OS
 ): Promise<true> {
   core.addPath(path);
-  await configureOutputs(tool, path, os);
+  await configureOutputs(tool, version, path, os);
   core.info(
     `Found ${tool} ${version} in cache at path ${path}. Setup successful.`
   );
