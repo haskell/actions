@@ -86,6 +86,7 @@ export function getDefaults(os: OS): Defaults {
 }
 
 // E.g. resolve ghc latest to 9.4.2
+// resolve ghc 8.1 to 8.10.7 (bug, https://github.com/haskell/actions/issues/248)
 function resolve(
   version: string,
   supported: string[],

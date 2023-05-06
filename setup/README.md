@@ -224,6 +224,15 @@ In contrast, a proper `boolean` input like `cabal-update` only accepts values `t
 
 ## Version Support
 
+This action is conscious about the tool versions specified in [`versions.json`](src/versions.json).
+This list is replicated (hopefully correctly) below.
+
+Versions specified by the inputs, e.g. `ghc-version`, are resolved against this list,
+by taking the first entry from the list if `latest` is requested,
+or the first entry that is a (string-)extension of the requested version otherwise.
+E.g., `8.10` will be resolved to `8.10.7`, and so will `8.10.`, `8.` and `8`
+(and incorrectly, [even `8.1`](github.com/haskell/actions/issues/248)).
+
 **GHC:**
 
 - `latest` (default)
