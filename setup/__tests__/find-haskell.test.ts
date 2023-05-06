@@ -67,13 +67,13 @@ describe('haskell/actions/setup', () => {
   });
 
   it('Versions resolve correctly', () => {
-    const v = {ghc: '8.6.5', cabal: '2.4.1.0', stack: '2.1.3'};
+    const v = {ghc: '8.6.5', cabal: '3.4.1.0', stack: '1.9.3'};
     forAllOS(os => {
       const options = getOpts(def(os), os, {
         'enable-stack': 'true',
-        'stack-version': '2.1',
+        'stack-version': '1',
         'ghc-version': '8.6',
-        'cabal-version': '2.4'
+        'cabal-version': '3.4'
       });
       forAllTools(t => expect(options[t].resolved).toBe(v[t]));
     });
@@ -93,6 +93,19 @@ describe('haskell/actions/setup', () => {
           latestVersions[t]
         )
       );
+    });
+  });
+
+  it('Versions resolve as string prefix (resolving 8.1 to 8.10.x should be considered a bug)', () => {
+    const v = {ghc: '8.10.7', cabal: '2.4.1.0', stack: '2.1.3'};
+    forAllOS(os => {
+      const options = getOpts(def(os), os, {
+        'enable-stack': 'true',
+        'stack-version': '2.1',
+        'ghc-version': '8.1',
+        'cabal-version': '2'
+      });
+      forAllTools(t => expect(options[t].resolved).toBe(v[t]));
     });
   });
 

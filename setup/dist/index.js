@@ -13744,6 +13744,7 @@ function getDefaults(os) {
 }
 exports.getDefaults = getDefaults;
 // E.g. resolve ghc latest to 9.4.2
+// resolve ghc 8.1 to 8.10.7 (bug, https://github.com/haskell/actions/issues/248)
 function resolve(version, supported, tool, os, verbose // If resolution isn't the identity, print what resolved to what.
 ) {
     const result = version === 'latest'
