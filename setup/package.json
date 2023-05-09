@@ -6,7 +6,7 @@
   "main": "lib/setup-haskell",
   "types": "lib/setup-haskell",
   "scripts": {
-    "build": "tsup",
+    "build": "tsup && npm run generate-licenses",
     "dev": "tsup --watch",
     "lint": "eslint ./src --ext ts",
     "generate-licenses": "npx yarn licenses generate-disclaimer --prod >> dist/licenses.txt",
@@ -55,6 +55,7 @@
     "jest": "^29.4.3",
     "lint-staged": "^13.2.0",
     "prettier": "^2.8.7",
+    "tsup": "^6.7.0",
     "ts-jest": "^29.1.0",
     "typescript": "^5.0.4"
   }

@@ -2,8 +2,7 @@ import { defineConfig } from 'tsup'
 
 export default defineConfig({
   entry: {
-    index: 'src/main.ts',
-    post: 'src/post.ts'
+    index: 'src/main.ts'
   },
   dts: false,
   clean: true,
@@ -12,5 +11,5 @@ export default defineConfig({
   sourcemap: true,
   minify: false,
   // need to bundle dependencies because they aren't available otherwise when run inside the action
-  noExternal: '*'
+  noExternal: ['*']
 })
