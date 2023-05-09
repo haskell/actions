@@ -11,5 +11,14 @@ export default defineConfig({
   sourcemap: true,
   minify: false,
   // need to bundle dependencies because they aren't available otherwise when run inside the action
-  noExternal: ['*']
+  noExternal: [
+    '@actions/core',
+    '@actions/exec',
+    '@actions/glob',
+    '@actions/io',
+    '@actions/tool-cache',
+    'compare-versions',
+    'ensure-error',
+    'js-yaml'
+  ]
 })
