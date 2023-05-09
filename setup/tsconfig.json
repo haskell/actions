@@ -1,17 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es2021",
-    "lib": ["ES2021"],
+    "target": "es6",
     "module": "commonjs",
-    "incremental": true,
+    "noEmit": true,
+    "rootDir": "./src",
     "strict": true,
     "noImplicitAny": true,
-    "esModuleInterop": true,
-    "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "rootDir": "./src",
-    "outDir": ".out",
-    "tsBuildInfoFile": ".out/tsbuildinfo"
+    "esModuleInterop": true
   },
-  "exclude": ["**/*.test.ts"]
+  "exclude": ["node_modules", "**/*.test.ts"]
 }

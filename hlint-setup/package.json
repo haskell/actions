@@ -7,6 +7,7 @@
     "lint": "true",
     "test": "true",
     "compile": "tsc",
+    "generate-licenses": "npx yarn licenses generate-disclaimer --prod >> dist/licenses.txt",
     "package": "ncc build --source-map --license licenses.txt",
     "all": "npm run lint && npm run compile && npm run test"
   },
