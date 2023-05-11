@@ -29,6 +29,7 @@ jobs:
           node-version: "16"
           cache: "npm"
           cache-dependency-path: setup/package-lock.json
+      - run: npm install
       - run: npm run all
 
   install-haskell:
