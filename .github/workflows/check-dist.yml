@@ -1,9 +1,12 @@
 name: Check dist
 
 on:
+  pull_request:
+    branches:
+      - main
   push:
-    paths-ignore:
-      - '**.md'
+    branches:
+      - main
 
 jobs:
   check-dist:
