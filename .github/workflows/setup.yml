@@ -21,7 +21,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        os: [ubuntu-latest, macos-latest, windows-latest]
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-node@v3
@@ -29,9 +29,7 @@ jobs:
           node-version: "16"
           cache: "npm"
           cache-dependency-path: setup/package-lock.json
-      - run: npm ci --prefer-offline --no-audit --progress=false
-      - run: npm run bundle
-      - run: npm test
+      - run: npm run all
 
   install-haskell:
     name: GHC ${{ matrix.plan.ghc }}, Cabal ${{ matrix.plan.cabal }} - ${{ matrix.os }}
