@@ -3267,8 +3267,8 @@ module.exports = __toCommonJS(main_exports);
 var core5 = __toESM(require_core());
 
 // src/inputs.ts
-var core = __toESM(require_core());
 var path2 = __toESM(require("path"));
+var core = __toESM(require_core());
 
 // src/hlint/index.ts
 var path = __toESM(require("path"));
@@ -3284,7 +3284,9 @@ var MATCH_LINE_KEYS = [
   "message"
 ];
 function getSerializedProblem(toolName, prob) {
-  const fields = MATCH_LINE_KEYS.map((key) => prob[key]).map((field) => String(field || "").replace(/(\n|\t)/g, " ").replace(/\s+/g, " ")).join("	");
+  const fields = MATCH_LINE_KEYS.map((key) => prob[key]).map(
+    (field) => String(field || "").replace(/(\n|\t)/g, " ").replace(/\s+/g, " ")
+  ).join("	");
   return `${toolName}	${fields}`;
 }
 function getMatchLineRegexString(toolName) {
@@ -3294,7 +3296,12 @@ function getMatchLineRegexString(toolName) {
     "$"
   ].join("");
 }
-var MATCH_LINE_REGEX_GROUPS = MATCH_LINE_KEYS.map((key, index) => [key, index + 1]).reduce((obj, [key, matchGroup]) => ({ ...obj, [key]: matchGroup }), {});
+var MATCH_LINE_REGEX_GROUPS = MATCH_LINE_KEYS.map(
+  (key, index) => [key, index + 1]
+).reduce(
+  (obj, [key, matchGroup]) => ({ ...obj, [key]: matchGroup }),
+  {}
+);
 function getMatcherPatternObj(toolName) {
   return {
     regexp: getMatchLineRegexString(toolName),
@@ -3303,10 +3310,12 @@ function getMatcherPatternObj(toolName) {
 }
 function getMatcherDef(toolName) {
   return {
-    problemMatcher: [{
-      owner: toolName,
-      pattern: [getMatcherPatternObj(toolName)]
-    }]
+    problemMatcher: [
+      {
+        owner: toolName,
+        pattern: [getMatcherPatternObj(toolName)]
+      }
+    ]
   };
 }
 var SingleLineMatcherFormat = class {
@@ -3322,7 +3331,12 @@ var SingleLineMatcherFormat = class {
 };
 
 // src/hlint/index.ts
-var SEVERITY_LEVELS = ["Error", "Warning", "Suggestion", "Ignore"];
+var SEVERITY_LEVELS = [
+  "Error",
+  "Warning",
+  "Suggestion",
+  "Ignore"
+];
 var HLINT_SEV_TO_GITHUB_SEV = {
   Error: "error",
   Warning: "warning",
@@ -3352,13 +3366,21 @@ function getNiceMessage(idea) {
     messageParts.push(`Perhaps: ${escapeString(idea.to, true)}`);
   }
   if (idea.note && idea.note.length) {
-    messageParts.push(`Note: ${idea.note.map((n) => escapeString(n, false)).join(" ")}`);
+    messageParts.push(
+      `Note: ${idea.note.map((n) => escapeString(n, false)).join(" ")}`
+    );
   }
   const message = messageParts.join(" \u25AB\uFE0E ");
   return [prefix, message].filter(Boolean).join(": ");
 }
 function toMatchableProblem(idea) {
-  const { file, startLine: line, startColumn: column, hint: code, severity: hlintSev } = idea;
+  const {
+    file,
+    startLine: line,
+    startColumn: column,
+    hint: code,
+    severity: hlintSev
+  } = idea;
   return {
     file,
     line,
@@ -3387,7 +3409,9 @@ function parseStringOrJsonArray(rawInput) {
 }
 function parseCheckMode(arg) {
   arg = arg.toUpperCase();
-  const matchingLevel = SEVERITY_LEVELS.find((sev) => sev.toUpperCase() === arg);
+  const matchingLevel = SEVERITY_LEVELS.find(
+    (sev) => sev.toUpperCase() === arg
+  );
   if (matchingLevel != null) {
     return matchingLevel;
   } else if (arg === "STATUS" || arg === "NEVER") {
@@ -3401,15 +3425,19 @@ var INPUT_KEY_HLINT_FILES = "path";
 var INPUT_KEY_HLINT_FAIL_MODE = "fail-on";
 function getInputs() {
   const hlintCmd = core.getInput(INPUT_KEY_HLINT_BIN, { required: false }) || "hlint";
-  const pathList = parseStringOrJsonArray(core.getInput(INPUT_KEY_HLINT_FILES, { required: false }) || ".");
-  const failOn = parseCheckMode(core.getInput(INPUT_KEY_HLINT_FAIL_MODE, { required: false }) || "NEVER");
+  const pathList = parseStringOrJsonArray(
+    core.getInput(INPUT_KEY_HLINT_FILES, { required: false }) || "."
+  );
+  const failOn = parseCheckMode(
+    core.getInput(INPUT_KEY_HLINT_FAIL_MODE, { required: false }) || "NEVER"
+  );
   const baseDir = path2.join(__dirname, "..");
   return { baseDir, hlintCmd, pathList, failOn };
 }
 
 // src/run.ts
-var core3 = __toESM(require_core());
 var path3 = __toESM(require("path"));
+var core3 = __toESM(require_core());
 
 // src/util/bufferedExec.ts
 var exec = __toESM(require_exec());
@@ -3428,9 +3456,9 @@ async function bufferedExec(cmd, args) {
 }
 
 // src/util/withMatcherAtPath.ts
-var core2 = __toESM(require_core());
 var fs = __toESM(require("fs"));
 var import_util = require("util");
+var core2 = __toESM(require_core());
 var import_command = __toESM(require_command());
 var readFile2 = (0, import_util.promisify)(fs.readFile);
 async function addMatcherAtPath(matcherPath) {
@@ -3473,7 +3501,10 @@ async function runHLint(cmd, args) {
   return { ideas, statusCode };
 }
 function getOverallCheckResult(failOn, { ideas, statusCode }) {
-  const hintsBySev = SEVERITY_LEVELS.map((sev) => [sev, ideas.filter((hint) => hint.severity === sev).length]);
+  const hintsBySev = SEVERITY_LEVELS.map((sev) => [
+    sev,
+    ideas.filter((hint) => hint.severity === sev).length
+  ]);
   const hintSummary = hintsBySev.filter(([_sevName, numHints]) => numHints > 0).map(([sev, num]) => `${sev} (${num})`).join(", ");
   let ok;
   if (failOn === "STATUS" && statusCode !== 0) {
@@ -3486,10 +3517,18 @@ function getOverallCheckResult(failOn, { ideas, statusCode }) {
   }
   return { ok, hintSummary };
 }
-async function run({ baseDir, hlintCmd, pathList, failOn }) {
+async function run({
+  baseDir,
+  hlintCmd,
+  pathList,
+  failOn
+}) {
   const hlintArgs = ["-j", "--json", "--", ...pathList];
   const matcherDefPath = path3.join(baseDir, MATCHER_DEF_PATH);
-  const { ideas, statusCode } = await withMatcherAtPath(matcherDefPath, () => runHLint(hlintCmd, hlintArgs));
+  const { ideas, statusCode } = await withMatcherAtPath(
+    matcherDefPath,
+    () => runHLint(hlintCmd, hlintArgs)
+  );
   const { ok, hintSummary } = getOverallCheckResult(failOn, { ideas, statusCode });
   return { ok, statusCode, ideas, hintSummary };
 }
