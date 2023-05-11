@@ -2,17 +2,9 @@ import {readFileSync} from 'fs';
 import {join} from 'path';
 import * as core from '@actions/core';
 import {load} from 'js-yaml';
-import * as sv from './versions.json';
-import * as rv from './release-revisions.json';
+import {releaseRevisions} from './release-revisions';
+import {supportedVersions} from './versions';
 
-export const releaseRevisions = rv as Revisions;
-export const supportedVersions = sv as Record<Tool, string[]>;
-export const ghcupVersion = sv.ghcup[0]; // Known to be an array of length 1
-
-export type Revisions = Record<
-  OS,
-  Record<Tool, Array<{from: string; to: string}>>
->;
 export type OS = 'linux' | 'darwin' | 'win32';
 export type Tool = 'cabal' | 'ghc' | 'stack';
 

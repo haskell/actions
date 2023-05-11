@@ -1,21 +1,19 @@
-import {
-  getOpts,
-  getDefaults,
-  release_revisions,
-  supported_versions
-} from '../src/opts';
+import {getOpts, getDefaults} from '../src/opts';
 import type {OS, Tool} from '../src/opts';
+import {releaseRevisions} from '../src/release-revisions';
+import {supportedVersions} from '../src/versions';
 
 const def = (os: OS) => getDefaults(os);
 const latestVersions = {
-  ghc: supported_versions.ghc[0],
-  cabal: supported_versions.cabal[0],
-  stack: supported_versions.stack[0]
+  ghc: supportedVersions.ghc[0],
+  cabal: supportedVersions.cabal[0],
+  stack: supportedVersions.stack[0]
 };
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 const latestRevisions = (os: OS, version: string) => ({
-  ghc: release_revisions?.[os]?.ghc?.find(v => v.from === version)?.to,
-  cabal: release_revisions?.[os]?.cabal?.find(v => v.from === version)?.to,
-  stack: release_revisions?.[os]?.stack?.find(v => v.from === version)?.to
+  ghc: releaseRevisions?.[os]?.ghc?.find(v => v.from === version)?.to,
+  cabal: releaseRevisions?.[os]?.cabal?.find(v => v.from === version)?.to,
+  stack: releaseRevisions?.[os]?.stack?.find(v => v.from === version)?.to
 });
 
 const forAllOS = (fn: (t: OS) => any) =>
@@ -40,7 +38,7 @@ describe('haskell/actions/setup', () => {
 
   it('Supported versions are parsed from JSON correctly', () =>
     forAllOS(os =>
-      forAllTools(t => expect(def(os)[t].supported).toBe(supported_versions[t]))
+      forAllTools(t => expect(def(os)[t].supported).toBe(supportedVersions[t]))
     ));
 
   it('Setting disable-matcher to true disables matcher', () => {

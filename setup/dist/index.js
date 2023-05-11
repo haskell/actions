@@ -6872,7 +6872,7 @@ var require_internal_globber = __commonJS({
               patterns.push(new internal_pattern_1.Pattern(pattern.negate, true, pattern.segments.concat("**")));
             }
           }
-          const stack3 = [];
+          const stack2 = [];
           for (const searchPath of patternHelper.getSearchPaths(patterns)) {
             core6.debug(`Search path '${searchPath}'`);
             try {
@@ -6883,11 +6883,11 @@ var require_internal_globber = __commonJS({
               }
               throw err;
             }
-            stack3.unshift(new internal_search_state_1.SearchState(searchPath, 1));
+            stack2.unshift(new internal_search_state_1.SearchState(searchPath, 1));
           }
           const traversalChain = [];
-          while (stack3.length) {
-            const item = stack3.pop();
+          while (stack2.length) {
+            const item = stack2.pop();
             const match = patternHelper.match(patterns, item.path);
             const partialMatch = !!match || patternHelper.partialMatch(patterns, item.path);
             if (!match && !partialMatch) {
@@ -6908,7 +6908,7 @@ var require_internal_globber = __commonJS({
               }
               const childLevel = item.level + 1;
               const childItems = (yield __await(fs3.promises.readdir(item.path))).map((x) => new internal_search_state_1.SearchState(path2.join(item.path, x), childLevel));
-              stack3.push(...childItems.reverse());
+              stack2.push(...childItems.reverse());
             } else if (match & internal_match_kind_1.MatchKind.File) {
               yield yield __await(item.path);
             }
@@ -7176,8 +7176,9 @@ var require_glob = __commonJS({
 var core5 = __toESM(require_core());
 
 // src/opts.ts
-var core2 = __toESM(require_core());
 var import_fs = require("fs");
+var import_path = require("path");
+var core2 = __toESM(require_core());
 
 // node_modules/js-yaml/dist/js-yaml.mjs
 function isNothing(subject) {
@@ -9836,144 +9837,138 @@ var safeLoad = renamed("safeLoad", "load");
 var safeLoadAll = renamed("safeLoadAll", "loadAll");
 var safeDump = renamed("safeDump", "dump");
 
-// src/opts.ts
-var import_path = require("path");
-
-// src/versions.json
-var versions_exports = {};
-__export(versions_exports, {
-  cabal: () => cabal,
-  default: () => versions_default,
-  ghc: () => ghc,
-  ghcup: () => ghcup,
-  stack: () => stack
-});
-var ghc = [
-  "9.6.1",
-  "9.4.5",
-  "9.4.4",
-  "9.4.3",
-  "9.4.2",
-  "9.4.1",
-  "9.2.7",
-  "9.2.6",
-  "9.2.5",
-  "9.2.4",
-  "9.2.3",
-  "9.2.2",
-  "9.2.1",
-  "9.0.2",
-  "9.0.1",
-  "8.10.7",
-  "8.10.6",
-  "8.10.5",
-  "8.10.4",
-  "8.10.3",
-  "8.10.2",
-  "8.10.1",
-  "8.8.4",
-  "8.8.3",
-  "8.8.2",
-  "8.8.1",
-  "8.6.5",
-  "8.6.4",
-  "8.6.3",
-  "8.6.2",
-  "8.6.1",
-  "8.4.4",
-  "8.4.3",
-  "8.4.2",
-  "8.4.1",
-  "8.2.2",
-  "8.0.2",
-  "7.10.3"
-];
-var cabal = [
-  "3.10.1.0",
-  "3.8.1.0",
-  "3.6.2.0",
-  "3.6.0.0",
-  "3.4.1.0",
-  "3.4.0.0",
-  "3.2.0.0",
-  "3.0.0.0",
-  "2.4.1.0"
-];
-var stack = [
-  "2.9.3",
-  "2.9.1",
-  "2.7.5",
-  "2.7.3",
-  "2.7.1",
-  "2.5.1",
-  "2.3.3",
-  "2.3.1",
-  "2.1.3",
-  "2.1.1",
-  "1.9.3",
-  "1.9.1",
-  "1.7.1",
-  "1.6.5",
-  "1.6.3",
-  "1.6.1",
-  "1.5.1",
-  "1.5.0",
-  "1.4.0",
-  "1.3.2",
-  "1.3.0",
-  "1.2.0"
-];
-var ghcup = ["0.1.19.2"];
-var versions_default = {
-  ghc,
-  cabal,
-  stack,
-  ghcup
+// src/release-revisions.ts
+var releaseRevisions = {
+  win32: {
+    stack: [],
+    ghc: [
+      { from: "9.4.3", to: "9.4.3.1" },
+      { from: "9.2.5", to: "9.2.5.1" },
+      { from: "8.10.2", to: "8.10.2.2" },
+      { from: "8.10.1", to: "8.10.1.1" },
+      { from: "8.8.4", to: "8.8.4.1" },
+      { from: "8.8.3", to: "8.8.3.1" },
+      { from: "8.8.2", to: "8.8.2.1" },
+      { from: "8.6.1", to: "8.6.1.1" },
+      { from: "8.0.2", to: "8.0.2.2" },
+      { from: "7.10.3", to: "7.10.3.2" },
+      { from: "7.10.2", to: "7.10.2.1" },
+      { from: "7.10.1", to: "7.10.1.1" },
+      { from: "7.8.4", to: "7.8.4.1" },
+      { from: "7.8.3", to: "7.8.3.1" },
+      { from: "7.8.2", to: "7.8.2.1" },
+      { from: "7.8.1", to: "7.8.1.1" },
+      { from: "7.6.3", to: "7.6.3.1" },
+      { from: "7.6.2", to: "7.6.2.1" },
+      { from: "7.6.1", to: "7.6.1.1" }
+    ],
+    cabal: [{ from: "3.10.1.0", to: "3.10.1.1" }]
+  },
+  // TODO
+  darwin: {
+    stack: [],
+    ghc: [],
+    cabal: []
+  },
+  linux: {
+    stack: [],
+    ghc: [],
+    cabal: []
+  }
 };
 
-// src/release-revisions.json
-var release_revisions_exports = {};
-__export(release_revisions_exports, {
-  default: () => release_revisions_default,
-  win32: () => win32
-});
-var win32 = {
+// src/versions.ts
+var supportedVersions = {
   ghc: [
-    { from: "9.4.3", to: "9.4.3.1" },
-    { from: "9.2.5", to: "9.2.5.1" },
-    { from: "8.10.2", to: "8.10.2.2" },
-    { from: "8.10.1", to: "8.10.1.1" },
-    { from: "8.8.4", to: "8.8.4.1" },
-    { from: "8.8.3", to: "8.8.3.1" },
-    { from: "8.8.2", to: "8.8.2.1" },
-    { from: "8.6.1", to: "8.6.1.1" },
-    { from: "8.0.2", to: "8.0.2.2" },
-    { from: "7.10.3", to: "7.10.3.2" },
-    { from: "7.10.2", to: "7.10.2.1" },
-    { from: "7.10.1", to: "7.10.1.1" },
-    { from: "7.8.4", to: "7.8.4.1" },
-    { from: "7.8.3", to: "7.8.3.1" },
-    { from: "7.8.2", to: "7.8.2.1" },
-    { from: "7.8.1", to: "7.8.1.1" },
-    { from: "7.6.3", to: "7.6.3.1" },
-    { from: "7.6.2", to: "7.6.2.1" },
-    { from: "7.6.1", to: "7.6.1.1" }
+    "9.6.1",
+    "9.4.5",
+    "9.4.4",
+    "9.4.3",
+    "9.4.2",
+    "9.4.1",
+    "9.2.7",
+    "9.2.6",
+    "9.2.5",
+    "9.2.4",
+    "9.2.3",
+    "9.2.2",
+    "9.2.1",
+    "9.0.2",
+    "9.0.1",
+    "8.10.7",
+    "8.10.6",
+    "8.10.5",
+    "8.10.4",
+    "8.10.3",
+    "8.10.2",
+    "8.10.1",
+    "8.8.4",
+    "8.8.3",
+    "8.8.2",
+    "8.8.1",
+    "8.6.5",
+    "8.6.4",
+    "8.6.3",
+    "8.6.2",
+    "8.6.1",
+    "8.4.4",
+    "8.4.3",
+    "8.4.2",
+    "8.4.1",
+    "8.2.2",
+    "8.0.2",
+    "7.10.3"
   ],
-  cabal: [{ from: "3.10.1.0", to: "3.10.1.1" }]
+  cabal: [
+    "3.10.1.0",
+    "3.8.1.0",
+    "3.6.2.0",
+    "3.6.0.0",
+    "3.4.1.0",
+    "3.4.0.0",
+    "3.2.0.0",
+    "3.0.0.0",
+    "2.4.1.0"
+  ],
+  stack: [
+    "2.9.3",
+    "2.9.1",
+    "2.7.5",
+    "2.7.3",
+    "2.7.1",
+    "2.5.1",
+    "2.3.3",
+    "2.3.1",
+    "2.1.3",
+    "2.1.1",
+    "1.9.3",
+    "1.9.1",
+    "1.7.1",
+    "1.6.5",
+    "1.6.3",
+    "1.6.1",
+    "1.5.1",
+    "1.5.0",
+    "1.4.0",
+    "1.3.2",
+    "1.3.0",
+    "1.2.0"
+  ]
 };
-var release_revisions_default = {
-  win32
-};
+var ghcupVersion = "0.1.19.2";
 
 // src/opts.ts
-var release_revisions = release_revisions_exports;
-var supported_versions = versions_exports;
-var ghcup_version = ghcup[0];
 var yamlInputs = load(
   (0, import_fs.readFileSync)((0, import_path.join)(__dirname, "..", "action.yml"), "utf8")
   // The action.yml file structure is statically known.
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ).inputs;
+function resolve(version2, supported, tool, os, verbose) {
+  const result = version2 === "latest" ? supported[0] : supported.find((v) => v.startsWith(version2)) ?? version2;
+  if (verbose === true && version2 !== result)
+    core2.info(`Resolved ${tool} ${version2} to ${result}`);
+  return result;
+}
 function getDefaults(os) {
   const mkVersion = (v, vs, t) => ({
     version: resolve(yamlInputs[v].default, vs, t, os, false),
@@ -9981,20 +9976,14 @@ function getDefaults(os) {
     supported: vs
   });
   return {
-    ghc: mkVersion("ghc-version", supported_versions.ghc, "ghc"),
-    cabal: mkVersion("cabal-version", supported_versions.cabal, "cabal"),
-    stack: mkVersion("stack-version", supported_versions.stack, "stack"),
+    ghc: mkVersion("ghc-version", supportedVersions.ghc, "ghc"),
+    cabal: mkVersion("cabal-version", supportedVersions.cabal, "cabal"),
+    stack: mkVersion("stack-version", supportedVersions.stack, "stack"),
     general: { matcher: { enable: true } }
   };
 }
-function resolve(version2, supported, tool, os, verbose) {
-  const result = version2 === "latest" ? supported[0] : supported.find((v) => v.startsWith(version2)) ?? version2;
-  if (verbose === true && version2 !== result)
-    core2.info(`Resolved ${tool} ${version2} to ${result}`);
-  return result;
-}
 function releaseRevision(version2, tool, os) {
-  const result = release_revisions?.[os]?.[tool]?.find(({ from }) => from === version2)?.to ?? version2;
+  const result = releaseRevisions?.[os]?.[tool]?.find(({ from }) => from === version2)?.to ?? version2;
   return result;
 }
 function parseYAMLBoolean(name, val) {
@@ -10018,7 +10007,7 @@ function parseURL(name, val) {
     throw new TypeError(`Action input "${name}" is not a valid URL`);
   }
 }
-function getOpts({ ghc: ghc2, cabal: cabal2, stack: stack3 }, os, inputs) {
+function getOpts({ ghc, cabal, stack: stack2 }, os, inputs) {
   core2.debug(`Inputs are: ${JSON.stringify(inputs)}`);
   const stackNoGlobal = (inputs["stack-no-global"] || "") !== "";
   const stackSetupGhc = (inputs["stack-setup-ghc"] || "") !== "";
@@ -10034,9 +10023,9 @@ function getOpts({ ghc: ghc2, cabal: cabal2, stack: stack3 }, os, inputs) {
   );
   core2.debug(`${stackNoGlobal}/${stackSetupGhc}/${stackEnable}`);
   const verInpt = {
-    ghc: inputs["ghc-version"] || ghc2.version,
-    cabal: inputs["cabal-version"] || cabal2.version,
-    stack: inputs["stack-version"] || stack3.version
+    ghc: inputs["ghc-version"] || ghc.version,
+    cabal: inputs["cabal-version"] || cabal.version,
+    stack: inputs["stack-version"] || stack2.version
   };
   const errors = [];
   if (stackNoGlobal && !stackEnable) {
@@ -10055,7 +10044,7 @@ function getOpts({ ghc: ghc2, cabal: cabal2, stack: stack3 }, os, inputs) {
       raw: verInpt.ghc,
       resolved: resolve(
         verInpt.ghc,
-        ghc2.supported,
+        ghc.supported,
         "ghc",
         os,
         ghcEnable
@@ -10070,7 +10059,7 @@ function getOpts({ ghc: ghc2, cabal: cabal2, stack: stack3 }, os, inputs) {
       raw: verInpt.cabal,
       resolved: resolve(
         verInpt.cabal,
-        cabal2.supported,
+        cabal.supported,
         "cabal",
         os,
         cabalEnable
@@ -10083,7 +10072,7 @@ function getOpts({ ghc: ghc2, cabal: cabal2, stack: stack3 }, os, inputs) {
       raw: verInpt.stack,
       resolved: resolve(
         verInpt.stack,
-        stack3.supported,
+        stack2.supported,
         "stack",
         os,
         stackEnable
@@ -10099,6 +10088,9 @@ function getOpts({ ghc: ghc2, cabal: cabal2, stack: stack3 }, os, inputs) {
 }
 
 // src/setup-haskell.ts
+var import_os = require("os");
+var path = __toESM(require("path"));
+var fs2 = __toESM(require("fs"));
 var core4 = __toESM(require_core());
 var io = __toESM(require_io());
 
@@ -10145,20 +10137,18 @@ function ensureError(input) {
 }
 
 // src/setup-haskell.ts
-var fs2 = __toESM(require("fs"));
-var path = __toESM(require("path"));
-var import_os = require("os");
+var import_exec2 = __toESM(require_exec());
 
 // src/installer.ts
+var import_fs2 = require("fs");
+var import_path2 = require("path");
+var import_process = __toESM(require("process"));
+var fs = __toESM(require("fs"));
 var core3 = __toESM(require_core());
 var import_exec = __toESM(require_exec());
 var import_io = __toESM(require_io());
 var tc = __toESM(require_tool_cache());
-var import_fs2 = require("fs");
-var import_path2 = require("path");
-var import_process = __toESM(require("process"));
 var glob = __toESM(require_glob());
-var fs = __toESM(require("fs"));
 
 // node_modules/compare-versions/lib/esm/index.js
 var compareVersions = (v12, v2) => {
@@ -10229,8 +10219,8 @@ function failed(tool, version2) {
 async function configureOutputs(tool, version2, path2, os) {
   core3.setOutput(`${tool}-path`, path2);
   core3.setOutput(`${tool}-exe`, await (0, import_io.which)(tool));
-  if (tool == "stack") {
-    const sr = import_process.default.env["STACK_ROOT"] ?? (os === "win32" ? "C:\\sr" : `${import_process.default.env.HOME}/.stack`);
+  if (tool === "stack") {
+    const sr = import_process.default.env.STACK_ROOT ?? (os === "win32" ? "C:\\sr" : `${import_process.default.env.HOME}/.stack`);
     core3.setOutput("stack-root", sr);
     if (os === "win32")
       core3.exportVariable("STACK_ROOT", sr);
@@ -10256,6 +10246,43 @@ by using the appropriate tool request template: https://github.com/actions/runne
 }
 function aptVersion(tool, version2) {
   return tool === "cabal" ? /[^.]*\.?[^.]*/.exec(version2)[0] : version2;
+}
+async function getChocoPath(tool, version2, revision) {
+  core3.debug(
+    `getChocoPath(): ChocolateyToolsLocation = ${import_process.default.env.ChocolateyToolsLocation}`
+  );
+  const chocoToolsLocation = import_process.default.env.ChocolateyToolsLocation ?? (0, import_path2.join)(`${import_process.default.env.SystemDrive}`, "tools");
+  let chocoToolPath = (0, import_path2.join)(chocoToolsLocation, `${tool}-${version2}`);
+  if (!fs.existsSync(chocoToolPath)) {
+    chocoToolPath = (0, import_path2.join)(
+      `${import_process.default.env.ChocolateyInstall}`,
+      "lib",
+      `${tool}.${revision}`
+    );
+  }
+  core3.debug(`getChocoPath(): chocoToolPath = ${chocoToolPath}`);
+  const pattern = `${chocoToolPath}/**/${tool}.exe`;
+  const globber = await glob.create(pattern);
+  for await (const file of globber.globGenerator()) {
+    core3.debug(`getChocoPath(): found ${tool} at ${file}`);
+    return (0, import_path2.dirname)(file);
+  }
+  core3.debug(`getChocoPath(): cannot find binary for ${tool}`);
+  return "<not-found>";
+}
+async function ghcupBin(os) {
+  core3.debug(`ghcupBin : ${os}`);
+  if (os === "win32") {
+    return "ghcup";
+  }
+  const cachedBin = tc.find("ghcup", ghcupVersion);
+  if (cachedBin)
+    return (0, import_path2.join)(cachedBin, "ghcup");
+  const bin = await tc.downloadTool(
+    `https://downloads.haskell.org/ghcup/${ghcupVersion}/x86_64-${os === "darwin" ? "apple-darwin" : "linux"}-ghcup-${ghcupVersion}`
+  );
+  await import_fs2.promises.chmod(bin, 493);
+  return (0, import_path2.join)(await tc.cacheFile(bin, "ghcup", "ghcup", ghcupVersion), "ghcup");
 }
 async function isInstalled(tool, version2, os) {
   const toolPath = tc.find(tool, version2);
@@ -10291,7 +10318,7 @@ async function isInstalled(tool, version2, os) {
   for (const p of locations[tool]) {
     core3.info(`Attempting to access tool ${tool} at location ${p}`);
     const installedPath = await import_fs2.promises.access(p).then(() => p).catch(() => void 0);
-    if (installedPath == void 0) {
+    if (installedPath === void 0) {
       core3.info(`Failed to access tool ${tool} at location ${p}`);
     } else {
       core3.info(`Succeeded accessing tool ${tool} at location ${p}`);
@@ -10304,7 +10331,7 @@ async function isInstalled(tool, version2, os) {
           tool,
           version2
         ]);
-        if (ghcupSetResult == 0) {
+        if (ghcupSetResult === 0) {
           return success(tool, version2, installedPath, os);
         } else {
           await exec(await ghcupBin(os), ["unset", tool]);
@@ -10316,65 +10343,7 @@ async function isInstalled(tool, version2, os) {
   }
   return false;
 }
-async function installTool(tool, version2, os) {
-  if (await isInstalled(tool, version2, os))
-    return;
-  warn(tool, version2);
-  if (tool === "stack") {
-    await stack2(version2, os);
-    if (await isInstalled(tool, version2, os))
-      return;
-    return failed(tool, version2);
-  }
-  switch (os) {
-    case "linux":
-      if (tool === "ghc" && version2 === "head") {
-        if (!await aptBuildEssential())
-          break;
-        await ghcupGHCHead();
-        break;
-      }
-      if (tool === "ghc" && compareVersions("8.3", version2)) {
-        await aptLibNCurses5();
-      }
-      await ghcup2(tool, version2, os);
-      if (await isInstalled(tool, version2, os))
-        return;
-      await apt(tool, version2);
-      break;
-    case "win32":
-      await choco(tool, version2);
-      if (await isInstalled(tool, version2, os))
-        return;
-      await ghcup2(tool, version2, os);
-      break;
-    case "darwin":
-      await ghcup2(tool, version2, os);
-      break;
-  }
-  if (await isInstalled(tool, version2, os))
-    return;
-  return failed(tool, version2);
-}
-async function resetTool(tool, _version, os) {
-  if (tool === "stack") {
-    return;
-  }
-  let bin = "";
-  switch (os) {
-    case "linux":
-      bin = await ghcupBin(os);
-      await exec(bin, ["unset", tool]);
-      return;
-    case "darwin":
-      bin = await ghcupBin(os);
-      await exec(bin, ["unset", tool]);
-      return;
-    case "win32":
-      return;
-  }
-}
-async function stack2(version2, os) {
+async function stack(version2, os) {
   core3.info(`Attempting to install stack ${version2}`);
   const build = {
     linux: `linux-x86_64${compareVersions(version2, "2.3.1") >= 0 ? "" : "-static"}`,
@@ -10395,6 +10364,19 @@ async function aptBuildEssential() {
   );
   return returnCode === 0;
 }
+async function ghcupGHCHead() {
+  core3.info(`Attempting to install ghc head using ghcup`);
+  const bin = await ghcupBin("linux");
+  const returnCode = await exec(bin, [
+    "install",
+    "ghc",
+    "-u",
+    "https://gitlab.haskell.org/ghc/ghc/-/jobs/artifacts/master/raw/ghc-x86_64-deb9-linux-integer-simple.tar.xz?job=validate-x86_64-linux-deb9-integer-simple",
+    "head"
+  ]);
+  if (returnCode === 0)
+    await exec(bin, ["set", "ghc", "head"]);
+}
 async function aptLibNCurses5() {
   core3.info(
     `Installing libcurses5 and libtinfo5 using apt-get (for ghc < 8.3)`
@@ -10403,6 +10385,13 @@ async function aptLibNCurses5() {
     `sudo -- sh -c "apt-get update && apt-get -y install libncurses5 libtinfo5"`
   );
   return returnCode === 0;
+}
+async function ghcup(tool, version2, os) {
+  core3.info(`Attempting to install ${tool} ${version2} using ghcup`);
+  const bin = await ghcupBin(os);
+  const returnCode = await exec(bin, ["install", tool, version2]);
+  if (returnCode === 0)
+    await exec(bin, ["set", tool, version2]);
 }
 async function apt(tool, version2) {
   const toolName = tool === "ghc" ? "ghc" : "cabal-install";
@@ -10428,7 +10417,7 @@ async function choco(tool, version2) {
     "--allow-multiple-versions",
     // Andreas, 2023-03-13, issue #202:
     // When installing GHC, skip automatic cabal installation.
-    tool == "ghc" ? "--ignore-dependencies" : "",
+    tool === "ghc" ? "--ignore-dependencies" : "",
     // Verbosity options:
     "--no-progress",
     core3.isDebug() ? "--debug" : "--limit-output"
@@ -10437,77 +10426,74 @@ async function choco(tool, version2) {
     await exec("powershell", [...args, "--pre"]);
   console.log("::SetupHaskellStopCommands::");
   const chocoPath = await getChocoPath(tool, version2, revision);
-  if (tool == "ghc")
+  if (tool === "ghc")
     core3.addPath(chocoPath);
 }
-async function ghcupBin(os) {
-  core3.debug(`ghcupBin : ${os}`);
-  if (os === "win32") {
-    return "ghcup";
+async function installTool(tool, version2, os) {
+  if (await isInstalled(tool, version2, os))
+    return;
+  warn(tool, version2);
+  if (tool === "stack") {
+    await stack(version2, os);
+    if (await isInstalled(tool, version2, os))
+      return;
+    return failed(tool, version2);
   }
-  const cachedBin = tc.find("ghcup", ghcup_version);
-  if (cachedBin)
-    return (0, import_path2.join)(cachedBin, "ghcup");
-  const bin = await tc.downloadTool(
-    `https://downloads.haskell.org/ghcup/${ghcup_version}/x86_64-${os === "darwin" ? "apple-darwin" : "linux"}-ghcup-${ghcup_version}`
-  );
-  await import_fs2.promises.chmod(bin, 493);
-  return (0, import_path2.join)(
-    await tc.cacheFile(bin, "ghcup", "ghcup", ghcup_version),
-    "ghcup"
-  );
+  switch (os) {
+    case "linux":
+      if (tool === "ghc" && version2 === "head") {
+        if (!await aptBuildEssential())
+          break;
+        await ghcupGHCHead();
+        break;
+      }
+      if (tool === "ghc" && compareVersions("8.3", version2)) {
+        await aptLibNCurses5();
+      }
+      await ghcup(tool, version2, os);
+      if (await isInstalled(tool, version2, os))
+        return;
+      await apt(tool, version2);
+      break;
+    case "win32":
+      await choco(tool, version2);
+      if (await isInstalled(tool, version2, os))
+        return;
+      await ghcup(tool, version2, os);
+      break;
+    case "darwin":
+      await ghcup(tool, version2, os);
+      break;
+  }
+  if (await isInstalled(tool, version2, os))
+    return;
+  return failed(tool, version2);
+}
+async function resetTool(tool, _version, os) {
+  if (tool === "stack") {
+    return;
+  }
+  let bin = "";
+  switch (os) {
+    case "linux":
+      bin = await ghcupBin(os);
+      await exec(bin, ["unset", tool]);
+      break;
+    case "darwin":
+      bin = await ghcupBin(os);
+      await exec(bin, ["unset", tool]);
+      break;
+    case "win32":
+      break;
+  }
 }
 async function addGhcupReleaseChannel(channel, os) {
   core3.info(`Adding ghcup release channel: ${channel}`);
   const bin = await ghcupBin(os);
   await exec(bin, ["config", "add-release-channel", channel.toString()]);
 }
-async function ghcup2(tool, version2, os) {
-  core3.info(`Attempting to install ${tool} ${version2} using ghcup`);
-  const bin = await ghcupBin(os);
-  const returnCode = await exec(bin, ["install", tool, version2]);
-  if (returnCode === 0)
-    await exec(bin, ["set", tool, version2]);
-}
-async function ghcupGHCHead() {
-  core3.info(`Attempting to install ghc head using ghcup`);
-  const bin = await ghcupBin("linux");
-  const returnCode = await exec(bin, [
-    "install",
-    "ghc",
-    "-u",
-    "https://gitlab.haskell.org/ghc/ghc/-/jobs/artifacts/master/raw/ghc-x86_64-deb9-linux-integer-simple.tar.xz?job=validate-x86_64-linux-deb9-integer-simple",
-    "head"
-  ]);
-  if (returnCode === 0)
-    await exec(bin, ["set", "ghc", "head"]);
-}
-async function getChocoPath(tool, version2, revision) {
-  core3.debug(
-    `getChocoPath(): ChocolateyToolsLocation = ${import_process.default.env.ChocolateyToolsLocation}`
-  );
-  const chocoToolsLocation = import_process.default.env.ChocolateyToolsLocation ?? (0, import_path2.join)(`${import_process.default.env.SystemDrive}`, "tools");
-  let chocoToolPath = (0, import_path2.join)(chocoToolsLocation, `${tool}-${version2}`);
-  if (!fs.existsSync(chocoToolPath)) {
-    chocoToolPath = (0, import_path2.join)(
-      `${import_process.default.env.ChocolateyInstall}`,
-      "lib",
-      `${tool}.${revision}`
-    );
-  }
-  core3.debug(`getChocoPath(): chocoToolPath = ${chocoToolPath}`);
-  const pattern = `${chocoToolPath}/**/${tool}.exe`;
-  const globber = await glob.create(pattern);
-  for await (const file of globber.globGenerator()) {
-    core3.debug(`getChocoPath(): found ${tool} at ${file}`);
-    return (0, import_path2.dirname)(file);
-  }
-  core3.debug(`getChocoPath(): cannot find binary for ${tool}`);
-  return "<not-found>";
-}
 
 // src/setup-haskell.ts
-var import_exec2 = __toESM(require_exec());
 async function cabalConfig() {
   let out = Buffer.from("");
   const append = (b) => out = Buffer.concat([out, b]);
@@ -10528,7 +10514,11 @@ async function run(inputs) {
     if (opts.ghcup.releaseChannel) {
       await core4.group(
         `Preparing ghcup environment`,
-        async () => addGhcupReleaseChannel(opts.ghcup.releaseChannel, os)
+        async () => (
+          // TODO: fix no-non-null-assertion
+          // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+          addGhcupReleaseChannel(opts.ghcup.releaseChannel, os)
+        )
       );
     }
     for (const [t, { resolved }] of Object.entries(opts).filter(

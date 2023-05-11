@@ -9,7 +9,8 @@ import * as tc from '@actions/tool-cache';
 import * as glob from '@actions/glob';
 import {compareVersions} from 'compare-versions'; // compareVersions can be used in the sense of >
 import type {OS, Tool} from './opts';
-import {ghcupVersion, releaseRevision} from './opts';
+import {releaseRevision} from './opts';
+import {ghcupVersion} from './versions';
 
 // Don't throw on non-zero.
 const exec = async (cmd: string, args?: string[]): Promise<number> =>
