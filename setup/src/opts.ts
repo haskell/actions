@@ -1,13 +1,13 @@
-import * as core from '@actions/core';
 import {readFileSync} from 'fs';
-import {load} from 'js-yaml';
 import {join} from 'path';
+import * as core from '@actions/core';
+import {load} from 'js-yaml';
 import * as sv from './versions.json';
 import * as rv from './release-revisions.json';
 
-export const release_revisions = rv as Revisions;
-export const supported_versions = sv as Record<Tool, string[]>;
-export const ghcup_version = sv.ghcup[0]; // Known to be an array of length 1
+export const releaseRevisions = rv as Revisions;
+export const supportedVersions = sv as Record<Tool, string[]>;
+export const ghcupVersion = sv.ghcup[0]; // Known to be an array of length 1
 
 export type Revisions = Record<
   OS,
@@ -71,20 +71,6 @@ export const yamlInputs: Record<string, {default: string}> = (
   ) as any
 ).inputs;
 
-export function getDefaults(os: OS): Defaults {
-  const mkVersion = (v: string, vs: string[], t: Tool): Version => ({
-    version: resolve(yamlInputs[v].default, vs, t, os, false), // verbose=false: no printout here
-    supported: vs
-  });
-
-  return {
-    ghc: mkVersion('ghc-version', supported_versions.ghc, 'ghc'),
-    cabal: mkVersion('cabal-version', supported_versions.cabal, 'cabal'),
-    stack: mkVersion('stack-version', supported_versions.stack, 'stack'),
-    general: {matcher: {enable: true}}
-  };
-}
-
 // E.g. resolve ghc latest to 9.4.2
 // resolve ghc 8.1 to 8.10.7 (bug, https://github.com/haskell/actions/issues/248)
 function resolve(
@@ -97,18 +83,32 @@ function resolve(
   const result =
     version === 'latest'
       ? supported[0]
-      : supported.find(v => v.startsWith(version)) ?? version;
+      : supported.find((v) => v.startsWith(version)) ?? version;
   // Andreas 2022-12-29, issue #144: inform about resolution here where we can also output ${tool}.
   if (verbose === true && version !== result)
     core.info(`Resolved ${tool} ${version} to ${result}`);
   return result;
 }
 
+export function getDefaults(os: OS): Defaults {
+  const mkVersion = (v: string, vs: string[], t: Tool): Version => ({
+    version: resolve(yamlInputs[v].default, vs, t, os, false), // verbose=false: no printout here
+    supported: vs
+  });
+
+  return {
+    ghc: mkVersion('ghc-version', supportedVersions.ghc, 'ghc'),
+    cabal: mkVersion('cabal-version', supportedVersions.cabal, 'cabal'),
+    stack: mkVersion('stack-version', supportedVersions.stack, 'stack'),
+    general: {matcher: {enable: true}}
+  };
+}
+
 // Further resolve the version to a revision using release-revisions.json.
 // This is only needed for choco-installs (at time of writing, 2022-12-29).
 export function releaseRevision(version: string, tool: Tool, os: OS): string {
   const result: string =
-    release_revisions?.[os]?.[tool]?.find(({from}) => from === version)?.to ??
+    releaseRevisions?.[os]?.[tool]?.find(({from}) => from === version)?.to ??
     version;
   return result;
 }
