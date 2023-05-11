@@ -1,21 +1,12 @@
 {
   "compilerOptions": {
-    "target": "es2021",
-    "lib": ["ES2021"],
+    "target": "es2020",
     "module": "commonjs",
-    "outDir": "./dist",
+    "noEmit": true,
     "rootDir": "./src",
     "strict": true,
     "noImplicitAny": true,
-    "noImplicitThis": true,
-    "alwaysStrict": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true
+    "esModuleInterop": true
   },
-  "exclude": ["node_modules", "**/*.test.ts"],
+  "exclude": ["node_modules", "**/*.test.ts"]
 }
