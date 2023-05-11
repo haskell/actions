@@ -1,5 +1,4 @@
 dist/
-lib/
 .out/
 __tests__/
 node_modules/
