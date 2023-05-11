@@ -1,56 +1,53 @@
-export type Severity
-  = 'error'
-  | 'warning'
-  ;
+export type Severity = 'error' | 'warning';
 
 export interface ProblemPattern {
   // The regex pattern that provides the groups to match against **required**
-  regexp: string,
+  regexp: string;
   // A group number containing the file name
-  file?: number,
+  file?: number;
   // A group number containing a filepath used to root the file (e.g. a project file)
-  fromPath?: number,
+  fromPath?: number;
   // A group number containing the line number
-  line?: number,
+  line?: number;
   // A group number containing the column information
-  column?: number,
+  column?: number;
   // A group number containing either 'warning' or 'error' case-insensitive. Defaults to `error`
-  severity?: number,
+  severity?: number;
   // A group number containing the error code
-  code?: number,
+  code?: number;
   // A group number containing the error message. **required** at least one pattern must set the message
-  message: number,
+  message: number;
   // Whether to loop until a match is not found, only valid on the last pattern of a multipattern matcher
   // NOTE: If there is only one matcher, this will error with:
   //  Only the last pattern in a multiline matcher may set 'loop'
-  loop?: boolean,
+  loop?: boolean;
 }
 
 export interface ProblemMatcher {
   // An ID field that can be used to remove or replace the problem matcher. **required**
-  owner: string,
+  owner: string;
 
   // Indicates the default severity, either 'warning' or 'error' case-insensitive. Defaults to 'error'
-  severity?: Severity,
-  pattern: ProblemPattern[],
+  severity?: Severity;
+  pattern: ProblemPattern[];
 }
 
 export interface ProblemMatcherDocument {
-  problemMatcher: ProblemMatcher[],
+  problemMatcher: ProblemMatcher[];
 }
 
 // An object representing information that a "problemMatcher" can match on.
 export type Problem = {
-  file?: string,
-  fromPath?: string,
-  line?: number,
-  column?: number,
-  severity?: Severity,
-  code?: string,
-  message: string,
+  file?: string;
+  fromPath?: string;
+  line?: number;
+  column?: number;
+  severity?: Severity;
+  code?: string;
+  message: string;
 };
 
-type MatchLineKey = keyof Problem
+type MatchLineKey = keyof Problem;
 
 export const MATCH_LINE_KEYS: MatchLineKey[] = [
   'file',
@@ -59,14 +56,17 @@ export const MATCH_LINE_KEYS: MatchLineKey[] = [
   'column',
   'severity',
   'code',
-  'message',
+  'message'
 ];
 
 // Constructs a string matching the problem matcher format defined in .github/hlint.json
 function getSerializedProblem(toolName: string, prob: Problem): string {
-  const fields = MATCH_LINE_KEYS
-    .map(key => prob[key])
-    .map(field => String(field || '').replace(/(\n|\t)/g, ' ').replace(/\s+/g, ' '))
+  const fields = MATCH_LINE_KEYS.map((key) => prob[key])
+    .map((field) =>
+      String(field || '')
+        .replace(/(\n|\t)/g, ' ')
+        .replace(/\s+/g, ' ')
+    )
     .join('\t');
   return `${toolName}\t${fields}`;
 }
@@ -75,36 +75,35 @@ function getSerializedProblem(toolName: string, prob: Problem): string {
 function getMatchLineRegexString(toolName: string): string {
   return [
     `^${toolName}\\t`,
-    ...(
-      MATCH_LINE_KEYS
-      .map(key => `(?<${key}>[^\\t]*)`)
-      .join('\\t')
-    ),
-    '$',
+    ...MATCH_LINE_KEYS.map((key) => `(?<${key}>[^\\t]*)`).join('\\t'),
+    '$'
   ].join('');
 }
 
 // Mapping each field name to the corresponding regex group number
-type MatcherGroups = Record<keyof Problem, number>
-const MATCH_LINE_REGEX_GROUPS: MatcherGroups = (
-  MATCH_LINE_KEYS
-  .map((key, index) => ([key, index + 1]))
-  .reduce((obj, [key, matchGroup]) => ({...obj, [key]: matchGroup}), {} as MatcherGroups)
+type MatcherGroups = Record<keyof Problem, number>;
+const MATCH_LINE_REGEX_GROUPS: MatcherGroups = MATCH_LINE_KEYS.map(
+  (key, index) => [key, index + 1]
+).reduce(
+  (obj, [key, matchGroup]) => ({...obj, [key]: matchGroup}),
+  {} as MatcherGroups
 );
 
 function getMatcherPatternObj(toolName: string): ProblemPattern {
   return {
     regexp: getMatchLineRegexString(toolName),
-    ...MATCH_LINE_REGEX_GROUPS,
+    ...MATCH_LINE_REGEX_GROUPS
   };
 }
 
 function getMatcherDef(toolName: string): ProblemMatcherDocument {
   return {
-    problemMatcher: [{
-      owner: toolName,
-      pattern: [getMatcherPatternObj(toolName)],
-    }],
+    problemMatcher: [
+      {
+        owner: toolName,
+        pattern: [getMatcherPatternObj(toolName)]
+      }
+    ]
   };
 }
 

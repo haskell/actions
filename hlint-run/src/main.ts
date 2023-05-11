@@ -1,4 +1,4 @@
-import * as core from '@actions/core'
+import * as core from '@actions/core';
 
 import getInputs from './inputs';
 import run from './run';

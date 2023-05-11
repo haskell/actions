@@ -1,18 +1,18 @@
 import * as path from 'path';
-import {
+import type {
   Severity as GitHubSeverity,
-  Problem as GitHubProblem,
-  SingleLineMatcherFormat,
+  Problem as GitHubProblem
 } from '../github';
+import {SingleLineMatcherFormat} from '../github';
 
-export type Severity
-  = 'Error'
-  | 'Warning'
-  | 'Suggestion'
-  | 'Ignore'
-  ;
+export type Severity = 'Error' | 'Warning' | 'Suggestion' | 'Ignore';
 
-export const SEVERITY_LEVELS = ['Error', 'Warning', 'Suggestion', 'Ignore'] as const;
+export const SEVERITY_LEVELS = [
+  'Error',
+  'Warning',
+  'Suggestion',
+  'Ignore'
+] as const;
 
 /**
  * An idea suggested by an hlint 'Hint'.
@@ -23,62 +23,62 @@ export interface Idea {
   /**
    * The modules the idea is for, usually a singleton.
    */
-  module: string[],
+  module: string[];
   /**
    * The declarations the idea is for, usually a singleton, typically the function name, but may be a type name.
    */
-  decl: string[],
+  decl: string[];
   /**
    * The severity of the idea, e.g. 'Warning'.
    */
-  severity: Severity,
+  severity: Severity;
   /**
    * The name of the hint that generated the idea, e.g. @\"Use reverse\"@.
    */
-  hint: string,
+  hint: string;
   /**
    * The source code filename the idea relates to.
    */
-  file: string,
+  file: string;
   /**
    * The start line in the source code the idea relates to.
    */
-  startLine: number,
+  startLine: number;
   /**
    * The start column of the source code the idea relates to.
    */
-  startColumn: number,
+  startColumn: number;
   /**
    * The end line in the source code the idea relates to.
    */
-  endLine: number,
+  endLine: number;
   /**
    * The end column of the source code the idea relates to.
    */
-  endColumn: number,
+  endColumn: number;
   /**
    * The contents of the source code the idea relates to.
    */
-  from: string,
+  from: string;
   /**
    * The suggested replacement, or 'Nothing' for no replacement (e.g. on parse errors).
    */
-  to?: string,
+  to?: string;
   /**
    * Notes about the effect of applying the replacement.
    */
-  note: string[],
+  note: string[];
   /**
    * How to perform this idea.
    */
-  refactorings: string,
+  refactorings: string;
 }
 
 const HLINT_SEV_TO_GITHUB_SEV: Record<Severity, GitHubSeverity> = {
   Error: 'error',
   Warning: 'warning',
   Suggestion: 'warning',
-  Ignore: 'warning',
+  Ignore: 'warning'
 };
 
 /**
@@ -117,21 +117,29 @@ function getNiceMessage(idea: Idea): string {
     messageParts.push(`Perhaps: ${escapeString(idea.to, true)}`);
   }
   if (idea.note && idea.note.length) {
-    messageParts.push(`Note: ${idea.note.map(n => escapeString(n, false)).join(' ')}`);
+    messageParts.push(
+      `Note: ${idea.note.map((n) => escapeString(n, false)).join(' ')}`
+    );
   }
   const message = messageParts.join(' ▫︎ ');
   return [prefix, message].filter(Boolean).join(': ');
 }
 
 function toMatchableProblem(idea: Idea): GitHubProblem {
-  const {file, startLine: line, startColumn: column, hint: code, severity: hlintSev} = idea;
+  const {
+    file,
+    startLine: line,
+    startColumn: column,
+    hint: code,
+    severity: hlintSev
+  } = idea;
   return {
     file,
     line,
     column,
     severity: HLINT_SEV_TO_GITHUB_SEV[hlintSev],
     code,
-    message: getNiceMessage(idea),
+    message: getNiceMessage(idea)
   };
 }
 

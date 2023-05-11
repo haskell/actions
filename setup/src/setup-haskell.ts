@@ -1,13 +1,13 @@
+import {EOL} from 'os';
+import * as path from 'path';
+import * as fs from 'fs';
 import * as core from '@actions/core';
 import * as io from '@actions/io';
 import ensureError from 'ensure-error';
-import * as fs from 'fs';
-import * as path from 'path';
-import {EOL} from 'os';
-import {getOpts, getDefaults, Tool} from './opts';
-import {addGhcupReleaseChannel, installTool, resetTool} from './installer';
-import type {OS} from './opts';
 import {exec} from '@actions/exec';
+import {getOpts, getDefaults} from './opts';
+import {addGhcupReleaseChannel, installTool, resetTool} from './installer';
+import type {OS, Tool} from './opts';
 
 async function cabalConfig(): Promise<string> {
   let out = Buffer.from('');
@@ -32,12 +32,14 @@ export default async function run(
 
     if (opts.ghcup.releaseChannel) {
       await core.group(`Preparing ghcup environment`, async () =>
+        // TODO: fix no-non-null-assertion
+        // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
         addGhcupReleaseChannel(opts.ghcup.releaseChannel!, os)
       );
     }
 
     for (const [t, {resolved}] of Object.entries(opts).filter(
-      o => o[1].enable
+      (o) => o[1].enable
     )) {
       await core.group(`Preparing ${t} environment`, async () =>
         resetTool(t as Tool, resolved, os)

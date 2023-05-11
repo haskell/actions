@@ -1,10 +1,10 @@
-import {
+import type {
   Problem,
   Severity,
   ProblemPattern,
-  ProblemMatcherDocument,
-  MATCH_LINE_KEYS,
+  ProblemMatcherDocument
 } from './core';
+import {MATCH_LINE_KEYS} from './core';
 
 // Parses the line-by-line output we've serialized.
 // This is *just* for validating the matcher JSON regexes.
@@ -24,11 +24,12 @@ const parseSeverity = (str: string): Severity => {
   return str;
 };
 
-const parseNullableString = (str: string): string | undefined => str || undefined;
+const parseNullableString = (str: string): string | undefined =>
+  str || undefined;
 
 type FieldParser<K extends keyof Problem> = (_: string) => Problem[K];
 type FieldParserSet = {
-  readonly [K in keyof Required<Problem>]: FieldParser<K>
+  readonly [K in keyof Required<Problem>]: FieldParser<K>;
 };
 
 const PROBLEM_FIELD_PARSERS: FieldParserSet = {
@@ -38,10 +39,13 @@ const PROBLEM_FIELD_PARSERS: FieldParserSet = {
   column: parseInt,
   severity: parseSeverity,
   code: parseNullableString,
-  message: String,
+  message: String
 };
 
-export function parseFormattedProblem(def: ProblemMatcherDocument, line: string): Problem {
+export function parseFormattedProblem(
+  def: ProblemMatcherDocument,
+  line: string
+): Problem {
   const defaultSeverity = def.problemMatcher[0].severity;
   const pattern: ProblemPattern = def.problemMatcher[0].pattern[0];
   const re = RegExp(pattern.regexp);
@@ -51,7 +55,9 @@ export function parseFormattedProblem(def: ProblemMatcherDocument, line: string)
   }
   const match = matchMb;
 
-  function parseKey<K extends keyof Required<Problem>>(k: K): Problem[K] | undefined {
+  function parseKey<K extends keyof Required<Problem>>(
+    k: K
+  ): Problem[K] | undefined {
     const groupNum = pattern[k];
     if (groupNum == null || typeof groupNum !== 'number') {
       return;
@@ -60,20 +66,15 @@ export function parseFormattedProblem(def: ProblemMatcherDocument, line: string)
     if (matchVal == null) {
       return;
     }
-    // https://github.com/microsoft/TypeScript/issues/29225#issuecomment-451678927
-    // > […] type parameters constrained to other type parameters, where we could deduce
-    // > that they are always related, but we currently don't reason about those.
-    // @ts-ignore
     const parser: FieldParser<K> = PROBLEM_FIELD_PARSERS[k];
     return parser(matchVal);
   }
-  const prob = MATCH_LINE_KEYS
-    .reduce((obj, k) => {
-      const v = parseKey(k);
-      return v == null ? obj : {...obj, [k]: v};
-    }, {} as Problem);
+  const prob = MATCH_LINE_KEYS.reduce((obj, k) => {
+    const v = parseKey(k);
+    return v == null ? obj : {...obj, [k]: v};
+  }, {} as Problem);
   return {
     ...prob,
-    severity: prob.severity || defaultSeverity,
+    severity: prob.severity || defaultSeverity
   };
 }
