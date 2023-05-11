@@ -12,7 +12,7 @@ jobs:
   check-dist:
     strategy:
       matrix:
-        action: ['setup']
+        action: ['setup', 'hlint-setup', 'hlint-run']
     runs-on: ubuntu-latest
     defaults:
       run:
