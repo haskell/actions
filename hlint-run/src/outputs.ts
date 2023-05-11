@@ -1,8 +1,5 @@
-import * as core from '@actions/core'
-import type {
-  RunResult,
-} from './run';
-
+import * as core from '@actions/core';
+import type {RunResult} from './run';
 
 const OUTPUT_KEY_HLINT_IDEAS = 'ideas';
 
