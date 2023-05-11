@@ -31,7 +31,8 @@ module.exports = {
         singleQuote: true,
         trailingComma: 'none',
         bracketSpacing: false,
-        allowParens: 'avoid'
+        allowParens: 'avoid',
+        endOfLine: 'auto'
       }
     ]
   }
