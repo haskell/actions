@@ -45,7 +45,7 @@ async function runHLint(cmd: string, args: string[]): Promise<HLintResult> {
 function getOverallCheckResult(failOn: CheckMode, {ideas, statusCode}: HLintResult): CheckResult {
   const hintsBySev = HLINT_SEV_LEVELS.map(sev => ([sev, ideas.filter(hint => hint.severity === sev).length]));
   const hintSummary = hintsBySev
-    .filter(([_sevName, numHints]) => numHints > 0)
+    .filter(([_sevName, numHints]) => +numHints > 0)
     .map(([sev, num]) => `${sev} (${num})`).join(', ');
 
   let ok: boolean;
@@ -59,7 +59,7 @@ function getOverallCheckResult(failOn: CheckMode, {ideas, statusCode}: HLintResu
     // Note that the summary still shows all counts.
     const failedBySev = hintsBySev
       .slice(0, HLINT_SEV_LEVELS.indexOf(failOn) + 1)
-      .filter(([_sevName, numHints]) => numHints > 0);
+      .filter(([_sevName, numHints]) => +numHints > 0);
     ok = failedBySev.length === 0;
   }
 
