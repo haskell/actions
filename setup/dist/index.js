@@ -13750,7 +13750,11 @@ function resolve(version, supported, tool, os, verbose // If resolution isn't th
 ) {
     const result = version === 'latest'
         ? supported[0]
-        : supported.find(v => v.startsWith(version)) ?? version;
+        : supported.find(v => v === version) ??
+            supported.find(v => v.startsWith(version + '.')) ??
+            // Andreas, 2023-05-19, issue #248
+            // Append "." so that eg stack "2.1" resolves to "2.1.3" and not "2.11.1".
+            version;
     // Andreas 2022-12-29, issue #144: inform about resolution here where we can also output ${tool}.
     if (verbose === true && version !== result)
         core.info(`Resolved ${tool} ${version} to ${result}`);

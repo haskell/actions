@@ -96,13 +96,13 @@ describe('haskell/actions/setup', () => {
     });
   });
 
-  it('Versions resolve as string prefix (resolving 8.1 to 8.10.x should be considered a bug)', () => {
+  it('Versions resolve as version prefix', () => {
     const v = {ghc: '8.10.7', cabal: '2.4.1.0', stack: '2.1.3'};
     forAllOS(os => {
       const options = getOpts(def(os), os, {
         'enable-stack': 'true',
         'stack-version': '2.1',
-        'ghc-version': '8.1',
+        'ghc-version': '8.10',
         'cabal-version': '2'
       });
       forAllTools(t => expect(options[t].resolved).toBe(v[t]));

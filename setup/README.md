@@ -230,9 +230,9 @@ This list is replicated (hopefully correctly) below.
 
 Versions specified by the inputs, e.g. `ghc-version`, are resolved against this list,
 by taking the first entry from the list if `latest` is requested,
-or the first entry that is a (string-)extension of the requested version otherwise.
-E.g., `8.10` will be resolved to `8.10.7`, and so will `8.10.`, `8.` and `8`
-(and incorrectly, [even `8.1`](github.com/haskell/actions/issues/248)).
+or the first entry that matches exactly,
+or otherwise the first entry that is a (string-)extension of the requested version extended by a `.`.
+E.g., `8.10` will be resolved to `8.10.7`, and so will `8`.
 
 **GHC:**
 
