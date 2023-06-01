@@ -41,10 +41,10 @@
     semver "^6.1.0"
     uuid "^3.3.2"
 
-"@types/node@^18.16.3":
-  version "18.16.9"
-  resolved "https://registry.yarnpkg.com/@types/node/-/node-18.16.9.tgz#e79416d778a8714597342bb87efb5a6e914f7a73"
-  integrity sha512-IeB32oIV4oGArLrd7znD2rkHQ6EDCM+2Sr76dJnrHwv9OHBTTM6nuDLK9bmikXzPa0ZlWMWtRGo/Uw4mrzQedA==
+"@types/node@^20.2.5":
+  version "20.2.5"
+  resolved "https://registry.yarnpkg.com/@types/node/-/node-20.2.5.tgz#26d295f3570323b2837d322180dfbf1ba156fefb"
+  integrity sha512-JJulVEQXmiY9Px5axXHeYGLSjhkZEnD+MDPDGbCbIAbMslkKwmygtZFy1X6s/075Yo94sf8GuSlFfPzysQrWZQ==
 
 "@vercel/ncc@^0.36.1":
   version "0.36.1"
