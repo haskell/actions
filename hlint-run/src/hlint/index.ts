@@ -119,7 +119,7 @@ function getNiceMessage(idea: Idea): string {
   if (idea.note && idea.note.length) {
     messageParts.push(`Note: ${idea.note.map(n => escapeString(n, false)).join(' ')}`);
   }
-  const message = messageParts.join(' ▫︎ ');
+  const message = messageParts.join('%0A');
   return [prefix, message].filter(Boolean).join(': ');
 }
 
