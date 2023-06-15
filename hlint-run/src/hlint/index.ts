@@ -82,10 +82,10 @@ const HLINT_SEV_TO_GITHUB_SEV: Record<Severity, GitHubSeverity> = {
 };
 
 /**
- * Use JSON escaping to turn messages with newlines and such into a single line.
+ * Use JSON escaping to turn convert literal newlines to Github Action-supported newlines.
  */
 function escapeString(str: string, quote: boolean): string {
-  const jsonEscaped = JSON.stringify(str).replace(/\n/g, ' ');
+  const jsonEscaped = JSON.stringify(str).replace(/\n/g, '%0A');
   // Possibly drop the surrounding quotes
   return quote ? jsonEscaped : jsonEscaped.slice(1, jsonEscaped.length - 1);
 }
@@ -94,7 +94,7 @@ function escapeString(str: string, quote: boolean): string {
  * Combine the non-"poblemMatcher" fields of an "idea" into
  * a single line as a human-readable message.
  *
- * Fields are visually separated by a box character (' ▫︎ ').
+ * Fields are visually separated by newlines.
  */
 function getNiceMessage(idea: Idea): string {
   const prefixParts = [];
