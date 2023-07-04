@@ -8,7 +8,7 @@ import {ghcup_version, OS, Tool, releaseRevision} from './opts';
 import process from 'process';
 import * as glob from '@actions/glob';
 import * as fs from 'fs';
-import {compareVersions} from 'compare-versions'; // compareVersions can be used in the sense of >
+import {compareVersions, validate} from 'compare-versions'; // compareVersions can be used in the sense of >
 
 // Don't throw on non-zero.
 const exec = async (cmd: string, args?: string[]): Promise<number> =>
@@ -171,7 +171,12 @@ export async function installTool(
         await ghcupGHCHead();
         break;
       }
-      if (tool === 'ghc' && compareVersions('8.3', version)) {
+      // “version” may not be a semantic version (e.g. “latest-nightly”),
+      // so guard “compareVersions” with “validate”.
+      if (
+        tool === 'ghc' &&
+        (!validate(version) || compareVersions('8.3', version))
+      ) {
         // Andreas, 2022-12-09: The following errors out if we are not ubuntu-20.04.
         // Atm, I do not know how to check whether we are on ubuntu-20.04.
         // So, ignore the error.

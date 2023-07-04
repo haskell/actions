@@ -98,6 +98,14 @@ jobs:
               ghc:   "9.6.0.20230111"
               cabal: "3.8"
 
+          # Test ghc nightly
+          - os: ubuntu-latest
+            ghcup_release_channel: "https://ghc.gitlab.haskell.org/ghcup-metadata/ghcup-nightlies-0.0.7.yaml"
+            plan:
+              ghc:     "latest-nightly"
+              ghc-dev: "9.7"
+              cabal:   "latest"
+
           # setup does something special for 7.10.3 (issue #79)
           - os: ubuntu-20.04
             plan:
@@ -160,8 +168,11 @@ jobs:
           GHCVER="$(ghc --numeric-version)"
           echo "CABALVER=${CABALVER}" >> "${GITHUB_ENV}"
           echo "GHCVER=${GHCVER}"     >> "${GITHUB_ENV}"
+          GHCDEV="$(echo $GHCVER | cut -d. -f 1-2)"
           [[ "${CABALVER}" == "${{ steps.setup.outputs.cabal-version }}" ]] && \
-            [[ "${GHCVER}" == "${{ steps.setup.outputs.ghc-version }}" ]]
+            [[ "${GHCVER}" == "${{ steps.setup.outputs.ghc-version }}" || \
+               ( -n "${{ matrix.plan.ghc-dev }}" && \
+                 "${GHCDEV}" == "${{ matrix.plan.ghc-dev }}" ) ]]
 
       - name: Test runghc
         run: |
