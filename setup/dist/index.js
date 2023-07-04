@@ -2409,18 +2409,16 @@ exports.create = create;
  * Computes the sha256 hash of a glob
  *
  * @param patterns  Patterns separated by newlines
- * @param currentWorkspace  Workspace used when matching files
  * @param options   Glob options
- * @param verbose   Enables verbose logging
  */
-function hashFiles(patterns, currentWorkspace = '', options, verbose = false) {
+function hashFiles(patterns, options, verbose = false) {
     return __awaiter(this, void 0, void 0, function* () {
         let followSymbolicLinks = true;
         if (options && typeof options.followSymbolicLinks === 'boolean') {
             followSymbolicLinks = options.followSymbolicLinks;
         }
         const globber = yield create(patterns, { followSymbolicLinks });
-        return internal_hash_files_1.hashFiles(globber, currentWorkspace, verbose);
+        return internal_hash_files_1.hashFiles(globber, verbose);
     });
 }
 exports.hashFiles = hashFiles;
@@ -2780,15 +2778,13 @@ const fs = __importStar(__nccwpck_require__(7147));
 const stream = __importStar(__nccwpck_require__(2781));
 const util = __importStar(__nccwpck_require__(3837));
 const path = __importStar(__nccwpck_require__(1017));
-function hashFiles(globber, currentWorkspace, verbose = false) {
+function hashFiles(globber, verbose = false) {
     var e_1, _a;
     var _b;
     return __awaiter(this, void 0, void 0, function* () {
         const writeDelegate = verbose ? core.info : core.debug;
         let hasMatch = false;
-        const githubWorkspace = currentWorkspace
-            ? currentWorkspace
-            : (_b = process.env['GITHUB_WORKSPACE']) !== null && _b !== void 0 ? _b : process.cwd();
+        const githubWorkspace = (_b = process.env['GITHUB_WORKSPACE']) !== null && _b !== void 0 ? _b : process.cwd();
         const result = crypto.createHash('sha256');
         let count = 0;
         try {
@@ -14202,7 +14198,7 @@ module.exports = JSON.parse('{"win32":{"ghc":[{"from":"9.4.3","to":"9.4.3.1"},{"
 /***/ ((module) => {
 
 "use strict";
-module.exports = JSON.parse('{"ghc":["9.6.2","9.6.1","9.4.5","9.4.4","9.4.3","9.4.2","9.4.1","9.2.8","9.2.7","9.2.6","9.2.5","9.2.4","9.2.3","9.2.2","9.2.1","9.0.2","9.0.1","8.10.7","8.10.6","8.10.5","8.10.4","8.10.3","8.10.2","8.10.1","8.8.4","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.10.1.0","3.8.1.0","3.6.2.0","3.6.0.0","3.4.1.0","3.4.0.0","3.2.0.0","3.0.0.0","2.4.1.0"],"stack":["2.11.1","2.9.3","2.9.1","2.7.5","2.7.3","2.7.1","2.5.1","2.3.3","2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"],"ghcup":["0.1.19.2"]}');
+module.exports = JSON.parse('{"ghc":["9.6.2","9.6.1","9.4.5","9.4.4","9.4.3","9.4.2","9.4.1","9.2.8","9.2.7","9.2.6","9.2.5","9.2.4","9.2.3","9.2.2","9.2.1","9.0.2","9.0.1","8.10.7","8.10.6","8.10.5","8.10.4","8.10.3","8.10.2","8.10.1","8.8.4","8.8.3","8.8.2","8.8.1","8.6.5","8.6.4","8.6.3","8.6.2","8.6.1","8.4.4","8.4.3","8.4.2","8.4.1","8.2.2","8.0.2","7.10.3"],"cabal":["3.10.1.0","3.8.1.0","3.6.2.0","3.6.0.0","3.4.1.0","3.4.0.0","3.2.0.0","3.0.0.0","2.4.1.0"],"stack":["2.11.1","2.9.3","2.9.1","2.7.5","2.7.3","2.7.1","2.5.1","2.3.3","2.3.1","2.1.3","2.1.1","1.9.3","1.9.1","1.7.1","1.6.5","1.6.3","1.6.1","1.5.1","1.5.0","1.4.0","1.3.2","1.3.0","1.2.0"],"ghcup":["0.1.19.4"]}');
 
 /***/ })
 
