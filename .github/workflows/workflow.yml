@@ -169,16 +169,16 @@ jobs:
           echo "GHCVER=${GHCVER}"     >> "${GITHUB_ENV}"
           if [[ "${{ steps.setup.outputs.ghc-version }}" == "latest-nightly" ]]
           then
-            # TODO: Shouldn't we use steps.setup.outputs.ghcup-release-channel?
-            #       Why is empty?
-            NIGHTLY=$( \
+            GHCVER_EXPECTED=$( \
               curl "${{ matrix.ghcup_release_channel }}" | \
               yq '.ghcupDownloads.GHC[] | select(.viTags[] | contains("LatestNightly")) | key' \
             )
+            echo "Latest nightly: ${GHCVER_EXPECTED}"
+          else
+            GHCVER_EXPECTED="${{ steps.setup.outputs.ghc-version }}"
           fi
           [[ "${CABALVER}" == "${{ steps.setup.outputs.cabal-version }}" ]] && \
-            [[ "${GHCVER}" == "${{ steps.setup.outputs.ghc-version }}" || \
-              ( -n "${NIGHTLY}" && "${GHCVER}" == "${NIGHTLY}" ) ]]
+            [[ "${GHCVER}" == "${GHCVER_EXPECTED}" ]]
 
       - name: Test runghc
         run: |
