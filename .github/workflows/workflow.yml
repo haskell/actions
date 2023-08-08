@@ -48,6 +48,9 @@ jobs:
           - ghc:   latest
             cabal: latest
           # Recommended releases (update according to ghcup)
+          # 9.4 will be recommended soon
+          - ghc:   "9.4"
+            cabal: "3.8"
           - ghc:   "9.2"
             cabal: "3.6"
           # Some previously recommended releases of ghc with matching cabal
@@ -119,10 +122,6 @@ jobs:
             plan:
               ghc:   "9.4.3"
               cabal: "3.8.1.0"
-          - os: windows-latest
-            plan:
-              ghc:   "9.2.5"
-              cabal: "3.6"
 
           # Test ghcup on windows (PR #206) which choco does not have 9.4.5
           - os: windows-latest
