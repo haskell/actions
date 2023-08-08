@@ -161,7 +161,10 @@ async function installTool(tool, version, os) {
                 await ghcupGHCHead();
                 break;
             }
-            if (tool === 'ghc' && (0, compare_versions_1.compareVersions)('8.3', version)) {
+            // “version” may not be a semantic version (e.g. “latest-nightly”),
+            // so guard “compareVersions” with “validate”.
+            if (tool === 'ghc' &&
+                (!(0, compare_versions_1.validate)(version) || (0, compare_versions_1.compareVersions)('8.3', version))) {
                 // Andreas, 2022-12-09: The following errors out if we are not ubuntu-20.04.
                 // Atm, I do not know how to check whether we are on ubuntu-20.04.
                 // So, ignore the error.

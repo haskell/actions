@@ -101,6 +101,13 @@ jobs:
               ghc:   "9.6.0.20230111"
               cabal: "3.8"
 
+          # Test ghc nightly
+          - os: ubuntu-latest
+            ghcup_release_channel: "https://ghc.gitlab.haskell.org/ghcup-metadata/ghcup-nightlies-0.0.7.yaml"
+            plan:
+              ghc:   "latest-nightly"
+              cabal: "latest"
+
           # setup does something special for 7.10.3 (issue #79)
           - os: ubuntu-20.04
             plan:
@@ -159,8 +166,18 @@ jobs:
           GHCVER="$(ghc --numeric-version)"
           echo "CABALVER=${CABALVER}" >> "${GITHUB_ENV}"
           echo "GHCVER=${GHCVER}"     >> "${GITHUB_ENV}"
+          if [[ "${{ steps.setup.outputs.ghc-version }}" == "latest-nightly" ]]
+          then
+            GHCVER_EXPECTED=$( \
+              curl "${{ matrix.ghcup_release_channel }}" | \
+              yq '.ghcupDownloads.GHC[] | select(.viTags[] | contains("LatestNightly")) | key' \
+            )
+            echo "Latest nightly: ${GHCVER_EXPECTED}"
+          else
+            GHCVER_EXPECTED="${{ steps.setup.outputs.ghc-version }}"
+          fi
           [[ "${CABALVER}" == "${{ steps.setup.outputs.cabal-version }}" ]] && \
-            [[ "${GHCVER}" == "${{ steps.setup.outputs.ghc-version }}" ]]
+            [[ "${GHCVER}" == "${GHCVER_EXPECTED}" ]]
 
       - name: Test runghc
         run: |
