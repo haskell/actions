@@ -8,7 +8,7 @@ inputs:
     default: 'latest'
   cabal-version:
     required: false
-    description: 'Version of Cabal to use. If set to "latest", it will always get the latest stable version.'
+    description: 'Version of Cabal to use. If set to "latest", it will always get the latest stable version. If set to "head", it will always get the latest build of cabal.'
     default: 'latest'
   stack-version:
     required: false
