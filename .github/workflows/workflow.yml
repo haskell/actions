@@ -183,7 +183,7 @@ jobs:
           then
             CABALVER_EXPECTED=$( \
               curl --silent https://raw.githubusercontent.com/haskell/cabal/master/cabal-install/cabal-install.cabal | \
-              sed -n 's/^Version:\s\+//p' \
+              sed -E -n 's/^Version:[[:space:]]+//p' \
             )
             echo "Cabal head: ${CABALVER_EXPECTED}"
           else
