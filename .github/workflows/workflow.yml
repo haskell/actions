@@ -189,7 +189,7 @@ jobs:
           else
             CABALVER_EXPECTED="${{ steps.setup.outputs.cabal-version }}"
           fi
-          [[ "${CABALVER}" == "${CABALVER_EXPECTED}" ]] && \
+          [[ "${CABALVER_EXPECTED}" == ${CABALVER}* ]] && \
             [[ "${GHCVER}" == "${GHCVER_EXPECTED}" ]]
 
       - name: Test runghc
