@@ -116,6 +116,36 @@ const OUTPUT_KEY_HLINT_PATH = 'hlint-bin';
 const OUTPUT_KEY_HLINT_VERSION = 'version';
 
 async function run() {
+  core.warning(
+    'As of 2023-09-30, haskell/action/hlint-setup is no longer maintained, please switch to haskell-actions/hlint-setup (note: dash for slash).'
+  );
+  core.info(
+    `***************************************************************************`
+  );
+  core.info(
+    `**                                                                       **`
+  );
+  core.info(
+    `**              This action is DEPRECATED.                               **`
+  );
+  core.info(
+    `**                                                                       **`
+  );
+  core.info(
+    `**              Please use haskell-actions/hlint-setup instead.          **`
+  );
+  core.info(
+    `**                                                                       **`
+  );
+  core.info(
+    `**              (Note the dash instead of the slash.)                    **`
+  );
+  core.info(
+    `**                                                                       **`
+  );
+  core.info(
+    `***************************************************************************`
+  );
   try {
     const hlintVersion = core.getInput(INPUT_KEY_HLINT_VERSION) || HLINT_DEFAULT_VERSION;
     const config = mkHlintReleaseConfig(process.platform, os.arch(), hlintVersion);
