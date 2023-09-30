@@ -45,6 +45,16 @@ async function cabalConfig() {
     return out.toString().trim().split('\n').slice(-1)[0].trim();
 }
 async function run(inputs) {
+    core.warning('As of 2023-09-09, haskell/action/setup is no longer maintained, please switch to haskell-actions/setup (note: dash for slash).');
+    core.info(`***************************************************************************`);
+    core.info(`**                                                                       **`);
+    core.info(`**              This action is DEPRECATED.                               **`);
+    core.info(`**                                                                       **`);
+    core.info(`**              Please use haskell-actions/setup instead.                **`);
+    core.info(`**                                                                       **`);
+    core.info(`**              (Note the dash instead of the slash.)                    **`);
+    core.info(`**                                                                       **`);
+    core.info(`***************************************************************************`);
     try {
         core.info('Preparing to setup a Haskell environment');
         const os = process.platform;
