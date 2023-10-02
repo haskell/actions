@@ -284,6 +284,7 @@ Suggestion: Try to support at least the three latest major versions of GHC.
 
 **Cabal:**
 
+- `head` (the [cabal-head](https://github.com/haskell/cabal/releases/tag/cabal-head) release of the most recent build of the `master` branch)
 - `latest` (default, recommended)
 - `3.10.1.0` `3.10`
 - `3.8.1.0` `3.8`

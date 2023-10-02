@@ -47,6 +47,9 @@ jobs:
           # Latest releases
           - ghc:   latest
             cabal: latest
+          # Latest ghc with cabal head
+          - ghc:   latest
+            cabal: head
           # Recommended releases (update according to ghcup)
           # 9.4 will be recommended soon
           - ghc:   "9.4"
@@ -176,7 +179,17 @@ jobs:
           else
             GHCVER_EXPECTED="${{ steps.setup.outputs.ghc-version }}"
           fi
-          [[ "${CABALVER}" == "${{ steps.setup.outputs.cabal-version }}" ]] && \
+          if [[ "${{ steps.setup.outputs.cabal-version }}" == "head" ]]
+          then
+            CABALVER_EXPECTED=$( \
+              curl --silent https://raw.githubusercontent.com/haskell/cabal/master/cabal-install/cabal-install.cabal | \
+              sed -E -n 's/^Version:[[:space:]]+//p' \
+            )
+            echo "Cabal head: ${CABALVER_EXPECTED}"
+          else
+            CABALVER_EXPECTED="${{ steps.setup.outputs.cabal-version }}"
+          fi
+          [[ "${CABALVER_EXPECTED}" == ${CABALVER}* ]] && \
             [[ "${GHCVER}" == "${GHCVER_EXPECTED}" ]]
 
       - name: Test runghc

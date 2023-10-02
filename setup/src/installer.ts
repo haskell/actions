@@ -346,8 +346,36 @@ export async function addGhcupReleaseChannel(
 async function ghcup(tool: Tool, version: string, os: OS): Promise<void> {
   core.info(`Attempting to install ${tool} ${version} using ghcup`);
   const bin = await ghcupBin(os);
-  const returnCode = await exec(bin, ['install', tool, version]);
-  if (returnCode === 0) await exec(bin, ['set', tool, version]);
+  if (tool === 'cabal' && version === 'head') {
+    await ghcupCabalHead(os, bin);
+  } else {
+    const returnCode = await exec(bin, ['install', tool, version]);
+    if (returnCode === 0) await exec(bin, ['set', tool, version]);
+  }
+}
+
+function cabalHeadUrlTag(os: OS): string {
+  switch (os) {
+    case 'linux':
+      return 'Linux';
+    case 'darwin':
+      return 'macOS';
+    case 'win32':
+      return 'Windows';
+  }
+}
+
+async function ghcupCabalHead(os: OS, bin: string): Promise<void> {
+  const osTag = cabalHeadUrlTag(os);
+  const cabalHeadUrl = `https://github.com/haskell/cabal/releases/download/cabal-head/cabal-head-${osTag}-x86_64.tar.gz`;
+  const returnCode = await exec(bin, [
+    'install',
+    'cabal',
+    '-u',
+    cabalHeadUrl,
+    'head'
+  ]);
+  if (returnCode === 0) await exec(bin, ['set', 'cabal', 'head']);
 }
 
 async function ghcupGHCHead(): Promise<void> {
