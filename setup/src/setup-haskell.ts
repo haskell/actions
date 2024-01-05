@@ -20,6 +20,37 @@ async function cabalConfig(): Promise<string> {
 export default async function run(
   inputs: Record<string, string>
 ): Promise<void> {
+  core.warning(
+    'As of 2023-09-09, haskell/action/setup is no longer maintained, please switch to haskell-actions/setup (note: dash for slash).'
+  );
+  core.info(
+    `***************************************************************************`
+  );
+  core.info(
+    `**                                                                       **`
+  );
+  core.info(
+    `**              This action is DEPRECATED.                               **`
+  );
+  core.info(
+    `**                                                                       **`
+  );
+  core.info(
+    `**              Please use haskell-actions/setup instead.                **`
+  );
+  core.info(
+    `**                                                                       **`
+  );
+  core.info(
+    `**              (Note the dash instead of the slash.)                    **`
+  );
+  core.info(
+    `**                                                                       **`
+  );
+  core.info(
+    `***************************************************************************`
+  );
+
   try {
     core.info('Preparing to setup a Haskell environment');
     const os = process.platform as OS;
@@ -76,7 +107,7 @@ export default async function run(
       });
 
     core.info(`##[add-matcher]${path.join(__dirname, '..', 'matcher.json')}`);
-  } catch (error) {
+  } catch (error: any) {
     if (core.isDebug()) {
       // we don't fail here so that the error path can be tested in CI
       core.setOutput('failed', true);
