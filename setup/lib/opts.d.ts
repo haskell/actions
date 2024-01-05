@@ -1,12 +1,12 @@
 export declare const release_revisions: Revisions;
 export declare const supported_versions: Record<Tool, string[]>;
 export declare const ghcup_version: string;
-export declare type Revisions = Record<OS, Record<Tool, Array<{
+export type Revisions = Record<OS, Record<Tool, Array<{
     from: string;
     to: string;
 }>>>;
-export declare type OS = 'linux' | 'darwin' | 'win32';
-export declare type Tool = 'cabal' | 'ghc' | 'stack';
+export type OS = 'linux' | 'darwin' | 'win32';
+export type Tool = 'cabal' | 'ghc' | 'stack';
 export interface ProgramOpt {
     enable: boolean;
     raw: string;
@@ -24,11 +24,11 @@ export interface Options {
         };
     };
 }
-declare type Version = {
+type Version = {
     version: string;
     supported: string[];
 };
-export declare type Defaults = Record<Tool, Version> & {
+export type Defaults = Record<Tool, Version> & {
     general: {
         matcher: {
             enable: boolean;
